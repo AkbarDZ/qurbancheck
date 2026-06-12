@@ -1,0 +1,70 @@
+<div id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 p-3 sticky-top">
+    <a href="{{ url('/') }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2 sidebar-brand">
+        <i class="bi bi-box-seam fs-3 me-3"></i>
+        <span class="fs-5 fw-bold sidebar-text">QurbanCheck</span>
+    </a>
+    <hr class="text-secondary">
+    
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="{{ url('/') }}" class="nav-link {{ request()->is('dashboard*') ? 'active' : '' }}" title="Dashboard">
+                <i class="bi bi-house me-2"></i><span class="sidebar-text">Beranda</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('ternak.index') }}" class="nav-link {{ request()->is('ternak*') ? 'active' : '' }}" title="Manajemen Ternak">
+                <i class="bi bi-droplet-half me-2"></i><span class="sidebar-text">Manajemen Ternak</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('kesehatan.index') }}" class="nav-link {{ request()->is('kesehatan*') ? 'active' : '' }}" title="Kesehatan">
+                <i class="bi bi-heart-pulse me-2"></i><span class="sidebar-text">Kesehatan</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('syariat.index') }}" class="nav-link {{ request()->is('syariat*') ? 'active' : '' }}" title="Pemeriksaan Syariat">
+                <i class="bi bi-clipboard-check me-2"></i><span class="sidebar-text">Pemeriksaan Syariat</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('logistik.index') }}" class="nav-link {{ request()->is('logistik*') ? 'active' : '' }}" title="Logistik Pakan">
+                <i class="bi bi-box2 me-2"></i><span class="sidebar-text">Logistik Pakan</span>
+            </a>
+        </li>
+        
+        <hr class="text-secondary">
+        <small class=" px-3 pb-2 text-uppercase text-light fw-bold sidebar-text" style="font-size: 0.75rem;">Master & Pengaturan</small>
+        
+        <li>
+            <a href="{{ route('master.index') }}" class="nav-link {{ request()->is('master*') ? 'active' : '' }}" title="Master Data">
+                <i class="bi bi-database me-2"></i><span class="sidebar-text">Master Data</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('/users') }}" class="nav-link {{ request()->is('users*') ? 'active' : '' }}" title="Pengguna">
+                <i class="bi bi-people me-2"></i><span class="sidebar-text">Pengguna</span>
+            </a>
+        </li>
+        
+        <hr class="text-secondary">
+
+        <li>
+            <a href="#" class="nav-link" id="sidebarToggle" title="Toggle Sidebar">
+                <i class="bi bi-list me-2"></i><span class="sidebar-text">Collapse Menu</span>
+            </a>
+        </li>
+    </ul>
+
+    <hr class="text-secondary">
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle px-2" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle fs-4 me-2"></i>
+            <strong class="sidebar-text">Admin</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+            <li><a class="dropdown-item" href="#">Profil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Keluar</a></li>
+        </ul>
+    </div>
+</div>
