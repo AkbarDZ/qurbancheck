@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0">
+<div class="card shadow border-0">
     <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
         <ul class="nav nav-tabs" id="masterDataTab" role="tablist">
             <li class="nav-item" role="presentation">

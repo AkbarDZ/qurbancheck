@@ -7,3 +7,47 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.card{
+    border-radius:18px;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+    transition:0.3s;
+}
+
+.btn{
+    border-radius:10px;
+}
+
+.form-control,
+.form-select{
+    border-radius:10px;
+}
+
+.table tbody tr:hover{
+    background:#f8f9fa;
+}
+
+.card{
+    border-radius:18px;
+}
+
+.card-header{
+    border-bottom:1px solid #ececec;
+}
+
+.btn{
+    border-radius:10px;
+}
+
+.form-control,
+.form-select{
+    border-radius:10px;
+}
+
+.table tbody tr:hover{
+    background:#f8f9fa;
+    transition:.2s;
+}

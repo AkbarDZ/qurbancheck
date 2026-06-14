@@ -8,6 +8,8 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    
     
     <style>
         /* Styling minimal untuk mengatur layout Flexbox */
@@ -16,10 +18,11 @@
         }
         .sidebar {
             width: 260px;
-            min-height: 100vh;
+            height: 100vh;
             background-color: #0a3a2a; /* Dark theme untuk sidebar */
             transition: width 0.3s ease;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         .sidebar .nav-link {
             color: #adb5bd;
@@ -69,9 +72,9 @@
     </style>
     @stack('styles')
 </head>
-<body class="d-flex"> @include('components.sidebar')
+<body class="d-flex vh-100 overflow-hidden"> @include('components.sidebar')
 
-    <div class="main-content d-flex flex-column min-vh-100">
+    <div class="main-content d-flex flex-column vh-100 overflow-y-auto">
         
         <main class="flex-grow-1 p-4">
             @yield('content')
