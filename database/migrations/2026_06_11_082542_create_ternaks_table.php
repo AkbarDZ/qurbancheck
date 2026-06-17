@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('nomor_eartag')->unique();// eartag yang bukan dari pemerintah
             $table->string('nama_panggilan')->nullable(); // nama panggilan ternak
             $table->decimal('harga_beli_awal', 12, 2)->nullable();
-            $table->date('tanggal_lahir');
+            $table->date('tanggal_lahir')->nullable();
             $table->enum('jenis_kelamin', ['jantan', 'betina']);
             $table->boolean('gigi_tanggal')->default(false); 
             $table->string('dir_foto_hewan')->nullable();// foto hewanya

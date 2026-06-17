@@ -23,7 +23,7 @@
         </li>
         <li>
             <a href="{{ route('syariat.index') }}" class="nav-link {{ request()->is('syariat*') ? 'active' : '' }}" title="Pemeriksaan Syariat">
-                <i class="fa-solid fa-clipboard me-2"></i><span class="sidebar-text">Pemeriksaan Syariat</span>
+                <i class="fa-solid fa-clipboard me-2"></i><span class="sidebar-text">Kelayakan Kurban</span>
             </a>
         </li>
         <li>

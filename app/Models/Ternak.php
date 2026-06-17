@@ -8,6 +8,7 @@ class Ternak extends Model
 {
     protected $fillable = [
         'ras_id',
+        'kandang_id',
         'nomor_eartag',
         'nama_panggilan',
         'harga_beli_awal',
@@ -22,6 +23,11 @@ class Ternak extends Model
         'tanggal_lahir' => 'date',
         'gigi_tanggal' => 'boolean',
     ];
+
+    public function kandang()
+    {
+        return $this->belongsTo(Kandang::class);
+    }
 
     public function ras()
     {

@@ -15,6 +15,11 @@ class Kandang extends Model
         'kapasitas_maksimal' => 'integer',
     ];
 
+    public function ternaks()
+    {
+        return $this->hasMany(Ternak::class);
+    }
+
     public function distribusiPakans()
     {
         return $this->hasMany(DistribusiPakan::class);

@@ -35,6 +35,13 @@ Route::prefix('kesehatan')->group(function () {
 
 Route::prefix('ternak')->group(function () {
     Route::get('/', [TernakController::class, 'index'])->name('ternak.index');
+    Route::post('/', [TernakController::class, 'store'])->name('ternak.store');
+    Route::patch('/{id}/nama-panggilan', [TernakController::class, 'updateNamaPanggilan']);
+    Route::put('/{id}', [TernakController::class, 'update']);
+    Route::delete('/{id}', [TernakController::class, 'destroy']);
+
+    Route::get('/{id}/log-berat', [\App\Http\Controllers\LogBeratController::class, 'index']);
+    Route::post('/{id}/log-berat', [\App\Http\Controllers\LogBeratController::class, 'store']);
 });
 
 Route::prefix('logistik')->group(function () {
