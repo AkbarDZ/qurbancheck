@@ -16,12 +16,14 @@ class Ternak extends Model
         'jenis_kelamin',
         'gigi_tanggal',
         'dir_foto_hewan',
+        'is_karantina',
     ];
 
     protected $casts = [
         'harga_beli_awal' => 'decimal:2',
         'tanggal_lahir' => 'date',
         'gigi_tanggal' => 'boolean',
+        'is_karantina' => 'boolean',
     ];
 
     public function kandang()

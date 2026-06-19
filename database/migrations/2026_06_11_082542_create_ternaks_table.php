@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('ternaks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ras_id')->constrained('ras_ternaks')->onDelete('cascade');
+            $table->boolean('is_karantina')->default(false);
             $table->string('nomor_eartag')->unique();// eartag yang bukan dari pemerintah
             $table->string('nama_panggilan')->nullable(); // nama panggilan ternak
             $table->decimal('harga_beli_awal', 12, 2)->nullable();

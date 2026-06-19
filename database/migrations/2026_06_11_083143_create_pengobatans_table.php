@@ -18,8 +18,8 @@ return new class extends Migration
             $table->decimal('biaya_pengobatan', 12, 2)->nullable();
             $table->string('dosis')->nullable();
             $table->text('catatan')->nullable();
-            $table->boolean('dikarantina')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

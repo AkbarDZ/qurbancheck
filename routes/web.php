@@ -31,6 +31,9 @@ Route::prefix('master')->group(function () {
 
 Route::prefix('kesehatan')->group(function () {
     Route::get('/', [KesehatanController::class, 'index'])->name('kesehatan.index');
+    Route::post('/', [KesehatanController::class, 'store']);
+    Route::get('/{id}', [KesehatanController::class, 'show']);
+    Route::delete('/{id}', [KesehatanController::class, 'destroy']);
 });
 
 Route::prefix('ternak')->group(function () {

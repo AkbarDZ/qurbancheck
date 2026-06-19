@@ -14,10 +14,17 @@ return new class extends Migration
         Schema::create('log_kesehatans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ternak_id')->constrained('ternaks')->onDelete('cascade');
+            $table->boolean('status_karantina');
+            // Kolom Penanggung Jawab (Relasi ke tabel users)
+            // Dibuat nullable agar jika user/pekerja dihapus, data rekam medis tidak ikut hilang
+            $table->foreignId('penanggung_jawab_id')->nullable()->constrained('users')->nullOnDelete();
+            
             $table->date('tanggal_rekam');
             $table->text('gejala'); // Gejala klinis yang ditemukan
-            $table->string('dir_foto_gejala')->nullable();// Link bukti foto fisik di AWS S3
+            $table->string('dir_foto_gejala')->nullable(); // Link bukti foto fisik
+            
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

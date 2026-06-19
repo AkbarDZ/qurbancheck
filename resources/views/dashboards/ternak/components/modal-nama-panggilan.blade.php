@@ -23,7 +23,16 @@
     </div>
 
     <div>
-        <span class="badge bg-secondary rounded-pill px-3 py-2">Belum diperiksa</span>
+        @php
+            $hasLog = isset($ternak->log_kesehatans_count) ? ($ternak->log_kesehatans_count > 0) : $ternak->logKesehatans()->exists();
+        @endphp
+        @if (!$hasLog)
+            <span class="badge bg-secondary rounded-pill px-3 py-2">Belum diperiksa</span>
+        @elseif ($ternak->is_karantina)
+            <span class="badge bg-danger rounded-pill px-3 py-2">Di Karantina</span>
+        @else
+            <span class="badge bg-success rounded-pill px-3 py-2">Tersedia</span>
+        @endif
     </div>
 </div>
 

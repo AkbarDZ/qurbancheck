@@ -63,7 +63,7 @@
                                 data-id="${data.id}" data-eartag="${data.nomor_eartag}">
                                 <i class="bi bi-bar-chart-line"></i> Perkembangan Berat
                             </button>
-                            <button class="btn btn-outline-warning btn-sm"><i class="bi bi-heart-pulse"></i> Data Kesehatan</button>
+                            <a href="/kesehatan?tambah_ternak_id=${data.id}" class="btn btn-outline-warning btn-sm"><i class="bi bi-heart-pulse"></i> Data Kesehatan</a>
                             <button class="btn btn-outline-success btn-sm"><i class="bi bi-clipboard-check"></i> Kelayakan Kurban</button>
                             <button class="btn btn-outline-danger btn-sm ms-auto btn-delete-ternak" data-id="${data.id}"><i class="bi bi-trash"></i></button>
                         </div>

@@ -21,7 +21,7 @@ class TernakController extends Controller
             'logBerats' => function($q) {
                 $q->latest('tanggal_timbang')->take(1);
             }
-        ]);
+        ])->withCount('logKesehatans');
 
         // Filter: Pencarian berdasarkan eartag atau nama panggilan
         if ($request->filled('search')) {
@@ -118,7 +118,7 @@ class TernakController extends Controller
             // 5. Eager Load Relasi untuk Response AJAX (Agar bisa langsung dirender di UI Card)
             $ternak->load(['ras.tipeTernak', 'kandang', 'logBerats' => function($query) {
                 $query->latest('tanggal_timbang')->take(1);
-            }]);
+            }])->loadCount('logKesehatans');
 
             return response()->json([
                 'success' => true,
@@ -196,7 +196,7 @@ class TernakController extends Controller
             // Load relasi agar data di UI langsung berganti nama ras/kandangnya
             $ternak->load(['ras.tipeTernak', 'kandang', 'logBerats' => function($query) {
                 $query->latest('tanggal_timbang')->take(1); // Ambil timbangan paling baru
-            }]);
+            }])->loadCount('logKesehatans');
 
             return response()->json([
                 'success' => true,

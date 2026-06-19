@@ -42,9 +42,9 @@
                         data-id="{{ $ternak->id }}" data-eartag="{{ $ternak->nomor_eartag }}">
                         <i class="bi bi-bar-chart-line"></i> Perkembangan Berat
                     </button>
-                    <button class="btn btn-outline-warning btn-sm">
+                    <a href="{{ url('/kesehatan?tambah_ternak_id=' . $ternak->id) }}" class="btn btn-outline-warning btn-sm">
                         <i class="bi bi-heart-pulse"></i> Data Kesehatan
-                    </button>
+                    </a>
                     <button class="btn btn-outline-success btn-sm">
                         <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
                     </button>

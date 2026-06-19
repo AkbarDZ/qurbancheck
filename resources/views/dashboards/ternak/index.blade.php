@@ -26,7 +26,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <select class="form-select filter-ternak" name="kandang_id" id="filterKandang">
                     <option value="">-- Semua Kandang --</option>
                     @foreach($kandangs as $k)
@@ -35,7 +35,7 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select class="form-select filter-ternak" name="ras_id" id="filterRas">
                     <option value="">-- Semua Jenis --</option>
                     @foreach($rasTernaks as $ras)
@@ -56,12 +56,6 @@
                     <option value="sakit">Belum diperiksa</option>
                 </select>
             </div> --}}
-
-            <div class="col-md-2 d-grid">
-                <button type="submit" class="btn btn-light text-success">
-                    <i class="bi bi-funnel"></i> Filter
-                </button>
-            </div>
         </form>
     </div>
 </div>
