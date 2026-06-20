@@ -1,44 +1,60 @@
 <div class="tab-pane fade p-4" id="ras-pane" role="tabpanel" tabindex="0">
-    <div class="d-flex justify-content-between mb-3">
-        <h5 class="mb-0">Data Ras Ternak</h5>
-        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahRas"><i
-                class="bi bi-plus-lg"></i> Tambah Ras</button>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="mb-1 fw-bold text-dark"><i class="bi bi-tag-fill me-2 text-primary"></i>Data Ras Ternak</h5>
+            <p class="text-muted small mb-0">Kelola spesifikasi ras/keturunan hewan qurban berdasarkan tipenya.</p>
+        </div>
+        <button class="btn btn btn-success px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahRas">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Ras
+        </button>
     </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>No</th>
-                    <th>Tipe Ternak</th>
-                    <th>Nama Ras</th>
-                    <th>Deskripsi</th>
-                    <th class="text-end">Aksi</th>
+    
+    <div class="table-responsive rounded-3 border border-light-subtle shadow-sm bg-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary">
+                <tr class="border-bottom border-light-subtle">
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem; width: 60px;">No</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-tag me-2 text-muted"></i>Jenis Ternak</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-intersect me-2 text-muted"></i>Nama Ras</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-file-text me-2 text-muted"></i>Deskripsi</th>
+                    <th class="py-3 px-3 text-muted fw-bold text-end" style="font-size: 0.85rem; width: 140px;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tableBodyRas">
                 @forelse($rasTernaks as $index => $ras)
                 <tr id="row-ras-{{ $ras->id }}">
-                    <td>{{ $index + 1 }}</td>
-                    <td class="col-tipe"><span
-                            class="badge bg-info text-dark">{{ $ras->tipeTernak->nama_jenis ?? '-' }}</span></td>
-                    <td class="col-nama">{{ $ras->nama_ras }}</td>
-                    <td class="col-deskripsi">{{ $ras->deskripsi ?: '-' }}</td>
-                    <td class="text-end">
+                    <td class="py-3 px-3 fw-semibold text-secondary">{{ $index + 1 }}</td>
+                    <td class="py-3 px-3 col-tipe">
+                        <span class="badge bg-info-subtle text-dark border border-info px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">
+                            {{ $ras->tipeTernak->nama_jenis ?? '-' }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-3 col-nama fw-bold text-dark">{{ $ras->nama_ras }}</td>
+                    <td class="py-3 px-3 col-deskripsi text-secondary small">{{ $ras->deskripsi ?: '-' }}</td>
+                    <td class="py-3 px-3 text-end">
                         <button class="btn btn-sm btn-outline-secondary btn-edit-ras" data-id="{{ $ras->id }}"
                             data-tipe="{{ $ras->tipe_ternak_id }}" data-nama="{{ $ras->nama_ras }}"
-                            data-deskripsi="{{ $ras->deskripsi }}"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-sm btn-outline-danger btn-delete-ras" data-id="{{ $ras->id }}"><i
+                            data-deskripsi="{{ $ras->deskripsi }}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Ras"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger btn-delete-ras" data-id="{{ $ras->id }}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Ras"><i
                                 class="bi bi-trash"></i></button>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="text-center text-muted">Data kosong</td>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i>
+                        <h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Ras Ternak</h6>
+                        <p class="small text-muted mb-0">Klik tombol "Tambah Ras" untuk mendaftarkan kategori ras baru.</p>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+    <!-- Pagination Container -->
+    <div id="paginationRas" class="d-flex justify-content-center mt-3"></div>
 </div>
 
 <div class="modal fade" id="modalTambahRas" tabindex="-1" aria-hidden="true">
@@ -132,6 +148,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        window.rasPagination = window.initTablePagination('tableBodyRas', 'paginationRas', 5);
 
         // --- Handler Form Ras ---
         const formRas = document.getElementById('formTambahRas');
@@ -158,22 +175,25 @@
                 .then(data => {
                     if (data.success) {
                         let emptyRow = tableBodyRas.querySelector('td[colspan]');
-                        if (emptyRow && emptyRow.innerText.toLowerCase().includes('kosong')) {
+                        if (emptyRow && (emptyRow.innerText.toLowerCase().includes('kosong') || emptyRow.innerText.toLowerCase().includes('belum ada'))) {
                             emptyRow.parentElement.remove();
                         }
                         let tr = document.createElement('tr');
                         tr.id = `row-ras-${data.data.id}`;
                         tr.innerHTML = `
-                        <td>Baru</td>
-                        <td class="col-tipe"><span class="badge bg-info text-dark">${data.data.tipe_ternak.nama_jenis}</span></td>
-                        <td class="col-nama">${data.data.nama_ras}</td>
-                        <td class="col-deskripsi">${data.data.deskripsi || '-'}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-secondary btn-edit-ras" data-id="${data.data.id}" data-tipe="${data.data.tipe_ternak_id}" data-nama="${data.data.nama_ras}" data-deskripsi="${data.data.deskripsi || ''}"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete-ras" data-id="${data.data.id}"><i class="bi bi-trash"></i></button>
+                        <td class="py-3 px-3 fw-semibold text-secondary">Baru</td>
+                        <td class="py-3 px-3 col-tipe">
+                            <span class="badge bg-info-subtle text-dark border border-info px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">${data.data.tipe_ternak.nama_jenis}</span>
+                        </td>
+                        <td class="py-3 px-3 col-nama fw-bold text-dark">${data.data.nama_ras}</td>
+                        <td class="py-3 px-3 col-deskripsi text-secondary small">${data.data.deskripsi || '-'}</td>
+                        <td class="py-3 px-3 text-end">
+                            <button class="btn btn-sm btn-outline-secondary btn-edit-ras" data-id="${data.data.id}" data-tipe="${data.data.tipe_ternak_id}" data-nama="${data.data.nama_ras}" data-deskripsi="${data.data.deskripsi || ''}" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Ras"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete-ras" data-id="${data.data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Ras"><i class="bi bi-trash"></i></button>
                         </td>
                     `;
                         tableBodyRas.insertAdjacentElement('afterbegin', tr);
+                        if (window.rasPagination) window.rasPagination.update();
                         bootstrap.Modal.getInstance(document.getElementById('modalTambahRas'))
                             .hide();
                         formRas.reset();
@@ -251,7 +271,7 @@
                         let tipeText = formEditRas.querySelector(
                             `select option[value="${data.data.tipe_ternak_id}"]`).text;
                         tr.querySelector('.col-tipe').innerHTML =
-                            `<span class="badge bg-info text-dark">${tipeText}</span>`;
+                            `<span class="badge bg-info-subtle text-dark border border-info px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">${tipeText}</span>`;
                         tr.querySelector('.col-nama').innerText = data.data.nama_ras;
                         tr.querySelector('.col-deskripsi').innerText = data.data.deskripsi || '-';
 
@@ -319,11 +339,12 @@
                                     // Hapus elemen dari DOM HTML secara langsung
                                     tr.remove();
                                 }
+                                if (window.rasPagination) window.rasPagination.update();
 
                                 // 2. Cek apakah tabel sekarang kosong, jika ya, tampilkan pesan kosong
                                 if (tableBodyRas.querySelectorAll('tr').length === 0) {
                                     tableBodyRas.innerHTML =
-                                        '<tr><td colspan="5" class="text-center text-muted">Data kosong</td></tr>';
+                                        '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Ras Ternak</h6><p class="small text-muted mb-0">Klik tombol "Tambah Ras" untuk mendaftarkan kategori ras baru.</p></td></tr>';
                                 }
 
                                 alert(data.message);

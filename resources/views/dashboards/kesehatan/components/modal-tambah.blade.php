@@ -17,7 +17,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold text-muted">Pilih Hewan (Eartag) <span class="text-danger">*</span></label>
-                                <select class="form-select" name="ternak_id" required>
+                                <select class="form-select select2-ternak" name="ternak_id" required>
                                     <option value="">-- Pilih Eartag Hewan --</option>
                                     @foreach($ternaks as $ternak)
                                         <option value="{{ $ternak->id }}">{{ $ternak->nomor_eartag }} {{ $ternak->nama_panggilan ? '('.$ternak->nama_panggilan.')' : '' }}</option>
@@ -110,6 +110,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const globalErrorAlert = document.getElementById('tambah_global_error_kesehatan');
     const globalErrorMsg = document.getElementById('tambah_global_error_msg_kesehatan');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // Initialize Select2 when modal is shown
+    $('#modalTambahKesehatan').on('shown.bs.modal', function () {
+        $('#modalTambahKesehatan .select2-ternak').select2({
+            dropdownParent: $('#modalTambahKesehatan'),
+            width: '100%'
+        });
+    });
 
     // =======================================================================
     // 1. LOGIKA MULTI INPUT PENGOBATAN 
@@ -210,6 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (modalInstance) modalInstance.hide();
                     
                     formKesehatan.reset();
+                    $('#modalTambahKesehatan .select2-ternak').val('').trigger('change');
 
                     let container = document.getElementById('container-pengobatan');
                     let items = container.querySelectorAll('.pengobatan-item');

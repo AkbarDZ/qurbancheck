@@ -23,7 +23,7 @@ class PemeriksaanSyariat extends Model
         return $this->belongsTo(Ternak::class);
     }
 
-    public function penanggungjawab()
+    public function penanggungJawab()
     {
         return $this->belongsTo(User::class, 'penanggungjawab_id');
     }

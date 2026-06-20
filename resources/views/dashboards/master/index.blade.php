@@ -43,4 +43,133 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+window.initMasterTooltips = function (context = document) {
+    let triggers = context.querySelectorAll('[data-bs-toggle="tooltip"]');
+    [...triggers].forEach(el => {
+        let instance = bootstrap.Tooltip.getInstance(el);
+        if (instance) instance.dispose();
+        new bootstrap.Tooltip(el);
+    });
+};
+
+window.initTablePagination = function (tableBodyId, paginationId, itemsPerPage = 5) {
+    const tbody = document.getElementById(tableBodyId);
+    const paginationContainer = document.getElementById(paginationId);
+    if (!tbody || !paginationContainer) return null;
+
+    let currentPage = 1;
+
+    function render() {
+        const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => {
+            return !tr.querySelector('td[colspan]');
+        });
+
+        const totalItems = rows.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+
+        rows.forEach((row, index) => {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            if (index >= start && index < end) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+
+            const firstTd = row.querySelector('td:first-child');
+            if (firstTd && !isNaN(parseInt(firstTd.innerText))) {
+                firstTd.innerText = index + 1;
+            }
+        });
+
+        paginationContainer.innerHTML = '';
+        
+        // Re-initialize tooltips on the visible rows
+        window.initMasterTooltips(tbody);
+
+        if (totalPages <= 1) {
+            return;
+        }
+
+        const nav = document.createElement('nav');
+        const ul = document.createElement('ul');
+        ul.className = 'pagination pagination-sm mb-0 gap-1';
+
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        const prevA = document.createElement('a');
+        prevA.className = 'page-link rounded-2';
+        prevA.href = '#';
+        prevA.innerHTML = '&laquo;';
+        prevA.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                render();
+            }
+        });
+        prevLi.appendChild(prevA);
+        ul.appendChild(prevLi);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${currentPage === i ? 'active' : ''}`;
+            const a = document.createElement('a');
+            a.className = 'page-link rounded-2';
+            a.href = '#';
+            a.innerText = i;
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentPage = i;
+                render();
+            });
+            li.appendChild(a);
+            ul.appendChild(li);
+        }
+
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        const nextA = document.createElement('a');
+        nextA.className = 'page-link rounded-2';
+        nextA.href = '#';
+        nextA.innerHTML = '&raquo;';
+        nextA.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                render();
+            }
+        });
+        nextLi.appendChild(nextA);
+        ul.appendChild(nextLi);
+
+        nav.appendChild(ul);
+        paginationContainer.appendChild(nav);
+    }
+
+    render();
+
+    return {
+        update: function () {
+            render();
+        },
+        setCurrentPage: function (page) {
+            currentPage = page;
+            render();
+        }
+    };
+};
+
+document.addEventListener("DOMContentLoaded", function () {
+    window.initMasterTooltips();
+});
+</script>
+@endpush
 @endsection

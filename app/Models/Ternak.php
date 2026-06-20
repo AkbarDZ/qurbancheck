@@ -46,7 +46,7 @@ class Ternak extends Model
         return $this->hasMany(LogKesehatan::class);
     }
 
-    public function pemeriksaanSyariats()
+    public function pemeriksaanSyariat()
     {
         return $this->hasMany(PemeriksaanSyariat::class);
     }

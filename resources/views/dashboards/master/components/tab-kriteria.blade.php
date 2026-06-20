@@ -1,40 +1,58 @@
 <div class="tab-pane fade p-4" id="kriteria-pane" role="tabpanel" tabindex="0">
-    <div class="d-flex justify-content-between mb-3">
-        <h5 class="mb-0">Kriteria Syariat</h5>
-        <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-            data-bs-target="#modalTambahKriteria"><i class="bi bi-plus-lg"></i> Tambah Kriteria</button>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="mb-1 fw-bold text-dark"><i class="bi bi-shield-check me-2 text-primary"></i>Kriteria Syariat</h5>
+            <p class="text-muted small mb-0">Kelola daftar kriteria kelayakan hewan qurban berdasarkan hukum syariat Islam.</p>
+        </div>
+        <button class="btn btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKriteria">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Kriteria
+        </button>
     </div>
-    <table class="table table-hover align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Kriteria</th>
-                <th>Fatal?</th>
-                <th class="text-end">Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="tableBodyKriteria">
-            @forelse($kriteriaKurbans as $kriteria)
-            <tr id="row-kriteria-{{ $kriteria->id }}">
-                <td class="col-nama">{{ $kriteria->nama_kriteria }}</td>
-                <td class="col-fatal">
-                    @if($kriteria->is_fatal)
-                        <span class="badge bg-danger">Ya</span>
-                    @else
-                        <span class="badge bg-secondary">Tidak</span>
-                    @endif
-                </td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-secondary btn-edit-kriteria" data-id="{{ $kriteria->id }}" data-nama="{{ $kriteria->nama_kriteria }}" data-deskripsi="{{ $kriteria->deskripsi }}" data-fatal="{{ $kriteria->is_fatal }}"><i class="bi bi-pencil"></i></button>
-                    <button class="btn btn-sm btn-outline-danger btn-delete-kriteria" data-id="{{ $kriteria->id }}"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="3" class="text-center text-muted">Data kosong</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+    
+    <div class="table-responsive rounded-3 border border-light-subtle shadow-sm bg-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary">
+                <tr class="border-bottom border-light-subtle">
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-clipboard-check me-2 text-muted"></i>Kriteria</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem; width: 120px;"><i class="bi bi-exclamation-triangle me-2 text-muted"></i>Fatal?</th>
+                    <th class="py-3 px-3 text-muted fw-bold text-end" style="font-size: 0.85rem; width: 140px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBodyKriteria">
+                @forelse($kriteriaKurbans as $kriteria)
+                <tr id="row-kriteria-{{ $kriteria->id }}">
+                    <td class="py-3 px-3 col-nama fw-bold text-dark">
+                        <div>{{ $kriteria->nama_kriteria }}</div>
+                        @if($kriteria->deskripsi)
+                            <div class="text-muted small fw-normal mt-1">{{ $kriteria->deskripsi }}</div>
+                        @endif
+                    </td>
+                    <td class="py-3 px-3 col-fatal">
+                        @if($kriteria->is_fatal)
+                            <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Ya</span>
+                        @else
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tidak</span>
+                        @endif
+                    </td>
+                    <td class="py-3 px-3 text-end">
+                        <button class="btn btn-sm btn-outline-secondary btn-edit-kriteria" data-id="{{ $kriteria->id }}" data-nama="{{ $kriteria->nama_kriteria }}" data-deskripsi="{{ $kriteria->deskripsi }}" data-fatal="{{ $kriteria->is_fatal }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Kriteria"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger btn-delete-kriteria" data-id="{{ $kriteria->id }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Kriteria"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="3" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i>
+                        <h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kriteria Syariat</h6>
+                        <p class="small text-muted mb-0">Klik tombol "Tambah Kriteria" untuk mendaftarkan kriteria syariat baru.</p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    <!-- Pagination Container -->
+    <div id="paginationKriteria" class="d-flex justify-content-center mt-3"></div>
 </div>
 
 <div class="modal fade" id="modalTambahKriteria" tabindex="-1" aria-hidden="true">
@@ -116,6 +134,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        window.kriteriaPagination = window.initTablePagination('tableBodyKriteria', 'paginationKriteria', 5);
 
         // --- Handler Form Kriteria ---
         const formKriteria = document.getElementById('formTambahKriteria');
@@ -142,22 +161,27 @@
                 .then(data => {
                     if (data.success) {
                         let emptyRow = tableBodyKriteria.querySelector('td[colspan]');
-                        if (emptyRow && emptyRow.innerText.toLowerCase().includes('kosong')) {
+                        if (emptyRow && (emptyRow.innerText.toLowerCase().includes('kosong') || emptyRow.innerText.toLowerCase().includes('belum ada'))) {
                             emptyRow.parentElement.remove();
                         }
-                        let badge = data.data.is_fatal ? '<span class="badge bg-danger">Ya</span>' :
-                            '<span class="badge bg-secondary">Tidak</span>';
+                        let badge = data.data.is_fatal ? '<span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Ya</span>' :
+                            '<span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tidak</span>';
+                        let descHtml = data.data.deskripsi ? `<div class="text-muted small fw-normal mt-1">${data.data.deskripsi}</div>` : '';
                         let tr = document.createElement('tr');
                         tr.id = `row-kriteria-${data.data.id}`;
                         tr.innerHTML = `
-                        <td class="col-nama">${data.data.nama_kriteria}</td>
-                        <td class="col-fatal">${badge}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-secondary btn-edit-kriteria" data-id="${data.data.id}" data-nama="${data.data.nama_kriteria}" data-deskripsi="${data.data.deskripsi || ''}" data-fatal="${data.data.is_fatal ? 1 : 0}"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete-kriteria" data-id="${data.data.id}"><i class="bi bi-trash"></i></button>
+                        <td class="py-3 px-3 col-nama fw-bold text-dark">
+                            <div>${data.data.nama_kriteria}</div>
+                            ${descHtml}
+                        </td>
+                        <td class="py-3 px-3 col-fatal">${badge}</td>
+                        <td class="py-3 px-3 text-end">
+                            <button class="btn btn-sm btn-outline-secondary btn-edit-kriteria" data-id="${data.data.id}" data-nama="${data.data.nama_kriteria}" data-deskripsi="${data.data.deskripsi || ''}" data-fatal="${data.data.is_fatal ? 1 : 0}" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Kriteria"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete-kriteria" data-id="${data.data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Kriteria"><i class="bi bi-trash"></i></button>
                         </td>
                     `;
                         tableBodyKriteria.insertAdjacentElement('afterbegin', tr);
+                        if (window.kriteriaPagination) window.kriteriaPagination.update();
                         bootstrap.Modal.getInstance(document.getElementById('modalTambahKriteria'))
                             .hide();
                         formKriteria.reset();
@@ -234,9 +258,12 @@
                 .then(data => {
                     if (data.success) {
                         let tr = document.getElementById(`row-kriteria-${id}`);
-                        tr.querySelector('.col-nama').innerText = data.data.nama_kriteria;
-                        let badge = data.data.is_fatal ? '<span class="badge bg-danger">Ya</span>' :
-                            '<span class="badge bg-secondary">Tidak</span>';
+                        
+                        let descHtml = data.data.deskripsi ? `<div class="text-muted small fw-normal mt-1">${data.data.deskripsi}</div>` : '';
+                        tr.querySelector('.col-nama').innerHTML = `<div>${data.data.nama_kriteria}</div>${descHtml}`;
+                        
+                        let badge = data.data.is_fatal ? '<span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Ya</span>' :
+                            '<span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tidak</span>';
                         tr.querySelector('.col-fatal').innerHTML = badge;
 
                         let btnEdit = tr.querySelector('.btn-edit-kriteria');
@@ -295,10 +322,11 @@
                                 if (tr) {
                                     tr.remove();
                                 }
+                                if (window.kriteriaPagination) window.kriteriaPagination.update();
 
                                 if (tableBodyKriteria.querySelectorAll('tr').length === 0) {
                                     tableBodyKriteria.innerHTML =
-                                        '<tr><td colspan="3" class="text-center text-muted">Data kosong</td></tr>';
+                                        '<tr><td colspan="3" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kriteria Syariat</h6><p class="small text-muted mb-0">Klik tombol "Tambah Kriteria" untuk mendaftarkan kriteria syariat baru.</p></td></tr>';
                                 }
 
                                 alert(data.message);

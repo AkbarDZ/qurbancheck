@@ -27,7 +27,34 @@ class KesehatanController extends Controller
             $query->where('status_karantina', $request->karantina);
         }
 
-        $logKesehatans = $query->latest('tanggal_rekam')->paginate(5);
+        // Filter berdasarkan rentang tanggal custom
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_rekam', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_rekam', '<=', $request->end_date);
+        }
+
+        // Sorting
+        if ($request->filled('sort')) {
+            if ($request->sort == 'oldest') {
+                $query->orderBy('tanggal_rekam', 'asc');
+            } elseif ($request->sort == 'az') {
+                $query->join('ternaks', 'log_kesehatans.ternak_id', '=', 'ternaks.id')
+                      ->select('log_kesehatans.*')
+                      ->orderBy('ternaks.nomor_eartag', 'asc');
+            } elseif ($request->sort == 'za') {
+                $query->join('ternaks', 'log_kesehatans.ternak_id', '=', 'ternaks.id')
+                      ->select('log_kesehatans.*')
+                      ->orderBy('ternaks.nomor_eartag', 'desc');
+            } else {
+                $query->orderBy('tanggal_rekam', 'desc');
+            }
+        } else {
+            $query->orderBy('tanggal_rekam', 'desc');
+        }
+
+        $logKesehatans = $query->paginate(5);
 
         if ($request->ajax()) {
             return response()->json([

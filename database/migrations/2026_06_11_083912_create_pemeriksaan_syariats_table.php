@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('pemeriksaan_syariats', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ternak_id')->constrained('ternaks')->onDelete('cascade');
-            $table->foreignId('penanggungjawab_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('penanggungjawab_id')->nullable()->constrained('users')->onDelete('cascade');
             
             // Relasi ke dokumen SKKH. Nullable karena bisa jadi pemeriksaan mandiri dulu.
             $table->foreignId('dokumen_skkh_id')->nullable()->constrained('dokumen_skkhs')->onDelete('set null');

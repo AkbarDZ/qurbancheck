@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('kriteria_id')->constrained('kriteria_kurbans')->onDelete('cascade');
             $table->boolean('is_lolos'); // true = Kondisi aman (tidak cacat), false = Mengalami cacat tersebut
             $table->text('catatan')->nullable(); // Catatan tambahan (misal: "Mata kanan katarak")
+            $table->string('dir_bukti_cacat')->nullable();
             $table->timestamps();
         });
     }

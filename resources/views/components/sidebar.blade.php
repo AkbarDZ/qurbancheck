@@ -41,7 +41,7 @@
             </a>
         </li>
         <li>
-            <a href="{{ url('/users') }}" class="nav-link {{ request()->is('users*') ? 'active' : '' }}" title="Pengguna">
+            <a href="{{ route('pengguna.index') }}" class="nav-link {{ request()->is('pengguna*') ? 'active' : '' }}" title="Pengguna">
                 <i class="fa-solid fa-user me-2"></i><span class="sidebar-text">Pengguna</span>
             </a>
         </li>

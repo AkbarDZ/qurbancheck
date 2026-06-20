@@ -3,9 +3,53 @@
     // 1. FUNGSI GLOBAL: Template Tunggal untuk Card Sapi/Ternak
     // Ditaruh di objek 'window' agar bisa dipanggil dari file modal-tambah atau modal-edit mana pun
     window.renderTernakCardHTML = function (data, fotoUrl) {
+        const isKandangPenuh = data.kandang && (data.kandang.ternaks_count ?? 0) >= (data.kandang.kapasitas_maksimal ?? 0);
+        const hasFoto = data.dir_foto_hewan ? true : false;
+        
+        // Health status evaluation
+        const hasLog = (data.log_kesehatans_count ?? 0) > 0;
+        let healthStatusHTML = '';
+        if (!hasLog) {
+            healthStatusHTML = `<span class="badge bg-secondary rounded-pill px-3 py-2">Belum diperiksa</span>`;
+        } else if (data.is_karantina) {
+            healthStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2">Di Karantina</span>`;
+        } else {
+            healthStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2">Tersedia</span>`;
+        }
+
+        // Qurban evaluation
+        const syariats = data.pemeriksaan_syariat || [];
+        const latestSyariat = syariats.length > 0 ? [...syariats].sort((a,b) => b.id - a.id)[0] : null;
+        const isLayak = latestSyariat && latestSyariat.status === 'layak_qurban';
+        const hasSkkh = latestSyariat && latestSyariat.dokumen_skkh_id ? true : false;
+
+        let qurbanStatusHTML = '';
+        if (!latestSyariat) {
+            qurbanStatusHTML = `<span class="badge bg-secondary rounded-pill px-3 py-2">Belum dicek</span>`;
+        } else if (isLayak) {
+            qurbanStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2">Layak Qurban</span>`;
+        } else {
+            qurbanStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2">Tidak Layak</span>`;
+        }
+
+        const skkhHTML = hasSkkh ? `
+            <span class="badge bg-info text-white rounded-pill px-2 py-1" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Terverifikasi SKKH">
+                <i class="bi bi-check-lg"></i>
+            </span>
+        ` : '';
+
+        const rightColumnHTML = hasFoto ? `
+            <div class="col-md-4 col-lg-4 p-0">
+                <img src="${fotoUrl}" class="img-fluid h-100 w-100 object-fit-cover" alt="Foto Ternak ${data.nomor_eartag}" style="min-height: 250px;">
+            </div>
+        ` : `
+            <div class="col-md-4 col-lg-4 p-0">
+                <img src="${fotoUrl}" class="img-fluid h-100 w-100 object-fit-cover" alt="Foto Ternak ${data.nomor_eartag}" style="min-height: 250px;">
+            </div>
+        `;
         return `
             <div class="row g-0">
-                <div class="col-md-8 col-lg-9">
+                <div class="col-md-8 col-lg-8">
                     <div class="card-body d-flex flex-column h-100">
                         <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                             <div class="d-flex align-items-center">
@@ -24,8 +68,10 @@
                                     `}
                                 </div>
                             </div>
-                            <div>
-                                <span class="badge bg-secondary rounded-pill px-3 py-2">Belum diperiksa</span>
+                            <div class="d-flex align-items-center gap-2">
+                                ${qurbanStatusHTML}
+                                ${healthStatusHTML}
+                                ${skkhHTML}
                             </div>
                         </div>
 
@@ -36,7 +82,7 @@
                             </div>
                             <div class="col-sm-6 mb-3">
                                 <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Lokasi Kandang</small>
-                                <strong class="text-kandang">${data.kandang.nama_kandang}</strong>
+                                <strong class="text-kandang ${isKandangPenuh ? 'text-danger' : ''}">${data.kandang.nama_kandang}</strong>
                             </div>
                             <div class="col-sm-6 mb-3">
                                 <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Jenis Kelamin</small>
@@ -48,6 +94,16 @@
                                     ${data.log_berats && data.log_berats.length > 0 ? data.log_berats[0].berat_kg + ' Kg' : 'Belum ditimbang'}
                                 </strong>
                             </div>
+                            <div class="col-sm-6 mb-3">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Asal Usul</small>
+                                <strong class="text-asal">${Number(data.harga_beli_awal) > 0 ? 'Pembelian' : 'Lahir di Peternakan'}</strong>
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">${Number(data.harga_beli_awal) > 0 ? 'Harga Beli' : 'Tanggal Lahir'}</small>
+                                <strong class="${Number(data.harga_beli_awal) > 0 ? 'text-primary' : ''}">
+                                    ${Number(data.harga_beli_awal) > 0 ? 'Rp ' + Number(data.harga_beli_awal).toLocaleString('id-ID') : (data.tanggal_lahir ? new Date(data.tanggal_lahir).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-')}
+                                </strong>
+                            </div>
                         </div>
 
                         <div class="mt-auto d-flex gap-2 flex-wrap">
@@ -56,7 +112,10 @@
                                 data-eartag="${data.nomor_eartag}" 
                                 data-ras="${data.ras_id}" 
                                 data-kandang="${data.kandang_id}" 
-                                data-gender="${data.jenis_kelamin}">
+                                data-gender="${data.jenis_kelamin}"
+                                data-foto="${data.dir_foto_hewan ? '/storage/' + data.dir_foto_hewan : ''}"
+                                data-harga-beli="${data.harga_beli_awal || ''}"
+                                data-tanggal-lahir="${data.tanggal_lahir ? (typeof data.tanggal_lahir === 'string' ? data.tanggal_lahir.substring(0, 10) : new Date(data.tanggal_lahir).toISOString().substring(0,10)) : ''}">
                                 <i class="bi bi-pencil"></i> Edit
                             </button>
                             <button class="btn btn-outline-info btn-sm btn-perkembangan-berat"
@@ -64,14 +123,23 @@
                                 <i class="bi bi-bar-chart-line"></i> Perkembangan Berat
                             </button>
                             <a href="/kesehatan?tambah_ternak_id=${data.id}" class="btn btn-outline-warning btn-sm"><i class="bi bi-heart-pulse"></i> Data Kesehatan</a>
-                            <button class="btn btn-outline-success btn-sm"><i class="bi bi-clipboard-check"></i> Kelayakan Kurban</button>
+                            ${latestSyariat ? `
+                                <a href="/syariat?show_pemeriksaan_id=${latestSyariat.id}" class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
+                                </a>
+                            ` : `
+                                <a href="/syariat?tambah_ternak_id=${data.id}" class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
+                                </a>
+                            `}
+                            <button class="btn btn-outline-primary btn-sm btn-keuangan-ternak" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-title="Kartu Rapor Keuangan">
+                                <i class="bi bi-receipt"></i>
+                            </button>
                             <button class="btn btn-outline-danger btn-sm ms-auto btn-delete-ternak" data-id="${data.id}"><i class="bi bi-trash"></i></button>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 col-lg-3 bg-white">
-                    <img src="${fotoUrl}" class="img-fluid rounded-end h-100 w-100 object-fit-cover" alt="Foto Ternak ${data.nomor_eartag}" style="min-height: 250px;">
-                </div>
+                ${rightColumnHTML}
             </div>
         `;
     };
@@ -94,9 +162,67 @@
         }
     };
 
+    window.updateKandangCapacity = function (kandangId, newCount, maxVal = null) {
+        // Tambah modal
+        let selectTambah = document.querySelector('#modalTambahTernak select[name="kandang_id"]');
+        if (selectTambah) {
+            let option = selectTambah.querySelector(`option[value="${kandangId}"]`);
+            if (option) {
+                let max = maxVal !== null ? maxVal : (parseInt(option.getAttribute('data-max')) || 0);
+                let baseNama = option.getAttribute('data-nama') || option.text.split(' (')[0];
+                
+                option.setAttribute('data-count', newCount);
+                option.setAttribute('data-max', max);
+                option.setAttribute('data-nama', baseNama);
+                
+                if (newCount >= max) {
+                    option.disabled = true;
+                    option.text = `${baseNama} (${newCount}/${max}) - [Penuh]`;
+                } else {
+                    option.disabled = false;
+                    option.text = `${baseNama} (${newCount}/${max})`;
+                }
+            }
+        }
+        
+        // Edit modal
+        let selectEdit = document.querySelector('#modalEditTernak select[name="kandang_id"]');
+        if (selectEdit) {
+            let option = selectEdit.querySelector(`option[value="${kandangId}"]`);
+            if (option) {
+                let max = maxVal !== null ? maxVal : (parseInt(option.getAttribute('data-max')) || 0);
+                let baseNama = option.getAttribute('data-nama') || option.text;
+                
+                option.setAttribute('data-count', newCount);
+                option.setAttribute('data-max', max);
+                option.setAttribute('data-nama', baseNama);
+            }
+        }
+    };
+
+    window.decrementKandangCount = function (kandangId) {
+        let selectEdit = document.querySelector('#modalEditTernak select[name="kandang_id"]');
+        if (selectEdit) {
+            let option = selectEdit.querySelector(`option[value="${kandangId}"]`);
+            if (option) {
+                let currentCount = parseInt(option.getAttribute('data-count')) || 0;
+                let newCount = Math.max(0, currentCount - 1);
+                window.updateKandangCapacity(kandangId, newCount);
+            }
+        }
+    };
+
     // Jalankan tooltip saat halaman pertama kali dibuka
     document.addEventListener("DOMContentLoaded", function () {
         window.initTooltips(document);
+
+        // Initialize Select2 on search filters
+        $('#filterKandang').select2({
+            width: '100%'
+        });
+        $('#filterRas').select2({
+            width: '100%'
+        });
 
         // ========== AJAX FILTER & SEARCH ==========
         const formFilter = document.getElementById('formFilter');
@@ -161,7 +287,18 @@
         // Intercept form submit
         formFilter.addEventListener('submit', function(e) {
             e.preventDefault();
-            let params = new URLSearchParams(new FormData(formFilter));
+            let formData = new FormData(formFilter);
+
+            // Append header filters
+            const sortVal = document.getElementById('filterSort').value;
+            const startDateVal = document.getElementById('filterStartDate').value;
+            const endDateVal = document.getElementById('filterEndDate').value;
+            
+            if (sortVal) formData.append('sort', sortVal);
+            if (startDateVal) formData.append('start_date', startDateVal);
+            if (endDateVal) formData.append('end_date', endDateVal);
+
+            let params = new URLSearchParams(formData);
             // Hapus params yang kosong agar URL bersih
             for (let [key, val] of [...params.entries()]) {
                 if (!val) params.delete(key);
@@ -169,11 +306,20 @@
             fetchTernak(params.toString());
         });
 
-        // Filter dropdown langsung tanpa klik tombol
-        document.querySelectorAll('.filter-ternak').forEach(select => {
-            select.addEventListener('change', function() {
-                formFilter.dispatchEvent(new Event('submit'));
-            });
+        // Filter dropdown langsung tanpa klik tombol (menggunakan jQuery agar ter-trigger dari Select2)
+        $('.filter-ternak').on('change', function() {
+            formFilter.dispatchEvent(new Event('submit'));
+        });
+
+        // Trigger submit when header filters change
+        document.getElementById('filterSort').addEventListener('change', function() {
+            formFilter.dispatchEvent(new Event('submit'));
+        });
+        document.getElementById('filterStartDate').addEventListener('change', function() {
+            formFilter.dispatchEvent(new Event('submit'));
+        });
+        document.getElementById('filterEndDate').addEventListener('change', function() {
+            formFilter.dispatchEvent(new Event('submit'));
         });
 
         // Debounced search saat mengetik
@@ -207,13 +353,96 @@
             // A. Pemicu Tombol Edit
             let btnEdit = e.target.closest('.btn-edit-ternak');
             if (btnEdit) {
+                let currentKandangId = btnEdit.getAttribute('data-kandang');
                 document.getElementById('edit_ternak_id').value = btnEdit.getAttribute('data-id');
                 document.getElementById('edit_nomor_eartag').value = btnEdit.getAttribute(
                 'data-eartag');
+                
+                // Set native values and trigger change for Select2
                 document.getElementById('edit_ras_id').value = btnEdit.getAttribute('data-ras');
-                document.getElementById('edit_kandang_id').value = btnEdit.getAttribute('data-kandang');
-                document.getElementById('edit_jenis_kelamin').value = btnEdit.getAttribute(
-                    'data-gender');
+                document.getElementById('edit_kandang_id').value = currentKandangId;
+                $('#edit_ras_id').trigger('change');
+                $('#edit_kandang_id').trigger('change');
+
+                 document.getElementById('edit_jenis_kelamin').value = btnEdit.getAttribute(
+                     'data-gender');
+ 
+                 // Populate Asal Usul fields
+                 let price = btnEdit.getAttribute('data-harga-beli');
+                 let dob = btnEdit.getAttribute('data-tanggal-lahir');
+ 
+                 let editRadioAsalBeli = document.getElementById('edit_asal_beli');
+                 let editRadioAsalLahir = document.getElementById('edit_asal_lahir');
+                 let editInputHargaBeli = document.getElementById('edit_harga_beli_awal');
+                 let editInputTanggalLahir = document.getElementById('edit_tanggal_lahir');
+ 
+                 if (price && Number(price) > 0) {
+                     if (editRadioAsalBeli) editRadioAsalBeli.checked = true;
+                     if (editInputHargaBeli) editInputHargaBeli.value = price;
+                 } else if (dob) {
+                     if (editRadioAsalLahir) editRadioAsalLahir.checked = true;
+                     if (editInputTanggalLahir) editInputTanggalLahir.value = dob;
+                 } else {
+                     if (editRadioAsalBeli) editRadioAsalBeli.checked = true;
+                 }
+                 
+                 if (typeof window.editToggleAsalUsul === 'function') {
+                     window.editToggleAsalUsul();
+                 }
+
+                // Populate current photo preview if exists
+                let currentFotoUrl = btnEdit.getAttribute('data-foto');
+                let currentFotoContainer = document.getElementById('edit_current_foto_container');
+                let currentFotoImg = document.getElementById('edit_current_foto');
+                if (currentFotoUrl) {
+                    if (currentFotoImg) currentFotoImg.src = currentFotoUrl;
+                    if (currentFotoContainer) currentFotoContainer.classList.remove('d-none');
+                } else {
+                    if (currentFotoImg) currentFotoImg.src = '';
+                    if (currentFotoContainer) currentFotoContainer.classList.add('d-none');
+                }
+                
+                // Clear any previous edit new photo previews/errors
+                let inputFotoEdit = document.getElementById('edit_foto');
+                if (inputFotoEdit) {
+                    inputFotoEdit.value = '';
+                    inputFotoEdit.classList.remove('is-invalid');
+                }
+                let newFotoContainer = document.getElementById('edit_new_foto_preview_container');
+                if (newFotoContainer) newFotoContainer.classList.add('d-none');
+                let newFotoImg = document.getElementById('edit_new_foto_preview');
+                if (newFotoImg) newFotoImg.src = '';
+                let errorFotoEdit = document.getElementById('error_edit_foto');
+                if (errorFotoEdit) errorFotoEdit.innerText = '';
+
+                // Reset Select2 validation states
+                $('#edit_ras_id').removeClass('is-invalid');
+                $('#edit_kandang_id').removeClass('is-invalid');
+
+                // Update option states and text dynamically
+                let selectKandang = document.getElementById('edit_kandang_id');
+                if (selectKandang) {
+                    let options = selectKandang.options;
+                    for (let i = 0; i < options.length; i++) {
+                        let option = options[i];
+                        let count = parseInt(option.getAttribute('data-count')) || 0;
+                        let max = parseInt(option.getAttribute('data-max')) || 0;
+                        let baseNama = option.getAttribute('data-nama') || option.text;
+                        
+                        if (option.value == currentKandangId) {
+                            option.disabled = false;
+                            option.text = `${baseNama} (${count}/${max})`;
+                        } else {
+                            if (count >= max) {
+                                option.disabled = true;
+                                option.text = `${baseNama} (${count}/${max}) - [Penuh]`;
+                            } else {
+                                option.disabled = false;
+                                option.text = `${baseNama} (${count}/${max})`;
+                            }
+                        }
+                    }
+                }
 
                 // Buka modal edit secara aman tanpa merusak backdrop
                 let modalEdit = bootstrap.Modal.getOrCreateInstance(document.getElementById(
@@ -226,6 +455,14 @@
             let btnDelete = e.target.closest('.btn-delete-ternak');
             if (btnDelete) {
                 let id = btnDelete.getAttribute('data-id');
+                let kandangId = null;
+                let card = document.getElementById(`card-ternak-${id}`);
+                if (card) {
+                    let btnEdit = card.querySelector('.btn-edit-ternak');
+                    if (btnEdit) {
+                        kandangId = btnEdit.getAttribute('data-kandang');
+                    }
+                }
                 if (confirm("Apakah Anda yakin ingin menghapus data hewan ini?")) {
                     btnDelete.disabled = true;
                     fetch(`/ternak/${id}`, {
@@ -240,6 +477,9 @@
                             if (data.success) {
                                 document.getElementById(`card-ternak-${id}`).remove();
                                 window.updateCounter(-1);
+                                if (kandangId) {
+                                    window.decrementKandangCount(kandangId);
+                                }
                                 alert(data.message);
                             }
                         });
@@ -269,6 +509,10 @@
             }
         });
 
+        window.currentLogs = [];
+        window.currentLogsPage = 1;
+        const logsPerPage = 5;
+
         // 4. Fungsi memuat tabel log berat
         window.loadLogBerat = function(id) {
             let tbody = document.getElementById('tableBodyBerat');
@@ -280,27 +524,81 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    if (data.data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="2" class="py-4 text-muted">Belum ada data timbang.</td></tr>';
-                    } else {
-                        tbody.innerHTML = '';
-                        data.data.forEach(log => {
-                            // Format date
-                            let d = new Date(log.tanggal_timbang);
-                            let dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td class="py-2 align-middle">${dateStr}</td>
-                                    <td class="py-2 align-middle fw-bold text-success">${log.berat_kg} Kg</td>
-                                </tr>
-                            `;
-                        });
-                    }
+                    window.currentLogs = data.data || [];
+                    window.renderLogsPage(1);
                 }
             })
             .catch(err => {
                 tbody.innerHTML = '<tr><td colspan="2" class="py-4 text-danger">Gagal memuat data.</td></tr>';
             });
+        };
+
+        window.renderLogsPage = function(page) {
+            window.currentLogsPage = page;
+            let tbody = document.getElementById('tableBodyBerat');
+            if (!tbody) return;
+
+            if (!window.currentLogs || window.currentLogs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-4 text-muted">Belum ada data timbang.</td></tr>';
+                window.renderLogsPagination(0);
+                return;
+            }
+
+            tbody.innerHTML = '';
+            let start = (page - 1) * logsPerPage;
+            let end = start + logsPerPage;
+            let paginated = window.currentLogs.slice(start, end);
+
+            paginated.forEach(log => {
+                let d = new Date(log.tanggal_timbang);
+                let dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="py-2 align-middle">${dateStr}</td>
+                        <td class="py-2 align-middle fw-bold text-success">${log.berat_kg} Kg</td>
+                    </tr>
+                `;
+            });
+
+            window.renderLogsPagination(window.currentLogs.length);
+        };
+
+        window.renderLogsPagination = function(totalItems) {
+            let container = document.getElementById('paginationBerat');
+            if (!container) return;
+
+            let totalPages = Math.ceil(totalItems / logsPerPage);
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<ul class="pagination pagination-sm mb-0 gap-1">';
+            
+            // Prev button
+            html += `
+                <li class="page-item ${window.currentLogsPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link rounded-2" href="#" onclick="event.preventDefault(); window.renderLogsPage(${window.currentLogsPage - 1})">&laquo;</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                html += `
+                    <li class="page-item ${window.currentLogsPage === i ? 'active' : ''}">
+                        <a class="page-link rounded-2" href="#" onclick="event.preventDefault(); window.renderLogsPage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next button
+            html += `
+                <li class="page-item ${window.currentLogsPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link rounded-2" href="#" onclick="event.preventDefault(); window.renderLogsPage(${window.currentLogsPage + 1})">&raquo;</a>
+                </li>
+            `;
+
+            html += '</ul>';
+            container.innerHTML = html;
         };
 
         // 5. Submit form tambah berat
@@ -375,6 +673,82 @@
                 btnSubmit.innerHTML = '<i class="bi bi-plus-lg"></i>';
             });
         });
+        // ========== KARTU RAPOR KEUANGAN ==========
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btn-keuangan-ternak')) {
+                let btn = e.target.closest('.btn-keuangan-ternak');
+                let id = btn.getAttribute('data-id');
+                
+                let modalEl = document.getElementById('modalKeuangan');
+                let modal = new bootstrap.Modal(modalEl);
+                modal.show();
+
+                document.getElementById('keuanganLoading').classList.remove('d-none');
+                document.getElementById('keuanganContent').classList.add('d-none');
+                
+                fetch(`/ternak/${id}/keuangan`, {
+                    headers: { 
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        let data = res.data;
+                        
+                        // Extract eartag from edit button on the same card
+                        let eartagEl = btn.closest('.card').querySelector('.btn-edit-ternak');
+                        document.getElementById('kEartag').innerText = eartagEl ? eartagEl.getAttribute('data-eartag') : '-';
+                        
+                        const formatRp = (num) => 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.round(num));
+                        
+                        document.getElementById('kModalAwal').innerText = formatRp(data.modal_awal);
+                        document.getElementById('kBiayaPakan').innerText = formatRp(data.biaya_pakan_proporsional);
+                        document.getElementById('kBiayaMedis').innerText = formatRp(data.biaya_medis);
+                        document.getElementById('kTotalRiil').innerText = formatRp(data.total_modal);
+                        document.getElementById('kSaranJual').innerText = formatRp(data.saran_jual);
+                        
+                        // Render Rincian
+                        let rincianContainer = document.getElementById('kRincianContainer');
+                        if (data.rincian_bulanan && data.rincian_bulanan.length > 0) {
+                            let html = '';
+                            data.rincian_bulanan.forEach(item => {
+                                html += `
+                                <div class="mb-2 pb-1" style="border-bottom: 1px dashed #eee;">
+                                    <div class="fw-bold text-dark" style="font-size: 0.75rem;">${item.bulan_tahun}</div>
+                                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
+                                        <span>Pakan:</span> <span>${formatRp(item.biaya_pakan)}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
+                                        <span>Medis:</span> <span>${formatRp(item.biaya_medis)}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between fw-semibold" style="font-size: 0.75rem;">
+                                        <span>Subtotal:</span> <span>${formatRp(item.subtotal)}</span>
+                                    </div>
+                                </div>
+                                `;
+                            });
+                            rincianContainer.innerHTML = html;
+                        } else {
+                            rincianContainer.innerHTML = '<div class="text-center text-muted py-2" style="font-size: 0.75rem;">Belum ada rincian biaya berjalan.</div>';
+                        }
+
+                        document.getElementById('keuanganLoading').classList.add('d-none');
+                        document.getElementById('keuanganContent').classList.remove('d-none');
+                    } else {
+                        alert(res.message || 'Gagal memuat data keuangan');
+                        modal.hide();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Terjadi kesalahan saat memuat data keuangan.');
+                    modal.hide();
+                });
+            }
+        });
+
     });
 
 </script>

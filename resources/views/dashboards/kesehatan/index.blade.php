@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Kesehatan - Sistem Qurban')
+
 @section('content')
 <div class="container-fluid">
 
@@ -41,41 +43,59 @@
     </div>
 
     <div class="card shadow border-0">
-        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h6 class="mb-0 fw-bold">Riwayat Pemeriksaan & Pengobatan</h6>
-            <span class="badge bg-primary rounded-pill px-3 py-2" id="totalLogBadge">Total:
-                {{ $logKesehatans->total() }} Catatan</span>
+            
+            <div class="d-flex align-items-center flex-wrap gap-2 ms-auto">
+                <!-- Sorting select -->
+                <select class="form-select form-select-sm border bg-light text-dark fw-semibold" id="filterSort" style="width: 140px; cursor: pointer;">
+                    <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                    <option value="az" {{ request('sort') == 'az' ? 'selected' : '' }}>Eartag (A-Z)</option>
+                    <option value="za" {{ request('sort') == 'za' ? 'selected' : '' }}>Eartag (Z-A)</option>
+                </select>
+
+                <!-- Custom Date Range -->
+                <div class="input-group input-group-sm" style="width: 280px;">
+                    <input type="date" class="form-control border bg-light text-dark" id="filterStartDate" value="{{ request('start_date') }}" title="Tanggal Mulai">
+                    <span class="input-group-text bg-light text-muted border border-start-0 border-end-0 small">s/d</span>
+                    <input type="date" class="form-control border bg-light text-dark" id="filterEndDate" value="{{ request('end_date') }}" title="Tanggal Selesai">
+                </div>
+
+                <span class="badge bg-primary px-3 py-2" id="totalLogBadge">Total:
+                    {{ $logKesehatans->total() }} Catatan</span>
+            </div>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
+        <div class="card-body p-4">
+            <div class="table-responsive rounded-3 border border-light-subtle shadow-sm bg-white">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Tanggal</th>
-                            <th>No. Eartag</th>
-                            <th>Gejala Klinis</th>
-                            <th>Tindakan Medis</th>
-                            <th>Status Karantina</th>
-                            <th class="text-end pe-4">Aksi</th>
+                    <thead class="bg-light text-secondary">
+                        <tr class="border-bottom border-light-subtle">
+                            <th class="py-3 ps-4 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-calendar3 me-2 text-muted"></i>Tanggal</th>
+                            <th class="py-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-tag me-2 text-muted"></i>No. Eartag</th>
+                            <th class="py-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-clipboard2-pulse me-2 text-muted"></i>Gejala Klinis</th>
+                            <th class="py-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-activity me-2 text-muted"></i>Tindakan Medis</th>
+                            <th class="py-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-exclamation-triangle me-2 text-muted"></i>Status Karantina</th>
+                            <th class="py-3 text-muted fw-bold text-end pe-4" style="font-size: 0.85rem; width: 140px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="kesehatanContainer">
                         @forelse($logKesehatans as $log)
                         <tr id="row-kesehatan-{{ $log->id }}">
-                            <td class="ps-4">{{ \Carbon\Carbon::parse($log->tanggal_rekam)->format('d M Y') }}</td>
-                            <td>
+                            <td class="py-3 ps-4">{{ \Carbon\Carbon::parse($log->tanggal_rekam)->format('d M Y') }}</td>
+                            <td class="py-3">
                                 <span class="fw-bold text-primary">{{ $log->ternak->nomor_eartag }}</span>
                                 @if($log->ternak->nama_panggilan)
                                 <small class="d-block text-muted">{{ $log->ternak->nama_panggilan }}</small>
                                 @endif
                             </td>
-                            <td>
+                            <td class="py-3">
                                 <span class="d-inline-block text-truncate" style="max-width: 200px;"
                                     title="{{ $log->gejala }}">
                                     {{ $log->gejala }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="py-3">
                                 @if($log->pengobatans->count() > 0)
                                 <span
                                     class="badge bg-light text-dark border">{{ $log->pengobatans->first()->nama_obat_tindakan }}</span>
@@ -86,21 +106,20 @@
                                 <span class="text-muted small">Belum ada tindakan</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="py-3">
                                 @if($log->status_karantina)
-                                <span class="badge bg-danger rounded-pill"><i class="bi bi-exclamation-triangle"></i>
-                                    Karantina</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle me-1"></i> Karantina</span>
                                 @else
-                                <span class="badge bg-success rounded-pill">Aman</span>
+                                <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;"><i class="bi bi-check-circle-fill me-1"></i> Aman</span>
                                 @endif
                             </td>
-                            <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-outline-info btn-detail-kesehatan"
-                                    data-id="{{ $log->id }}" title="Lihat Detail">
+                            <td class="py-3 text-end pe-4">
+                                <button class="btn btn-sm btn-outline-secondary me-1 btn-detail-kesehatan"
+                                    data-id="{{ $log->id }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
                                     <i class="bi bi-eye"></i>
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger btn-delete-kesehatan"
-                                    data-id="{{ $log->id }}" title="Hapus Log">
+                                    data-id="{{ $log->id }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Log">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>
@@ -173,27 +192,27 @@
         let isKarantina = data.status_karantina === 1 || data.status_karantina === true;
 
         let karantinaHtml = isKarantina ?
-            `<span class="badge bg-danger rounded-pill"><i class="bi bi-exclamation-triangle"></i> Karantina</span>` :
-            `<span class="badge bg-success rounded-pill">Aman</span>`;
+            `<span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle me-1"></i> Karantina</span>` :
+            `<span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;"><i class="bi bi-check-circle-fill me-1"></i> Aman</span>`;
 
         return `
-            <td class="ps-4">${formattedDate}</td>
-            <td>
+            <td class="py-3 ps-4">${formattedDate}</td>
+            <td class="py-3">
                 <span class="fw-bold text-primary">${data.ternak.nomor_eartag}</span>
                 ${namaPanggilan}
             </td>
-            <td>
+            <td class="py-3">
                 <span class="d-inline-block text-truncate" style="max-width: 200px;" title="${data.gejala}">
                     ${data.gejala}
                 </span>
             </td>
-            <td>${tindakanHtml}</td>
-            <td>${karantinaHtml}</td>
-            <td class="text-end pe-4">
-                <button class="btn btn-sm btn-outline-info btn-detail-kesehatan" data-id="${data.id}" title="Lihat Detail">
+            <td class="py-3">${tindakanHtml}</td>
+            <td class="py-3">${karantinaHtml}</td>
+            <td class="py-3 text-end pe-4">
+                <button class="btn btn-sm btn-outline-secondary me-1 btn-detail-kesehatan" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
                     <i class="bi bi-eye"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger btn-delete-kesehatan" data-id="${data.id}" title="Hapus Log">
+                <button class="btn btn-sm btn-outline-danger btn-delete-kesehatan" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Log">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -212,6 +231,17 @@
         const containerKesehatan = document.getElementById('kesehatanContainer');
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
         const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+        // Initialize Tooltips
+        function initTooltips(context = document) {
+            let triggers = context.querySelectorAll('[data-bs-toggle="tooltip"]');
+            [...triggers].forEach(el => {
+                let instance = bootstrap.Tooltip.getInstance(el);
+                if (instance) instance.dispose();
+                new bootstrap.Tooltip(el);
+            });
+        }
+        initTooltips();
 
         // ========== AJAX FILTER & SEARCH ==========
         const formFilter = document.getElementById('formFilter');
@@ -246,6 +276,7 @@
                             html += tr.outerHTML;
                         });
                         containerKesehatan.innerHTML = html;
+                        initTooltips(containerKesehatan);
                     } else {
                         containerKesehatan.innerHTML = `
                             <tr id="emptyStateKesehatan">
@@ -277,7 +308,18 @@
 
         formFilter.addEventListener('submit', function(e) {
             e.preventDefault();
-            let params = new URLSearchParams(new FormData(formFilter));
+            let formData = new FormData(formFilter);
+
+            // Append header filters
+            const sortVal = document.getElementById('filterSort').value;
+            const startDateVal = document.getElementById('filterStartDate').value;
+            const endDateVal = document.getElementById('filterEndDate').value;
+            
+            if (sortVal) formData.append('sort', sortVal);
+            if (startDateVal) formData.append('start_date', startDateVal);
+            if (endDateVal) formData.append('end_date', endDateVal);
+
+            let params = new URLSearchParams(formData);
             for (let [key, val] of [...params.entries()]) {
                 if (!val) params.delete(key);
             }
@@ -288,6 +330,17 @@
             select.addEventListener('change', function() {
                 formFilter.dispatchEvent(new Event('submit'));
             });
+        });
+
+        // Trigger submit when header filters change
+        document.getElementById('filterSort').addEventListener('change', function() {
+            formFilter.dispatchEvent(new Event('submit'));
+        });
+        document.getElementById('filterStartDate').addEventListener('change', function() {
+            formFilter.dispatchEvent(new Event('submit'));
+        });
+        document.getElementById('filterEndDate').addEventListener('change', function() {
+            formFilter.dispatchEvent(new Event('submit'));
         });
 
         const inputSearch = document.getElementById('inputSearchKesehatan');
@@ -466,13 +519,16 @@
             }
         });
 
-        // Auto-open modal if redirected with a specific ternak ID
+        // Auto-open modal if redirected with action=tambah or a specific ternak ID
         const urlParams = new URLSearchParams(window.location.search);
         const tambahTernakId = urlParams.get('tambah_ternak_id');
-        if (tambahTernakId) {
-            const selectTernak = document.querySelector('#formTambahKesehatan select[name="ternak_id"]');
-            if (selectTernak) {
-                selectTernak.value = tambahTernakId;
+        const action = urlParams.get('action');
+        if (action === 'tambah' || tambahTernakId) {
+            if (tambahTernakId) {
+                const selectTernak = document.querySelector('#formTambahKesehatan select[name="ternak_id"]');
+                if (selectTernak) {
+                    selectTernak.value = tambahTernakId;
+                }
             }
             
             const modalTambah = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTambahKesehatan'));

@@ -11,6 +11,7 @@ class DetailPemeriksaan extends Model
         'kriteria_id',
         'is_lolos',
         'catatan',
+        'dir_bukti_cacat', // Tambahkan ini
     ];
 
     protected $casts = [
@@ -22,7 +23,7 @@ class DetailPemeriksaan extends Model
         return $this->belongsTo(PemeriksaanSyariat::class, 'pemeriksaan_id');
     }
 
-    public function kriteriaKurban()
+    public function kriteria()
     {
         return $this->belongsTo(KriteriaKurban::class, 'kriteria_id');
     }

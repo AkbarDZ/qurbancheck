@@ -22,16 +22,39 @@
         </div>
     </div>
 
-    <div>
+    {{-- status badges --}}
+    <div class="d-flex align-items-center gap-2">
         @php
+            $latestPemeriksaan = $ternak->pemeriksaanSyariat->sortByDesc('tanggal_pemeriksaan')->first();
+            $isLayak = $latestPemeriksaan && $latestPemeriksaan->status === 'layak_qurban';
             $hasLog = isset($ternak->log_kesehatans_count) ? ($ternak->log_kesehatans_count > 0) : $ternak->logKesehatans()->exists();
         @endphp
+
+        {{-- kelayakan kurban --}}
+        @if (!$latestPemeriksaan)
+            <span class="badge bg-secondary rounded-pill px-3 py-2">Belum dicek</span>
+        @elseif ($isLayak)
+            <span class="badge bg-success rounded-pill px-3 py-2">Layak Qurban</span>
+        @else
+            <span class="badge bg-danger rounded-pill px-3 py-2">Tidak Layak</span>
+        @endif
+
+        {{-- status kesehatan --}}
         @if (!$hasLog)
             <span class="badge bg-secondary rounded-pill px-3 py-2">Belum diperiksa</span>
         @elseif ($ternak->is_karantina)
             <span class="badge bg-danger rounded-pill px-3 py-2">Di Karantina</span>
         @else
             <span class="badge bg-success rounded-pill px-3 py-2">Tersedia</span>
+        @endif
+
+        {{-- skkh verifikasi --}}
+        @if ($latestPemeriksaan && $latestPemeriksaan->dokumen_skkh_id)
+            <span class="badge bg-info text-white rounded-pill px-2 py-1" 
+                  style="cursor: pointer;"
+                  data-bs-toggle="tooltip" data-bs-placement="top" title="Terverifikasi SKKH">
+                <i class="bi bi-check-lg"></i>
+            </span>
         @endif
     </div>
 </div>

@@ -14,7 +14,7 @@ class MasterController extends Controller
     {
         $tipeTernaks = TipeTernak::all();
         $rasTernaks = RasTernak::with('tipeTernak')->get();
-        $kandangs = Kandang::all();
+        $kandangs = Kandang::withCount('ternaks')->get();
         $kriteriaKurbans = KriteriaKurban::all();
         return view('dashboards.master.index', compact('tipeTernaks', 'rasTernaks', 'kandangs', 'kriteriaKurbans'));
     }
@@ -63,6 +63,7 @@ class MasterController extends Controller
         ]);
 
         $kandang = Kandang::create($validated);
+        $kandang->loadCount('ternaks');
 
         return response()->json([
             'success' => true,
@@ -137,6 +138,7 @@ class MasterController extends Controller
 
         $kandang = Kandang::findOrFail($id);
         $kandang->update($validated);
+        $kandang->loadCount('ternaks');
 
         return response()->json([
             'success' => true,

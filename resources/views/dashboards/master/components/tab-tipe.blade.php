@@ -1,44 +1,58 @@
 <div class="tab-pane fade show active p-4" id="tipe-pane" role="tabpanel" tabindex="0">
-    <div class="d-flex justify-content-between mb-3">
-        <h5 class="mb-0">Data Tipe Ternak</h5>
-        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahTipe">
-            <i class="bi bi-plus-lg"></i> Tambah Tipe
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="mb-1 fw-bold text-dark"><i class="bi bi-tags-fill me-2 text-primary"></i>Data Jenis Ternak</h5>
+            <p class="text-muted small mb-0">Kelola kategori jenis hewan ternak, batas minimal umur kelayakan qurban.</p>
+        </div>
+        <button class="btn btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahTipe">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Jenis
         </button>
     </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>No</th>
-                    <th>Nama Jenis</th>
-                    <th>Umur Minimal Qurban (Bulan)</th>
-                    <th class="text-end">Aksi</th>
+    
+    <div class="table-responsive rounded-3 border border-light-subtle shadow-sm bg-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary">
+                <tr class="border-bottom border-light-subtle">
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem; width: 60px;">No</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-tag-fill me-2 text-muted"></i>Nama Jenis</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-calendar-event me-2 text-muted"></i>Umur Minimal Qurban</th>
+                    <th class="py-3 px-3 text-muted fw-bold text-end" style="font-size: 0.85rem; width: 140px;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tableBodyTipe">
                 @forelse($tipeTernaks as $index => $tipe)
                 <tr id="row-tipe-{{ $tipe->id }}">
-                    <td>{{ $index + 1 }}</td>
-                    <td class="col-nama">{{ $tipe->nama_jenis }}</td>
-                    <td class="col-umur">{{ $tipe->umur_minimal_qurban }}</td>
-                    <td class="text-end">
+                    <td class="py-3 px-3 fw-semibold text-secondary">{{ $index + 1 }}</td>
+                    <td class="py-3 px-3 col-nama fw-bold text-dark">{{ $tipe->nama_jenis }}</td>
+                    <td class="py-3 px-3 col-umur">
+                        <span class="fw-semibold text-dark">{{ $tipe->umur_minimal_qurban }}</span> <span class="text-muted small">bulan</span>
+                    </td>
+                    <td class="py-3 px-3 text-end">
                         <button class="btn btn-sm btn-outline-secondary btn-edit-tipe" data-id="{{ $tipe->id }}"
-                            data-nama="{{ $tipe->nama_jenis }}" data-umur="{{ $tipe->umur_minimal_qurban }}">
+                            data-nama="{{ $tipe->nama_jenis }}" data-umur="{{ $tipe->umur_minimal_qurban }}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Jenis">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger btn-delete-tipe" data-id="{{ $tipe->id }}">
+                        <button class="btn btn-sm btn-outline-danger btn-delete-tipe" data-id="{{ $tipe->id }}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Jenis">
                             <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="text-center text-muted">Data kosong</td>
+                    <td colspan="4" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i>
+                        <h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Tipe Ternak</h6>
+                        <p class="small text-muted mb-0">Klik tombol "Tambah Tipe" untuk mendaftarkan kategori baru.</p>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+    <!-- Pagination Container -->
+    <div id="paginationTipe" class="d-flex justify-content-center mt-3"></div>
 </div>
 
 {{-- // modal tambah --}}
@@ -117,6 +131,7 @@
 @push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        window.tipePagination = window.initTablePagination('tableBodyTipe', 'paginationTipe', 5);
 
         const formTipe = document.getElementById('formTambahTipe');
         const tableBody = document.getElementById('tableBodyTipe');
@@ -152,32 +167,37 @@
                 .then(data => {
                     if (data.success) {
                         let emptyRow = tableBody.querySelector('td[colspan]');
-                    if (emptyRow && emptyRow.innerText.toLowerCase().includes('kosong')) {
-                        emptyRow.parentElement.remove(); // Hapus elemen <tr> pembungkusnya
-                    }
+                        if (emptyRow && (emptyRow.innerText.toLowerCase().includes('kosong') || emptyRow.innerText.toLowerCase().includes('belum ada'))) {
+                            emptyRow.parentElement.remove(); // Hapus elemen <tr> pembungkusnya
+                        }
                         // 1. Sisipkan baris baru ke dalam tabel tanpa reload
                         // Catatan: Variabel 'data.data' berisi object model dari Controller
                         let tr = document.createElement('tr');
                         // Tambahkan ID pada row baru ini
                         tr.id = `row-tipe-${data.data.id}`;
                         tr.innerHTML = `
-                            <td>Baru</td>
-                            <td class="col-nama">${data.data.nama_jenis}</td>
-                            <td class="col-umur">${data.data.umur_minimal_qurban}</td>
-                            <td class="text-end">
+                            <td class="py-3 px-3 fw-semibold text-secondary">Baru</td>
+                            <td class="py-3 px-3 col-nama fw-bold text-dark">${data.data.nama_jenis}</td>
+                            <td class="py-3 px-3 col-umur">
+                                <span class="fw-semibold text-dark">${data.data.umur_minimal_qurban}</span> <span class="text-muted small">bulan</span>
+                            </td>
+                            <td class="py-3 px-3 text-end">
                                 <button class="btn btn-sm btn-outline-secondary btn-edit-tipe" 
                                     data-id="${data.data.id}" 
                                     data-nama="${data.data.nama_jenis}" 
-                                    data-umur="${data.data.umur_minimal_qurban}">
+                                    data-umur="${data.data.umur_minimal_qurban}"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Jenis">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger btn-delete-tipe" data-id="${data.data.id}">
+                                <button class="btn btn-sm btn-outline-danger btn-delete-tipe" data-id="${data.data.id}"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Jenis">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>
                         `;
                         tableBody.insertAdjacentElement('afterbegin',
                             tr); // Masukkan di urutan paling atas
+                        if (window.tipePagination) window.tipePagination.update();
 
                         // 2. Tutup Modal Bootstrap
                         let modalEl = document.getElementById('modalTambahTipe');
@@ -281,7 +301,11 @@
                         // Update tampilan baris di tabel tanpa reload
                         let tr = document.getElementById(`row-tipe-${id}`);
                         tr.querySelector('.col-nama').innerText = data.data.nama_jenis;
-                        tr.querySelector('.col-umur').innerText = data.data.umur_minimal_qurban;
+                        
+                        let colUmur = tr.querySelector('.col-umur');
+                        if (colUmur) {
+                            colUmur.innerHTML = `<span class="fw-semibold text-dark">${data.data.umur_minimal_qurban}</span> <span class="text-muted small">bulan</span>`;
+                        }
 
                         // Update juga atribut data-* pada tombol editnya agar jika diklik lagi datanya sudah baru
                         let btnEdit = tr.querySelector('.btn-edit-tipe');
@@ -356,11 +380,12 @@
                                     // Hapus elemen dari DOM HTML secara langsung
                                     tr.remove();
                                 }
+                                if (window.tipePagination) window.tipePagination.update();
 
                                 // 2. Cek apakah tabel sekarang kosong, jika ya, tampilkan pesan kosong
                                 if (tableBody.querySelectorAll('tr').length === 0) {
                                     tableBody.innerHTML =
-                                        '<tr><td colspan="4" class="text-center text-muted">Data kosong</td></tr>';
+                                        '<tr><td colspan="4" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Tipe Ternak</h6><p class="small text-muted mb-0">Klik tombol "Tambah Tipe" untuk mendaftarkan kategori baru.</p></td></tr>';
                                 }
 
                                 alert(data.message);

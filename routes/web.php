@@ -1,15 +1,15 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KesehatanController;
 use App\Http\Controllers\LogistikController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\SyariatController;
 use App\Http\Controllers\TernakController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('dashboards.index');
-});
+Route::get('/', [HomeController::class, 'index'])->name('dashboard');
 
 Route::prefix('master')->group(function () {
     Route::get('/', [MasterController::class, 'index'])->name('master.index');
@@ -42,6 +42,7 @@ Route::prefix('ternak')->group(function () {
     Route::patch('/{id}/nama-panggilan', [TernakController::class, 'updateNamaPanggilan']);
     Route::put('/{id}', [TernakController::class, 'update']);
     Route::delete('/{id}', [TernakController::class, 'destroy']);
+    Route::get('/{id}/keuangan', [TernakController::class, 'keuangan']);
 
     Route::get('/{id}/log-berat', [\App\Http\Controllers\LogBeratController::class, 'index']);
     Route::post('/{id}/log-berat', [\App\Http\Controllers\LogBeratController::class, 'store']);
@@ -49,8 +50,23 @@ Route::prefix('ternak')->group(function () {
 
 Route::prefix('logistik')->group(function () {
     Route::get('/', [LogistikController::class, 'index'])->name('logistik.index');
+    Route::post('/pakan', [\App\Http\Controllers\LogistikController::class, 'storePakan']);
+    Route::post('/distribusi', [\App\Http\Controllers\LogistikController::class, 'storeDistribusi']);
 });
 
 Route::prefix('syariat')->group(function () {
-    Route::get('/', [SyariatController::class, 'index'])->name('syariat.index');
+    Route::get('/', [\App\Http\Controllers\SyariatController::class, 'index'])->name('syariat.index');
+    Route::post('/pemeriksaan', [\App\Http\Controllers\SyariatController::class, 'storePemeriksaan']);
+    Route::post('/skkh', [\App\Http\Controllers\SyariatController::class, 'storeSkkh']);
+    Route::get('/skkh/{id}', [\App\Http\Controllers\SyariatController::class, 'showSkkh']);
+    Route::get('/pemeriksaan/{id}', [\App\Http\Controllers\SyariatController::class, 'showPemeriksaan']);
+    Route::delete('/pemeriksaan/{id}', [\App\Http\Controllers\SyariatController::class, 'destroyPemeriksaan']);
+    Route::delete('/skkh/{id}', [\App\Http\Controllers\SyariatController::class, 'destroySkkh']);
+});
+
+Route::prefix('pengguna')->group(function () {
+    Route::get('/', [PenggunaController::class, 'index'])->name('pengguna.index');
+    Route::post('/', [PenggunaController::class, 'store'])->name('pengguna.store');
+    Route::put('/{id}', [PenggunaController::class, 'update'])->name('pengguna.update');
+    Route::delete('/{id}', [PenggunaController::class, 'destroy'])->name('pengguna.destroy');
 });

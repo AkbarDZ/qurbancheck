@@ -1,4 +1,9 @@
 <div class="modal fade" id="modalPerkembanganBerat" tabindex="-1" aria-hidden="true">
+    <style>
+        #formTambahBerat .invalid-feedback:empty {
+            display: none !important;
+        }
+    </style>
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
             <div class="modal-header">
@@ -13,13 +18,13 @@
 
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-3">
-                        <h6 class="fw-bold mb-3">Tambah Data Timbang</h6>
+             
                         <form id="formTambahBerat">
                             <input type="hidden" id="berat_ternak_id">
                             <div class="row g-2 align-items-end">
                                 <div class="col-md-5">
                                     <label class="form-label small fw-bold text-muted mb-1">Tanggal</label>
-                                    <input type="date" class="form-control form-control-sm" name="tanggal_timbang" id="input_tanggal_timbang" required>
+                                    <input type="date" class="form-control form-control-sm" name="tanggal_timbang" id="input_tanggal_timbang" max="{{ date('Y-m-d') }}" required>
                                     <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_timbang" style="font-size: 0.75rem;"></div>
                                 </div>
                                 <div class="col-md-5">
@@ -50,6 +55,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div id="paginationBerat" class="d-flex justify-content-center py-2 bg-light border-top"></div>
                     </div>
                 </div>
 

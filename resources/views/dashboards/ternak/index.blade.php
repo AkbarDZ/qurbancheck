@@ -61,10 +61,27 @@
 </div>
 
 <div class="card shadow border-0 mb-4">
-    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
         <h6 class="mb-0 fw-bold">Daftar Hewan Ternak</h6>
-        <span class="badge bg-primary rounded-pill px-3 py-2" id="totalEkorBadge">Total: {{ $ternaks->total() }}
-            Ekor</span>
+        
+        <div class="d-flex align-items-center flex-wrap gap-2 ms-auto">
+            <!-- Sorting select -->
+            <select class="form-select form-select-sm border bg-light text-dark fw-semibold" id="filterSort" style="width: 150px; cursor: pointer;">
+                <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
+                <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                <option value="az" {{ request('sort') == 'az' ? 'selected' : '' }}>Nama/Eartag (A-Z)</option>
+                <option value="za" {{ request('sort') == 'za' ? 'selected' : '' }}>Nama/Eartag (Z-A)</option>
+            </select>
+
+            <!-- Custom Date Range -->
+            <div class="input-group input-group-sm" style="width: 280px;">
+                <input type="date" class="form-control border bg-light text-dark" id="filterStartDate" value="{{ request('start_date') }}" title="Tanggal Masuk Mulai">
+                <span class="input-group-text bg-light text-muted border border-start-0 border-end-0 small">s/d</span>
+                <input type="date" class="form-control border bg-light text-dark" id="filterEndDate" value="{{ request('end_date') }}" title="Tanggal Masuk Selesai">
+            </div>
+
+            <span class="badge bg-primary px-3 py-2" id="totalEkorBadge">Total: {{ $ternaks->total() }} Ekor</span>
+        </div>
     </div>
     <div class="card-body bg-light p-4">
         <div id="ternakContainer">
@@ -90,6 +107,7 @@
 @include('dashboards.ternak.components.modal-tambah')
 @include('dashboards.ternak.components.modal-edit')
 @include('dashboards.ternak.components.modal-perkembangan-berat')
+@include('dashboards.ternak.components.modal-keuangan')
 
 @push('styles')
 <style>
@@ -103,6 +121,28 @@
         justify-content: center !important;
     }
 
+    /* Styling to make Select2 fit Bootstrap 5 fields nicely */
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #dee2e6;
+        height: 38px;
+        line-height: 38px;
+        border-radius: 0.375rem;
+        padding-top: 5px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection--arrow {
+        height: 36px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection--rendered {
+        color: #212529;
+    }
+    .select2-dropdown {
+        border-color: #dee2e6;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #5aa17f;
+    }
 </style>
 @endpush
 

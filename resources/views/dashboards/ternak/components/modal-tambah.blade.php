@@ -1,71 +1,124 @@
 <div class="modal fade" id="modalTambahTernak" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow">
             <form id="formTambahTernak" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5">Tambah Data Ternak</h1>
+                <div class="modal-header bg-light border-bottom-0">
+                    <h1 class="modal-title fs-5 fw-bold text-dark">
+                        <i class="bi bi-plus-circle-fill me-2 text-primary"></i> Tambah Data Ternak
+                    </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body bg-light p-4">
                     <div class="alert alert-danger d-none py-2 small shadow-sm mb-3" id="tambah_global_error">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i> <span id="tambah_global_error_msg"></span>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">No. Eartag</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" name="nomor_eartag" id="inputEartag" required>
-                                <button class="btn btn-outline-secondary" type="button" id="btnGenerateEartag"
-                                    title="Generate otomatis jika hewan belum punya tag">
-                                    <i class="bi bi-magic"></i>
-                                </button>
+
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-muted">No. Eartag</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="nomor_eartag" id="inputEartag" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="btnGenerateEartag"
+                                            title="Generate otomatis jika hewan belum punya tag">
+                                            <i class="bi bi-magic"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nomor_eartag" style="font-size: 0.75rem;"></div>
+                                    <div class="form-text text-muted" style="font-size: 0.7rem;">
+                                        Ketik manual atau generate otomatis. <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill"></i> Nomor eartag harus unik (tidak boleh sama).</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-muted">Ras Ternak</label>
+                                    <select class="form-select select2-ras" name="ras_id" required>
+                                        <option value="">-- Pilih Ras --</option>
+                                        @foreach($rasTernaks as $ras)
+                                        <option value="{{ $ras->id }}">{{ $ras->tipeTernak->nama_jenis }} - {{ $ras->nama_ras }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_ras_id" style="font-size: 0.75rem;"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-muted">Jenis Kelamin</label>
+                                    <select class="form-select" name="jenis_kelamin" required>
+                                        <option value="jantan">Jantan</option>
+                                        <option value="betina">Betina</option>
+                                    </select>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_jenis_kelamin" style="font-size: 0.75rem;"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-muted">Kandang</label>
+                                    <select class="form-select select2-kandang" name="kandang_id" required>
+                                        <option value="">-- Pilih Kandang --</option>
+                                        @foreach($kandangs as $kandang)
+                                        <option value="{{ $kandang->id }}" 
+                                            data-count="{{ $kandang->ternaks_count }}" 
+                                            data-max="{{ $kandang->kapasitas_maksimal }}" 
+                                            data-nama="{{ $kandang->nama_kandang }}"
+                                            {{ $kandang->ternaks_count >= $kandang->kapasitas_maksimal ? 'disabled' : '' }}>
+                                            {{ $kandang->nama_kandang }} ({{ $kandang->ternaks_count }}/{{ $kandang->kapasitas_maksimal }})
+                                            @if($kandang->ternaks_count >= $kandang->kapasitas_maksimal) - [Penuh] @endif
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_kandang_id" style="font-size: 0.75rem;"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-muted">Berat Awal (Kg)</label>
+                                    <input type="number" step="0.01" class="form-control" name="berat_awal" required>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_awal" style="font-size: 0.75rem;"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-muted">Asal Usul Hewan</label>
+                                    <div class="d-flex gap-4 mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="asal_hewan" id="tambah_asal_beli" value="beli" checked>
+                                            <label class="form-check-label small" for="tambah_asal_beli">Beli</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="asal_hewan" id="tambah_asal_lahir" value="lahir">
+                                            <label class="form-check-label small" for="tambah_asal_lahir">Lahir di Peternakan</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3" id="tambah_container_harga_beli">
+                                    <label class="form-label small fw-bold text-muted">Harga Beli Awal (Rp)</label>
+                                    <input type="number" step="0.01" class="form-control" name="harga_beli_awal" id="tambah_harga_beli_awal" placeholder="Contoh: 15000000">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_harga_beli_awal" style="font-size: 0.75rem;"></div>
+                                </div>
+                                <div class="col-md-6 mb-3 d-none" id="tambah_container_tanggal_lahir">
+                                    <label class="form-label small fw-bold text-muted">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" name="tanggal_lahir" id="tambah_tanggal_lahir">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_lahir" style="font-size: 0.75rem;"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-muted">Foto Ternak (Opsional)</label>
+                                    <input type="file" class="form-control" name="foto" id="tambah_foto" accept="image/*">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_foto" style="font-size: 0.75rem;"></div>
+                                    <div class="form-text text-muted" style="font-size: 0.7rem;">
+                                        Format gambar (JPG, PNG, WEBP). <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill"></i> Ukuran foto maksimal 2MB.</span>
+                                    </div>
+                                    
+                                    <div class="mt-3 d-none" id="tambah_foto_preview_container">
+                                        <label class="form-label small text-muted fw-bold d-block">Preview Foto:</label>
+                                        <div class="position-relative d-inline-block rounded border overflow-hidden bg-light shadow-sm" style="width: 150px; height: 112px; border: 2px dashed #dee2e6 !important;">
+                                            <img src="" id="tambah_foto_preview" class="w-100 h-100 object-fit-cover">
+                                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 py-0 px-1" id="btnRemoveFotoTambah" style="font-size: 0.75rem; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nomor_eartag" style="font-size: 0.75rem;"></div>
-                            <div class="form-text" style="font-size: 0.7rem;">Ketik manual, atau gunakan tombol generate otomatis</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Ras Ternak</label>
-                            <select class="form-select" name="ras_id" required>
-                                <option value="">-- Pilih Ras --</option>
-                                @foreach($rasTernaks as $ras)
-                                <option value="{{ $ras->id }}">{{ $ras->tipeTernak->nama_jenis }} - {{ $ras->nama_ras }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_ras_id" style="font-size: 0.75rem;"></div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Jenis Kelamin</label>
-                            <select class="form-select" name="jenis_kelamin" required>
-                                <option value="jantan">Jantan</option>
-                                <option value="betina">Betina</option>
-                            </select>
-                            <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_jenis_kelamin" style="font-size: 0.75rem;"></div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kandang</label>
-                            <select class="form-select" name="kandang_id" required>
-                                @foreach($kandangs as $kandang)
-                                <option value="{{ $kandang->id }}">{{ $kandang->nama_kandang }}</option>
-                                @endforeach
-                            </select>
-                            <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_kandang_id" style="font-size: 0.75rem;"></div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Berat Awal (Kg)</label>
-                            <input type="number" step="0.01" class="form-control" name="berat_awal" required>
-                            <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_awal" style="font-size: 0.75rem;"></div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Foto Ternak (Opsional)</label>
-                            <input type="file" class="form-control" name="foto" accept="image/*">
-                            <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_foto" style="font-size: 0.75rem;"></div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer bg-light border-top-0 py-3">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary" id="btnSimpanTernak">Simpan Data</button>
                 </div>
@@ -93,19 +146,148 @@
     document.addEventListener("DOMContentLoaded", function () {
     const formTernak = document.getElementById('formTambahTernak');
     const btnSimpan = document.getElementById('btnSimpanTernak');
+
+    // Toggle Asal Usul Hewan (Mutually Exclusive)
+    const radioAsalBeli = document.getElementById('tambah_asal_beli');
+    const radioAsalLahir = document.getElementById('tambah_asal_lahir');
+    const containerHargaBeli = document.getElementById('tambah_container_harga_beli');
+    const containerTanggalLahir = document.getElementById('tambah_container_tanggal_lahir');
+    const inputHargaBeli = document.getElementById('tambah_harga_beli_awal');
+    const inputTanggalLahir = document.getElementById('tambah_tanggal_lahir');
+
+    function toggleAsalUsul() {
+        if (radioAsalBeli && radioAsalBeli.checked) {
+            if (containerHargaBeli) containerHargaBeli.classList.remove('d-none');
+            if (inputHargaBeli) {
+                inputHargaBeli.disabled = false;
+                inputHargaBeli.required = true;
+                if (inputHargaBeli.value === '0') {
+                    inputHargaBeli.value = '';
+                }
+            }
+            if (containerTanggalLahir) containerTanggalLahir.classList.add('d-none');
+            if (inputTanggalLahir) {
+                inputTanggalLahir.disabled = true;
+                inputTanggalLahir.required = false;
+                inputTanggalLahir.value = '';
+            }
+        } else {
+            if (containerHargaBeli) containerHargaBeli.classList.add('d-none');
+            if (inputHargaBeli) {
+                inputHargaBeli.disabled = true;
+                inputHargaBeli.required = false;
+                inputHargaBeli.value = '0';
+            }
+            if (containerTanggalLahir) containerTanggalLahir.classList.remove('d-none');
+            if (inputTanggalLahir) {
+                inputTanggalLahir.disabled = false;
+                inputTanggalLahir.required = true;
+            }
+        }
+    }
+
+    if (radioAsalBeli && radioAsalLahir) {
+        radioAsalBeli.addEventListener('change', toggleAsalUsul);
+        radioAsalLahir.addEventListener('change', toggleAsalUsul);
+        toggleAsalUsul();
+    }
+
+    if (formTernak) {
+        formTernak.addEventListener('reset', function() {
+            setTimeout(toggleAsalUsul, 10);
+        });
+    }
     const containerTernak = document.getElementById('ternakContainer');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+    // === Preview Foto & Validasi Ukuran (2MB) ===
+    const fileInput = document.getElementById('tambah_foto');
+    const previewContainer = document.getElementById('tambah_foto_preview_container');
+    const previewImg = document.getElementById('tambah_foto_preview');
+    const btnRemove = document.getElementById('btnRemoveFotoTambah');
+    const errorFoto = document.getElementById('error_foto');
+
+    // Initialize Select2 when modal is shown
+    $('#modalTambahTernak').on('shown.bs.modal', function () {
+        $('.select2-ras', this).select2({
+            dropdownParent: $('#modalTambahTernak'),
+            width: '100%'
+        });
+        $('.select2-kandang', this).select2({
+            dropdownParent: $('#modalTambahTernak'),
+            width: '100%'
+        });
+    });
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            fileInput.classList.remove('is-invalid');
+            if (errorFoto) errorFoto.innerText = '';
+            
+            if (file) {
+                // Check size (2MB = 2 * 1024 * 1024 bytes)
+                if (file.size > 2 * 1024 * 1024) {
+                    fileInput.classList.add('is-invalid');
+                    if (errorFoto) errorFoto.innerText = 'Ukuran foto melebihi 2MB. Silakan pilih file yang lebih kecil.';
+                    fileInput.value = ''; // Reset input
+                    if (previewContainer) previewContainer.classList.add('d-none');
+                    if (previewImg) previewImg.src = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (previewImg) previewImg.src = e.target.result;
+                    if (previewContainer) previewContainer.classList.remove('d-none');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                if (previewContainer) previewContainer.classList.add('d-none');
+                if (previewImg) previewImg.src = '';
+            }
+        });
+    }
+
+    if (btnRemove) {
+        btnRemove.addEventListener('click', function () {
+            if (fileInput) fileInput.value = '';
+            if (previewContainer) previewContainer.classList.add('d-none');
+            if (previewImg) previewImg.src = '';
+            if (fileInput) fileInput.classList.remove('is-invalid');
+            if (errorFoto) errorFoto.innerText = '';
+        });
+    }
+
     formTernak.addEventListener('submit', function (e) {
         e.preventDefault();
-        btnSimpan.disabled = true;
+        
+        // Reset seluruh visual error lama
         document.querySelectorAll('#formTambahTernak .is-invalid').forEach(el => el.classList.remove('is-invalid'));
         document.querySelectorAll('#formTambahTernak .invalid-feedback').forEach(el => el.innerText = '');
-        
+
         const globalErrorAlert = document.getElementById('tambah_global_error');
         const globalErrorMsg = document.getElementById('tambah_global_error_msg');
         if (globalErrorAlert) globalErrorAlert.classList.add('d-none');
-        
+
+        // Validation before submit
+        if (radioAsalBeli && radioAsalBeli.checked) {
+            if (inputHargaBeli && !inputHargaBeli.value.trim()) {
+                let errEl = document.getElementById('error_harga_beli_awal');
+                if (errEl) errEl.innerText = 'Harga beli awal wajib diisi jika asal usul adalah Beli.';
+                if (inputHargaBeli) inputHargaBeli.classList.add('is-invalid');
+                return;
+            }
+        } else if (radioAsalLahir && radioAsalLahir.checked) {
+            if (inputTanggalLahir && !inputTanggalLahir.value) {
+                let errEl = document.getElementById('error_tanggal_lahir');
+                if (errEl) errEl.innerText = 'Tanggal lahir wajib diisi jika lahir di peternakan.';
+                if (inputTanggalLahir) inputTanggalLahir.classList.add('is-invalid');
+                return;
+            }
+        }
+
+        btnSimpan.disabled = true;
         btnSimpan.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...';
 
         const formData = new FormData(formTernak);
@@ -150,8 +332,9 @@
                 
                 // MEMANGGIL TEMPLATE KARTU GLOBAL
                 let newCard = document.createElement('div');
-                newCard.className = "card shadow-sm border-0 mb-4";
+                newCard.className = "card shadow-sm border-1 mb-4";
                 newCard.id = `card-ternak-${data.data.id}`;
+                newCard.style.overflow = "hidden";
                 newCard.innerHTML = window.renderTernakCardHTML(data.data, fotoUrl);
 
                 containerTernak.insertAdjacentElement('afterbegin', newCard);
@@ -160,11 +343,23 @@
                 window.initTooltips(newCard);
                 window.updateCounter(1);
 
+                if (data.data.kandang_id && data.data.kandang) {
+                    window.updateKandangCapacity(
+                        data.data.kandang_id, 
+                        data.data.kandang.ternaks_count, 
+                        data.data.kandang.kapasitas_maksimal
+                    );
+                }
+
                 // TUTUP MODAL SECARA AMAN (Mencegah Bug Layar Gelap)
                 let modalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTambahTernak'));
                 if (modalInstance) modalInstance.hide();
                 
                 formTernak.reset();
+                if (previewContainer) previewContainer.classList.add('d-none');
+                if (previewImg) previewImg.src = '';
+                $('#modalTambahTernak .select2-ras').val('').trigger('change');
+                $('#modalTambahTernak .select2-kandang').val('').trigger('change');
                 alert(data.message);
             }
         })

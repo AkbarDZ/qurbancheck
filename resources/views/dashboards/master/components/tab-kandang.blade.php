@@ -1,41 +1,64 @@
 <div class="tab-pane fade p-4" id="kandang-pane" role="tabpanel" tabindex="0">
-    <div class="d-flex justify-content-between mb-3">
-        <h5 class="mb-0">Data Kandang</h5>
-        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKandang"><i
-                class="bi bi-plus-lg"></i> Tambah Kandang</button>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="mb-1 fw-bold text-dark"><i class="bi bi-house-door me-2 text-primary"></i>Data Kandang</h5>
+            <p class="text-muted small mb-0">Kelola kandang ternak, kapasitas maksimal, dan status keterisian.</p>
+        </div>
+        <button class="btn btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKandang">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Kandang
+        </button>
     </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>No</th>
-                    <th>Nama Kandang</th>
-                    <th>Kapasitas Maksimal</th>
-                    <th class="text-end">Aksi</th>
+    
+    <div class="table-responsive rounded-3 border border-light-subtle shadow-sm bg-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary">
+                <tr class="border-bottom border-light-subtle">
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem; width: 60px;">No</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-door-closed me-2 text-muted"></i>Nama Kandang</th>
+                    <th class="py-3 px-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="bi bi-bar-chart-steps me-2 text-muted"></i>Kapasitas Maksimal</th>
+                    <th class="py-3 px-3 text-muted fw-bold text-center" style="font-size: 0.85rem; width: 150px;"><i class="bi bi-info-circle me-2 text-muted"></i>Status</th>
+                    <th class="py-3 px-3 text-muted fw-bold text-end" style="font-size: 0.85rem; width: 140px;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tableBodyKandang">
                 @forelse($kandangs as $index => $kandang)
                 <tr id="row-kandang-{{ $kandang->id }}">
-                    <td>{{ $index + 1 }}</td>
-                    <td class="col-nama">{{ $kandang->nama_kandang }}</td>
-                    <td class="col-kapasitas">{{ $kandang->kapasitas_maksimal }}</td>
-                    <td class="text-end">
+                    <td class="py-3 px-3 fw-semibold text-secondary">{{ $index + 1 }}</td>
+                    <td class="py-3 px-3 col-nama fw-bold text-dark">{{ $kandang->nama_kandang }}</td>
+                    <td class="py-3 px-3 col-kapasitas">
+                        <span class="fw-semibold text-dark">{{ $kandang->kapasitas_maksimal }}</span> <span class="text-muted small">ekor</span>
+                    </td>
+                    <td class="py-3 px-3 text-center col-status">
+                        @if(($kandang->ternaks_count ?? 0) >= ($kandang->kapasitas_maksimal ?? 0))
+                            <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Penuh</span>
+                        @else
+                            <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tersedia</span>
+                        @endif
+                    </td>
+                    <td class="py-3 px-3 text-end">
                         <button class="btn btn-sm btn-outline-secondary btn-edit-kandang" data-id="{{ $kandang->id }}"
                             data-nama="{{ $kandang->nama_kandang }}"
-                            data-kapasitas="{{ $kandang->kapasitas_maksimal }}"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-sm btn-outline-danger btn-delete-kandang" data-id="{{ $kandang->id }}"><i
+                            data-kapasitas="{{ $kandang->kapasitas_maksimal }}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Kandang"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger btn-delete-kandang" data-id="{{ $kandang->id }}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Kandang"><i
                                 class="bi bi-trash"></i></button>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="text-center text-muted">Data kosong</td>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i>
+                        <h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kandang</h6>
+                        <p class="small text-muted mb-0">Klik tombol "Tambah Kandang" untuk mendaftarkan kandang baru.</p>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+    <!-- Pagination Container -->
+    <div id="paginationKandang" class="d-flex justify-content-center mt-3"></div>
 </div>
 
 <div class="modal fade" id="modalTambahKandang" tabindex="-1" aria-hidden="true">
@@ -112,6 +135,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        window.kandangPagination = window.initTablePagination('tableBodyKandang', 'paginationKandang', 5);
 
         // --- Handler Form Kandang ---
         const formKandang = document.getElementById('formTambahKandang');
@@ -138,21 +162,27 @@
                 .then(data => {
                     if (data.success) {
                         let emptyRow = tableBodyKandang.querySelector('td[colspan]');
-                        if (emptyRow && emptyRow.innerText.toLowerCase().includes('kosong')) {
+                        if (emptyRow && (emptyRow.innerText.toLowerCase().includes('kosong') || emptyRow.innerText.toLowerCase().includes('belum ada'))) {
                             emptyRow.parentElement.remove();
                         }
                         let tr = document.createElement('tr');
                         tr.id = `row-kandang-${data.data.id}`;
                         tr.innerHTML = `
-                        <td>Baru</td>
-                        <td class="col-nama">${data.data.nama_kandang}</td>
-                        <td class="col-kapasitas">${data.data.kapasitas_maksimal}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-secondary btn-edit-kandang" data-id="${data.data.id}" data-nama="${data.data.nama_kandang}" data-kapasitas="${data.data.kapasitas_maksimal}"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete-kandang" data-id="${data.data.id}"><i class="bi bi-trash"></i></button>
+                        <td class="py-3 px-3 fw-semibold text-secondary">Baru</td>
+                        <td class="py-3 px-3 col-nama fw-bold text-dark">${data.data.nama_kandang}</td>
+                        <td class="py-3 px-3 col-kapasitas">
+                            <span class="fw-semibold text-dark">${data.data.kapasitas_maksimal}</span> <span class="text-muted small">ekor</span>
+                        </td>
+                        <td class="py-3 px-3 text-center col-status">
+                            <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tersedia</span>
+                        </td>
+                        <td class="py-3 px-3 text-end">
+                            <button class="btn btn-sm btn-outline-secondary btn-edit-kandang" data-id="${data.data.id}" data-nama="${data.data.nama_kandang}" data-kapasitas="${data.data.kapasitas_maksimal}" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Kandang"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete-kandang" data-id="${data.data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Kandang"><i class="bi bi-trash"></i></button>
                         </td>
                     `;
                         tableBodyKandang.insertAdjacentElement('afterbegin', tr);
+                        if (window.kandangPagination) window.kandangPagination.update();
                         bootstrap.Modal.getInstance(document.getElementById('modalTambahKandang'))
                             .hide();
                         formKandang.reset();
@@ -226,7 +256,22 @@
                     if (data.success) {
                         let tr = document.getElementById(`row-kandang-${id}`);
                         tr.querySelector('.col-nama').innerText = data.data.nama_kandang;
-                        tr.querySelector('.col-kapasitas').innerText = data.data.kapasitas_maksimal;
+                        
+                        let kapasitasCol = tr.querySelector('.col-kapasitas');
+                        if (kapasitasCol) {
+                            kapasitasCol.innerHTML = `<span class="fw-semibold text-dark">${data.data.kapasitas_maksimal}</span> <span class="text-muted small">ekor</span>`;
+                        }
+
+                        let count = data.data.ternaks_count || 0;
+                        let max = data.data.kapasitas_maksimal || 0;
+                        let statusTd = tr.querySelector('.col-status');
+                        if (statusTd) {
+                            if (count >= max) {
+                                statusTd.innerHTML = '<span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Penuh</span>';
+                            } else {
+                                statusTd.innerHTML = '<span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tersedia</span>';
+                            }
+                        }
 
                         let btnEdit = tr.querySelector('.btn-edit-kandang');
                         btnEdit.setAttribute('data-nama', data.data.nama_kandang);
@@ -282,10 +327,11 @@
                                 if (tr) {
                                     tr.remove();
                                 }
+                                if (window.kandangPagination) window.kandangPagination.update();
 
                                 if (tableBodyKandang.querySelectorAll('tr').length === 0) {
                                     tableBodyKandang.innerHTML =
-                                        '<tr><td colspan="4" class="text-center text-muted">Data kosong</td></tr>';
+                                        '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kandang</h6><p class="small text-muted mb-0">Klik tombol "Tambah Kandang" untuk mendaftarkan kandang baru.</p></td></tr>';
                                 }
 
                                 alert(data.message);

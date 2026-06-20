@@ -24,12 +24,13 @@ class LogBeratController extends Controller
     {
         $validated = $request->validate([
             'berat_kg' => 'required|numeric|min:1',
-            'tanggal_timbang' => 'required|date',
+            'tanggal_timbang' => 'required|date|before_or_equal:today',
         ], [
             'berat_kg.required' => 'Berat badan harus diisi.',
             'berat_kg.numeric' => 'Berat badan harus berupa angka.',
             'tanggal_timbang.required' => 'Tanggal timbang harus diisi.',
             'tanggal_timbang.date' => 'Format tanggal tidak valid.',
+            'tanggal_timbang.before_or_equal' => 'Tanggal timbang tidak boleh di masa depan.',
         ]);
 
         try {
