@@ -47,7 +47,7 @@
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                     <input type="email" class="form-control @error('email') is-invalid @enderror" 
                            id="email" name="email" value="{{ old('email') }}" 
-                           placeholder="nama@qurban.com" required autofocus autocomplete="email">
+                           placeholder="Masukkan alamat email" required autofocus autocomplete="email">
                 </div>
             </div>
 
@@ -59,7 +59,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
                     <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                           id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                           id="password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
                     <span class="input-group-text toggle-password" id="btnTogglePassword">
                         <i class="bi bi-eye" id="eyeIcon"></i>
                     </span>

@@ -150,3 +150,10 @@ body::after {
 .alert-dismissible {
     border-radius: 10px !important;
 }
+
+/* Style placeholders to be distinct and lighter than actual text input */
+.form-control::placeholder {
+    color: #a0aec0 !important;
+    opacity: 0.65 !important;
+    font-weight: 400;
+}
