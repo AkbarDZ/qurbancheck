@@ -475,7 +475,7 @@
                         let imgFoto = document.getElementById('detail_foto');
                         
                         if(log.dir_foto_gejala) {
-                            imgFoto.src = `/storage/${log.dir_foto_gejala}`;
+                            imgFoto.src = `${window.storageBaseUrl}/${log.dir_foto_gejala}`;
                             containerFoto.classList.remove('d-none');
                         } else {
                             imgFoto.src = "";

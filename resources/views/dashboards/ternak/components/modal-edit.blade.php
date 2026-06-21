@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     let card = document.getElementById(`card-ternak-${id}`);
                     
                     if (card) {
-                        let fotoUrl = data.data.dir_foto_hewan ? `/storage/${data.data.dir_foto_hewan}` : '/image/icons/placeholder.png';
+                        let fotoUrl = data.data.dir_foto_hewan ? `${window.storageBaseUrl}/${data.data.dir_foto_hewan}` : '/image/icons/placeholder.png';
                         
                         // Menjalankan render ulang menggunakan template global window
                         card.innerHTML = window.renderTernakCardHTML(data.data, fotoUrl);

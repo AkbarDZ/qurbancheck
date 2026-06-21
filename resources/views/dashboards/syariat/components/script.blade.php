@@ -287,7 +287,7 @@
                                     .kriteria.is_fatal);
                                   let rowClass = isCacatFatal ? 'table-danger' : '';
                                   let fotoHtml = detail.dir_bukti_cacat ?
-                                      `<br><a href="/storage/${detail.dir_bukti_cacat}" target="_blank" class="btn btn-xs btn-outline-secondary mt-1 py-0" style="font-size: 0.7rem;"><i class="bi bi-camera"></i> Lihat Bukti</a>` :
+                                      `<br><a href="${window.storageBaseUrl}/${detail.dir_bukti_cacat}" target="_blank" class="btn btn-xs btn-outline-secondary mt-1 py-0" style="font-size: 0.7rem;"><i class="bi bi-camera"></i> Lihat Bukti</a>` :
                                       '';
 
                                   tbody.innerHTML += `
@@ -438,7 +438,7 @@
                         // Set Download Button
                         let downloadBtn = document.getElementById('skkh_detail_download_btn');
                         if (downloadBtn) {
-                            downloadBtn.setAttribute('href', `/storage/${skkh.dir_bukti_skkh}`);
+                            downloadBtn.setAttribute('href', `${window.storageBaseUrl}/${skkh.dir_bukti_skkh}`);
                         }
 
                         // Render Tabel Ternak

@@ -117,7 +117,7 @@
                                 data-ras="${data.ras_id}" 
                                 data-kandang="${data.kandang_id}" 
                                 data-gender="${data.jenis_kelamin}"
-                                data-foto="${data.dir_foto_hewan ? '/storage/' + data.dir_foto_hewan : ''}"
+                                data-foto="${data.dir_foto_hewan ? window.storageBaseUrl + '/' + data.dir_foto_hewan : ''}"
                                 data-harga-beli="${data.harga_beli_awal || ''}"
                                 data-tanggal-lahir="${data.tanggal_lahir ? (typeof data.tanggal_lahir === 'string' ? data.tanggal_lahir.substring(0, 10) : new Date(data.tanggal_lahir).toISOString().substring(0,10)) : ''}"
                                 data-umur-bulan="${data.umur_bulan}">

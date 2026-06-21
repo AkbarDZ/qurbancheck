@@ -402,7 +402,7 @@
                 let emptyState = document.getElementById('emptyStateTernak');
                 if (emptyState) emptyState.remove();
 
-                let fotoUrl = data.data.dir_foto_hewan ? `/storage/${data.data.dir_foto_hewan}` : '/image/icons/placeholder.png';
+                let fotoUrl = data.data.dir_foto_hewan ? `${window.storageBaseUrl}/${data.data.dir_foto_hewan}` : '/image/icons/placeholder.png';
                 
                 // MEMANGGIL TEMPLATE KARTU GLOBAL
                 let newCard = document.createElement('div');
