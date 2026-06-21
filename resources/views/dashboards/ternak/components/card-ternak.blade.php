@@ -57,7 +57,7 @@
                         data-id="{{ $ternak->id }}" data-eartag="{{ $ternak->nomor_eartag }}"
                         data-ras="{{ $ternak->ras_id }}" data-kandang="{{ $ternak->kandang_id }}"
                         data-gender="{{ $ternak->jenis_kelamin }}"
-                        data-foto="{{ $ternak->dir_foto_hewan ? Storage::url($ternak->dir_foto_hewan) : '' }}"
+                        data-foto="{{ $ternak->dir_foto_hewan ? Storage::disk('s3')->url($ternak->dir_foto_hewan) : '' }}"
                         data-harga-beli="{{ $ternak->harga_beli_awal }}"
                         data-tanggal-lahir="{{ $ternak->tanggal_lahir ? $ternak->tanggal_lahir->format('Y-m-d') : '' }}"
                         data-umur-bulan="{{ $ternak->umur_bulan }}">
@@ -99,7 +99,7 @@
 
         @if($ternak->dir_foto_hewan)
             <div class="col-md-4 col-lg-4 p-0">
-                <img src="{{ Storage::url($ternak->dir_foto_hewan) }}"
+                <img src="{{ Storage::disk('s3')->url($ternak->dir_foto_hewan) }}"
                     class="img-fluid h-100 w-100 object-fit-cover"
                     alt="Foto Ternak {{ $ternak->nomor_eartag }}" style="min-height: 250px;">
             </div>

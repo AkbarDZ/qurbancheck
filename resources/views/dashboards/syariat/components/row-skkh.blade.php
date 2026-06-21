@@ -8,7 +8,7 @@
             data-id="{{ $doc->id }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail SKKH">
             <i class="bi bi-eye"></i>
         </button>
-        <a href="{{ Storage::url($doc->dir_bukti_skkh) }}" target="_blank"
+        <a href="{{ Storage::disk('s3')->url($doc->dir_bukti_skkh) }}" target="_blank"
             class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Unduh PDF">
             <i class="bi bi-download"></i>
         </a>
