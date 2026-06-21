@@ -29,7 +29,7 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-bold text-muted mb-1">Berat (Kg)</label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="berat_kg" id="input_berat_kg" required>
+                                    <input type="number" min="1" step="0.01" class="form-control form-control-sm" name="berat_kg" id="input_berat_kg" required>
                                     <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_kg" style="font-size: 0.75rem;"></div>
                                 </div>
                                 <div class="col-md-2 d-grid">

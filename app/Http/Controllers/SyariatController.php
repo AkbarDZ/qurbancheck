@@ -84,7 +84,7 @@ class SyariatController extends Controller
         $request->validate([
             'ternak_id'           => 'required|array|min:1',
             'ternak_id.*'         => 'exists:ternaks,id',
-            'tanggal_pemeriksaan' => 'required|date',
+            'tanggal_pemeriksaan' => 'required|date|before_or_equal:today',
             'kriteria'            => 'required|array',
             // Validasi file foto di dalam array kriteria
             'kriteria.*.foto_cacat'=> 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -167,7 +167,7 @@ class SyariatController extends Controller
             'nomor_surat'           => 'nullable|string|max:255|unique:dokumen_skkhs,nomor_surat',
             'nama_dokter_pemeriksa' => 'required|string|max:255',
             'instansi_penerbit'     => 'nullable|string|max:255',
-            'tanggal_terbit'        => 'required|date',
+            'tanggal_terbit'        => 'required|date|before_or_equal:today',
             'file_skkh'             => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Maks 5MB
             'pemeriksaan_ids'       => 'required|array|min:1',
             'pemeriksaan_ids.*'     => 'exists:pemeriksaan_syariats,id',

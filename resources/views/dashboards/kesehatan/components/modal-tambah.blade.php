@@ -26,7 +26,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold text-muted">Tanggal Rekam <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" name="tanggal_rekam" value="{{ date('Y-m-d') }}" required>
+                                <input type="date" class="form-control" name="tanggal_rekam" id="tambah_tanggal_rekam" value="{{ date('Y-m-d') }}" required>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_rekam" style="font-size: 0.75rem;"></div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold text-muted">Gejala Klinis <span class="text-danger">*</span></label>
@@ -110,6 +111,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const globalErrorAlert = document.getElementById('tambah_global_error_kesehatan');
     const globalErrorMsg = document.getElementById('tambah_global_error_msg_kesehatan');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
+    const inputTanggalRekam = document.getElementById('tambah_tanggal_rekam');
+    if (inputTanggalRekam) {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        inputTanggalRekam.setAttribute('max', `${y}-${m}-${d}`);
+    }
 
     // Initialize Select2 when modal is shown
     $('#modalTambahKesehatan').on('shown.bs.modal', function () {
@@ -168,6 +178,22 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
             
             let originalText = btnSimpan.innerHTML;
+            
+            if (inputTanggalRekam && inputTanggalRekam.value) {
+                const selectedDate = new Date(inputTanggalRekam.value);
+                selectedDate.setHours(0,0,0,0);
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                if (selectedDate > today) {
+                    inputTanggalRekam.classList.add('is-invalid');
+                    let errorEl = document.getElementById('error_tanggal_rekam');
+                    if (errorEl) {
+                        errorEl.innerText = 'Tanggal rekam tidak boleh di masa depan.';
+                    }
+                    return;
+                }
+            }
+
             btnSimpan.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
             btnSimpan.disabled = true;
 

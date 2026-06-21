@@ -4,6 +4,15 @@
         const container = document.getElementById('pemeriksaanContainer');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
+        const inputTanggalSkkh = document.getElementById('tambah_tanggal_terbit');
+        if (inputTanggalSkkh) {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            inputTanggalSkkh.setAttribute('max', `${y}-${m}-${d}`);
+        }
+
         // Initialize Tooltips
         function initTooltips(context = document) {
             let triggers = context.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -107,6 +116,22 @@
                 e.preventDefault();
 
                 let originalText = btnSimpanSkkh.innerHTML;
+
+                if (inputTanggalSkkh && inputTanggalSkkh.value) {
+                    const selectedDate = new Date(inputTanggalSkkh.value);
+                    selectedDate.setHours(0,0,0,0);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    if (selectedDate > today) {
+                        inputTanggalSkkh.classList.add('is-invalid');
+                        let errorEl = document.getElementById('error_tanggal_terbit');
+                        if (errorEl) {
+                            errorEl.innerText = 'Tanggal terbit tidak boleh di masa depan.';
+                        }
+                        return;
+                    }
+                }
+
                 btnSimpanSkkh.innerHTML =
                     '<span class="spinner-border spinner-border-sm"></span> Mengunggah...';
                 btnSimpanSkkh.disabled = true;
@@ -316,39 +341,63 @@
                 if (btnDelete) {
                     let id = btnDelete.getAttribute('data-id');
 
-                    if (confirm(
-                            "Batalkan hasil pemeriksaan ini? Hewan akan dikembalikan ke status 'Belum Diperiksa'."
-                        )) {
-                        btnDelete.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-                        btnDelete.disabled = true;
+                    Swal.fire({
+                        title: 'Batalkan Pemeriksaan?',
+                        text: "Batalkan hasil pemeriksaan ini? Hewan akan dikembalikan ke status 'Belum Diperiksa'.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#D9534F',
+                        cancelButtonColor: '#6C757D',
+                        confirmButtonText: 'Ya, Batalkan!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            btnDelete.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                            btnDelete.disabled = true;
 
-                        fetch(`/syariat/pemeriksaan/${id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    alert(data.message);
-                                    // Refresh halaman untuk memperbarui tabel dan daftar modal
-                                    window.location.reload();
-                                } else {
-                                    alert(data.message);
+                            fetch(`/syariat/pemeriksaan/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': csrfToken,
+                                        'Accept': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            title: 'Berhasil',
+                                            text: data.message,
+                                            icon: 'success',
+                                            confirmButtonColor: '#428475'
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Gagal',
+                                            text: data.message,
+                                            icon: 'error',
+                                            confirmButtonColor: '#428475'
+                                        });
+                                        btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
+                                        btnDelete.disabled = false;
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: "Terjadi kesalahan sistem saat menghapus data.",
+                                        icon: 'error',
+                                        confirmButtonColor: '#428475'
+                                    });
                                     btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
                                     btnDelete.disabled = false;
-                                }
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                alert("Terjadi kesalahan sistem saat menghapus data.");
-                                btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
-                                btnDelete.disabled = false;
-                            });
-                    }
+                                });
+                        }
+                    });
                 }
             });
         }
@@ -451,36 +500,63 @@
                 } else if (btnDelete) {
                     let id = btnDelete.getAttribute('data-id');
 
-                    if (confirm("Hapus dokumen SKKH ini? Hubungan dengan semua hewan yang ditautkan akan dilepas (dikembalikan ke status pemeriksaan tanpa SKKH).")) {
-                        btnDelete.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-                        btnDelete.disabled = true;
+                    Swal.fire({
+                        title: 'Hapus SKKH?',
+                        text: "Hapus dokumen SKKH ini? Hubungan dengan semua hewan yang ditautkan akan dilepas (dikembalikan ke status pemeriksaan tanpa SKKH).",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#D9534F',
+                        cancelButtonColor: '#6C757D',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            btnDelete.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                            btnDelete.disabled = true;
 
-                        fetch(`/syariat/skkh/${id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    alert(data.message);
-                                    window.location.reload();
-                                } else {
-                                    alert(data.message);
+                            fetch(`/syariat/skkh/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': csrfToken,
+                                        'Accept': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            title: 'Berhasil',
+                                            text: data.message,
+                                            icon: 'success',
+                                            confirmButtonColor: '#428475'
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Gagal',
+                                            text: data.message,
+                                            icon: 'error',
+                                            confirmButtonColor: '#428475'
+                                        });
+                                        btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
+                                        btnDelete.disabled = false;
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: "Terjadi kesalahan sistem saat menghapus dokumen.",
+                                        icon: 'error',
+                                        confirmButtonColor: '#428475'
+                                    });
                                     btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
                                     btnDelete.disabled = false;
-                                }
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                alert("Terjadi kesalahan sistem saat menghapus dokumen.");
-                                btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
-                                btnDelete.disabled = false;
-                            });
-                    }
+                                });
+                        }
+                    });
                 }
             });
         }

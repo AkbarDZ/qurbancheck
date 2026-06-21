@@ -32,7 +32,7 @@
 
         {{-- kelayakan kurban --}}
         @if (!$latestPemeriksaan)
-            <span class="badge bg-secondary rounded-pill px-3 py-2">Belum dicek</span>
+            <span class="badge bg-warning rounded-pill px-3 py-2">Belum dicek</span>
         @elseif ($isLayak)
             <span class="badge bg-success rounded-pill px-3 py-2">Layak Qurban</span>
         @else
@@ -41,7 +41,7 @@
 
         {{-- status kesehatan --}}
         @if (!$hasLog)
-            <span class="badge bg-secondary rounded-pill px-3 py-2">Belum diperiksa</span>
+            <span class="badge bg-warning rounded-pill px-3 py-2">Belum diperiksa</span>
         @elseif ($ternak->is_karantina)
             <span class="badge bg-danger rounded-pill px-3 py-2">Di Karantina</span>
         @else

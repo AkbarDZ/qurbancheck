@@ -116,10 +116,10 @@
                                     <label class="form-label small fw-bold text-secondary mb-2">Tanggal Pemeriksaan <span class="text-danger">*</span></label>
                                     <div class="input-group shadow-sm rounded-3 overflow-hidden">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-calendar3"></i></span>
-                                        <input type="date" class="form-control border-start-0 ps-0 fw-semibold text-dark" name="tanggal_pemeriksaan"
+                                        <input type="date" class="form-control border-start-0 ps-0 fw-semibold text-dark" name="tanggal_pemeriksaan" id="tambah_tanggal_pemeriksaan"
                                             value="{{ date('Y-m-d') }}" required>
                                     </div>
-                                    <div class="invalid-feedback" id="error_tanggal_pemeriksaan"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_pemeriksaan" style="font-size: 0.75rem;"></div>
                                 </div>
                                 
                                 {{-- <div class="card bg-light border-0 rounded-3 p-3 mt-3 d-none d-md-block">
@@ -323,11 +323,36 @@
         const containerTabel = document.getElementById('pemeriksaanContainer');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
+        const inputTanggalPem = document.getElementById('tambah_tanggal_pemeriksaan');
+        if (inputTanggalPem) {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            inputTanggalPem.setAttribute('max', `${y}-${m}-${d}`);
+        }
+
         if (form) {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
 
                 let originalText = btnSimpan.innerHTML;
+
+                if (inputTanggalPem && inputTanggalPem.value) {
+                    const selectedDate = new Date(inputTanggalPem.value);
+                    selectedDate.setHours(0,0,0,0);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    if (selectedDate > today) {
+                        inputTanggalPem.classList.add('is-invalid');
+                        let errorEl = document.getElementById('error_tanggal_pemeriksaan');
+                        if (errorEl) {
+                            errorEl.innerText = 'Tanggal pemeriksaan tidak boleh di masa depan.';
+                        }
+                        return;
+                    }
+                }
+
                 btnSimpan.innerHTML =
                     '<span class="spinner-border spinner-border-sm"></span> Menganalisa...';
                 btnSimpan.disabled = true;

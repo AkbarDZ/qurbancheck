@@ -70,7 +70,7 @@
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Berat Awal (Kg)</label>
-                                    <input type="number" step="0.01" class="form-control" name="berat_awal" required>
+                                    <input type="number" min="1" step="0.01" class="form-control" name="berat_awal" required>
                                     <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_awal" style="font-size: 0.75rem;"></div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -88,7 +88,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3" id="tambah_container_harga_beli">
                                     <label class="form-label small fw-bold text-muted">Harga Beli Awal (Rp)</label>
-                                    <input type="number" step="0.01" class="form-control" name="harga_beli_awal" id="tambah_harga_beli_awal" placeholder="Contoh: 15000000">
+                                    <input type="number" min="0" step="0.01" class="form-control" name="harga_beli_awal" id="tambah_harga_beli_awal" placeholder="Contoh: 15000000">
                                     <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_harga_beli_awal" style="font-size: 0.75rem;"></div>
                                 </div>
                                 <div class="col-md-6 mb-3 d-none" id="tambah_container_tanggal_lahir">
@@ -154,6 +154,15 @@
     const containerTanggalLahir = document.getElementById('tambah_container_tanggal_lahir');
     const inputHargaBeli = document.getElementById('tambah_harga_beli_awal');
     const inputTanggalLahir = document.getElementById('tambah_tanggal_lahir');
+    const inputBeratAwal = document.querySelector('#formTambahTernak [name="berat_awal"]');
+
+    if (inputTanggalLahir) {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        inputTanggalLahir.setAttribute('max', `${y}-${m}-${d}`);
+    }
 
     function toggleAsalUsul() {
         if (radioAsalBeli && radioAsalBeli.checked) {
@@ -271,10 +280,31 @@
         if (globalErrorAlert) globalErrorAlert.classList.add('d-none');
 
         // Validation before submit
+        if (inputBeratAwal) {
+            if (!inputBeratAwal.value.trim()) {
+                let errEl = document.getElementById('error_berat_awal');
+                if (errEl) errEl.innerText = 'Berat awal wajib diisi.';
+                inputBeratAwal.classList.add('is-invalid');
+                return;
+            }
+            if (parseFloat(inputBeratAwal.value) < 1) {
+                let errEl = document.getElementById('error_berat_awal');
+                if (errEl) errEl.innerText = 'Berat awal harus minimal 1 Kg.';
+                inputBeratAwal.classList.add('is-invalid');
+                return;
+            }
+        }
+
         if (radioAsalBeli && radioAsalBeli.checked) {
             if (inputHargaBeli && !inputHargaBeli.value.trim()) {
                 let errEl = document.getElementById('error_harga_beli_awal');
                 if (errEl) errEl.innerText = 'Harga beli awal wajib diisi jika asal usul adalah Beli.';
+                if (inputHargaBeli) inputHargaBeli.classList.add('is-invalid');
+                return;
+            }
+            if (inputHargaBeli && parseFloat(inputHargaBeli.value) < 0) {
+                let errEl = document.getElementById('error_harga_beli_awal');
+                if (errEl) errEl.innerText = 'Harga beli awal tidak boleh bernilai negatif.';
                 if (inputHargaBeli) inputHargaBeli.classList.add('is-invalid');
                 return;
             }
@@ -284,6 +314,18 @@
                 if (errEl) errEl.innerText = 'Tanggal lahir wajib diisi jika lahir di peternakan.';
                 if (inputTanggalLahir) inputTanggalLahir.classList.add('is-invalid');
                 return;
+            }
+            if (inputTanggalLahir && inputTanggalLahir.value) {
+                const selectedDate = new Date(inputTanggalLahir.value);
+                selectedDate.setHours(0,0,0,0);
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                if (selectedDate > today) {
+                    let errEl = document.getElementById('error_tanggal_lahir');
+                    if (errEl) errEl.innerText = 'Tanggal lahir tidak boleh di masa depan.';
+                    if (inputTanggalLahir) inputTanggalLahir.classList.add('is-invalid');
+                    return;
+                }
             }
         }
 

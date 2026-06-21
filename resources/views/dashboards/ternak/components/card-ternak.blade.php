@@ -76,6 +76,7 @@
                             <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
                         </a>
                     @endif
+                    @if(Auth::user()->role === 'owner/admin')
                     <button class="btn btn-outline-primary btn-sm btn-keuangan-ternak"
                         data-id="{{ $ternak->id }}" data-bs-toggle="tooltip" data-bs-title="Kartu Rapor Keuangan">
                         <i class="bi bi-receipt"></i>
@@ -84,6 +85,7 @@
                         data-id="{{ $ternak->id }}">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
+                    @endif
                 </div>
 
             </div>

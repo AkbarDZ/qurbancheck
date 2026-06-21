@@ -1,0 +1,152 @@
+body {
+    background: linear-gradient(135deg, #1A312C 0%, #428475 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Decorative Background Bubbles */
+body::before, body::after {
+    content: "";
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    z-index: 1;
+    opacity: 0.15;
+    filter: blur(50px);
+}
+body::before {
+    background-color: #428475;
+    top: -100px;
+    left: -100px;
+}
+body::after {
+    background-color: #4382DF;
+    bottom: -100px;
+    right: -100px;
+}
+
+.login-container {
+    z-index: 10;
+    width: 100%;
+    max-width: 440px;
+    padding: 15px;
+}
+
+.login-card {
+    background: #ffffff; /* Solid Opaque White */
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    padding: 40px 30px;
+    transition: transform 0.3s ease;
+}
+
+.brand-name {
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 800;
+    color: #1A312C;
+    letter-spacing: -0.5px;
+}
+
+.input-group {
+    transition: all 0.3s ease;
+}
+
+.form-control {
+    border-radius: 10px;
+    border-color: #d1d8e0;
+    padding: 12px 15px;
+    transition: all 0.2s ease;
+}
+
+.input-group-text {
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    border-color: #d1d8e0;
+    color: #428475; /* Brand success green for colorful icons */
+    transition: all 0.2s ease;
+}
+
+/* Rounded corners for input groups */
+.input-group > :first-child {
+    border-top-left-radius: 10px !important;
+    border-bottom-left-radius: 10px !important;
+}
+
+.input-group > :last-child {
+    border-top-right-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
+}
+
+/* Active highlight for entire input group container */
+.input-group:focus-within .input-group-text {
+    border-color: #428475;
+    background-color: rgba(66, 132, 117, 0.05);
+    color: #428475;
+}
+
+.input-group:focus-within .form-control {
+    border-color: #428475;
+}
+
+.form-control:focus {
+    box-shadow: none !important;
+    border-color: #428475;
+}
+
+.btn-login {
+    background: #428475; /* Brand success green */
+    border: none;
+    color: white;
+    border-radius: 10px !important;
+    padding: 12px 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(66, 132, 117, 0.2);
+}
+
+.btn-login:hover {
+    background: #346b5e;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(66, 132, 117, 0.3);
+}
+
+.btn-login:active {
+    transform: translateY(1px);
+}
+
+.toggle-password {
+    cursor: pointer;
+    border-left: none;
+    background-color: white;
+}
+
+.toggle-password:hover {
+    color: #428475;
+}
+
+.form-check-input {
+    border-radius: 4px;
+}
+
+.form-check-input:checked {
+    background-color: #428475;
+    border-color: #428475;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(66, 132, 117, 0.15);
+    border-color: #428475;
+}
+
+.alert-dismissible {
+    border-radius: 10px !important;
+}

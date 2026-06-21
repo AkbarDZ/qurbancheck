@@ -20,20 +20,7 @@ class DatabaseSeeder extends Seeder
             TipeTernakSeeder::class,
             RasTernakSeeder::class,
             KandangSeeder::class,
-        ]);
-
-        User::create([
-            'name' => 'Owner Admin',
-            'email' => 'admin@qurban.com',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
-            'role' => 'owner/admin',
-        ]);
-
-        User::create([
-            'name' => 'Pekerja Satu',
-            'email' => 'pekerja@qurban.com',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
-            'role' => 'pekerja',
+            UserSeeder::class,
         ]);
     }
 }

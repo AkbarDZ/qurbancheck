@@ -3,17 +3,19 @@
 @section('title', 'Manajemen Ternak - Sistem Qurban')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="mb-0 text-dark">Data Ternak</h3>
-        <p class="text-muted mb-0">Kelola populasi, profil hewan, dan pantau bobot ternak.</p>
+<div class="card shadow border-1 mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="fw-bold mb-0 text-dark">Data Ternak</h3>
+            <p class="text-muted mb-0">Kelola populasi, profil hewan, dan pantau bobot ternak.</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahTernak">
+            <i class="bi bi-plus-lg"></i> Tambah Ternak
+        </button>
     </div>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahTernak">
-        <i class="bi bi-plus-lg"></i> Tambah Ternak
-    </button>
 </div>
 
-<div class="card shadow-sm border-0 mb-4 sticky-top" style="background-color: #5aa17f;">
+<div class="card shadow-sm border bg-success mb-4 sticky-top">
     <div class="card-body p-3">
         <form action="{{ url('/ternak') }}" method="GET" class="row g-3 align-items-center" id="formFilter">
             <div class="col-md-5">
@@ -60,13 +62,13 @@
     </div>
 </div>
 
-<div class="card shadow border-0 mb-4">
+<div class="card shadow border-1 mb-4">
     <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
         <h6 class="mb-0 fw-bold">Daftar Hewan Ternak</h6>
         
         <div class="d-flex align-items-center flex-wrap gap-2 ms-auto">
             <!-- Sorting select -->
-            <select class="form-select form-select-sm border bg-light text-dark fw-semibold" id="filterSort" style="width: 150px; cursor: pointer;">
+            <select class="form-select form-select-sm border border-light-subtle bg-white text-dark fw-semibold" id="filterSort" style="width: 150px; cursor: pointer;">
                 <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
                 <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
                 <option value="az" {{ request('sort') == 'az' ? 'selected' : '' }}>Nama/Eartag (A-Z)</option>
@@ -75,9 +77,9 @@
 
             <!-- Custom Date Range -->
             <div class="input-group input-group-sm" style="width: 280px;">
-                <input type="date" class="form-control border bg-light text-dark" id="filterStartDate" value="{{ request('start_date') }}" title="Tanggal Masuk Mulai">
-                <span class="input-group-text bg-light text-muted border border-start-0 border-end-0 small">s/d</span>
-                <input type="date" class="form-control border bg-light text-dark" id="filterEndDate" value="{{ request('end_date') }}" title="Tanggal Masuk Selesai">
+                <input type="date" class="form-control border border-light-subtle bg-white text-dark" id="filterStartDate" value="{{ request('start_date') }}" title="Tanggal Masuk Mulai">
+                <span class="input-group-text bg-white text-muted border border-light-subtle border-start-0 border-end-0 small">s/d</span>
+                <input type="date" class="form-control border border-light-subtle bg-white text-dark" id="filterEndDate" value="{{ request('end_date') }}" title="Tanggal Masuk Selesai">
             </div>
 
             <span class="badge bg-primary px-3 py-2" id="totalEkorBadge">Total: {{ $ternaks->total() }} Ekor</span>

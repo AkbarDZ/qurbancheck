@@ -3,14 +3,14 @@
 @section('title', 'Master Data - Sistem Qurban')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="mb-0 text-dark">Master Data</h3>
+<div class="card shadow border-1 mb-4">
+    <div class="card-body">
+        <h3 class="fw-bold mb-0 text-dark">Data Utama</h3>
         <p class="text-muted mb-0">Kelola data referensi kandang, jenis ternak, dan kriteria qurban.</p>
     </div>
 </div>
 
-<div class="card shadow border-0">
+<div class="card shadow border-1">
     <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
         <ul class="nav nav-tabs" id="masterDataTab" role="tablist">
             <li class="nav-item" role="presentation">

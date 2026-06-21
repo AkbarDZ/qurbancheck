@@ -41,8 +41,9 @@
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Tanggal Terbit <span
                                             class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" name="tanggal_terbit"
-                                        value="{{ date('Y-m-d') }}" required>
+                                    <input type="date" class="form-control" name="tanggal_terbit" id="tambah_tanggal_terbit"
+                                         value="{{ date('Y-m-d') }}" required>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_terbit" style="font-size: 0.75rem;"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">File Scan Dokumen (PDF/JPG/PNG)

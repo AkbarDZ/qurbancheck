@@ -32,12 +32,13 @@
             </a>
         </li>
         
+        @if(Auth::user() && Auth::user()->role === 'owner/admin')
         <hr class="text-secondary">
         <small class=" px-3 pb-2 text-uppercase text-light fw-bold sidebar-text" style="font-size: 0.75rem;">Master & Pengaturan</small>
         
         <li>
             <a href="{{ route('master.index') }}" class="nav-link {{ request()->is('master*') ? 'active' : '' }}" title="Master Data">
-                <i class="fa-solid fa-database me-2"></i><span class="sidebar-text">Master Data</span>
+                <i class="fa-solid fa-database me-2"></i><span class="sidebar-text">Data Utama</span>
             </a>
         </li>
         <li>
@@ -45,12 +46,13 @@
                 <i class="fa-solid fa-user me-2"></i><span class="sidebar-text">Pengguna</span>
             </a>
         </li>
+        @endif
         
         <hr class="text-secondary">
 
         <li>
             <a href="#" class="nav-link" id="sidebarToggle" title="Toggle Sidebar">
-                <i class="fa-solid fa-bars me-2"></i><span class="sidebar-text">Collapse Menu</span>
+                <i class="fa-solid fa-bars me-2"></i><span class="sidebar-text">Tutup Menu</span>
             </a>
         </li>
     </ul>
@@ -59,12 +61,19 @@
     <div class="dropdown">
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle px-2" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-person-circle fs-4 me-2"></i>
-            <strong class="sidebar-text">Admin</strong>
+            <strong class="sidebar-text">{{ Auth::user() ? Auth::user()->name : 'Tamu' }}</strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-            <li><a class="dropdown-item" href="#">Profil</a></li>
+            <li><a class="dropdown-item {{ request()->is('profil*') ? 'active' : '' }}" href="{{ route('profile.edit') }}">Profil</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Keluar</a></li>
+            <li>
+                <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Keluar
+                </a>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+            </li>
         </ul>
     </div>
 </div>

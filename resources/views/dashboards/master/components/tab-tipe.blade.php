@@ -4,7 +4,7 @@
             <h5 class="mb-1 fw-bold text-dark"><i class="bi bi-tags-fill me-2 text-primary"></i>Data Jenis Ternak</h5>
             <p class="text-muted small mb-0">Kelola kategori jenis hewan ternak, batas minimal umur kelayakan qurban.</p>
         </div>
-        <button class="btn btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahTipe">
+        <button class="btn btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahTipe">
             <i class="bi bi-plus-lg me-1"></i> Tambah Jenis
         </button>
     </div>
@@ -355,60 +355,85 @@
                 let id = btnDelete.getAttribute('data-id');
 
                 // Munculkan dialog konfirmasi
-                if (confirm('Apakah Anda yakin ingin menghapus tipe ternak ini?')) {
+                Swal.fire({
+                    title: 'Hapus Tipe?',
+                    text: "Apakah Anda yakin ingin menghapus tipe ternak ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#D9534F',
+                    cancelButtonColor: '#6C757D',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // UX: Ubah tombol jadi status loading agar tidak diklik dua kali
+                        let originalIcon = btnDelete.innerHTML;
+                        btnDelete.innerHTML =
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                        btnDelete.disabled = true;
 
-                    // UX: Ubah tombol jadi status loading agar tidak diklik dua kali
-                    let originalIcon = btnDelete.innerHTML;
-                    btnDelete.innerHTML =
-                        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-                    btnDelete.disabled = true;
-
-                    // Lakukan request DELETE
-                    fetch(`/master/tipe/${id}`, {
-                            method: 'DELETE', // Method langsung menggunakan DELETE
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // 1. Cari elemen <tr> berdasarkan ID yang kita buat sebelumnya
-                                let tr = document.getElementById(`row-tipe-${id}`);
-                                if (tr) {
-                                    // Hapus elemen dari DOM HTML secara langsung
-                                    tr.remove();
+                        // Lakukan request DELETE
+                        fetch(`/master/tipe/${id}`, {
+                                method: 'DELETE', // Method langsung menggunakan DELETE
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json'
                                 }
-                                if (window.tipePagination) window.tipePagination.update();
-
-                                // 2. Cek apakah tabel sekarang kosong, jika ya, tampilkan pesan kosong
-                                if (tableBody.querySelectorAll('tr').length === 0) {
-                                    tableBody.innerHTML =
-                                        '<tr><td colspan="4" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Tipe Ternak</h6><p class="small text-muted mb-0">Klik tombol "Tambah Tipe" untuk mendaftarkan kategori baru.</p></td></tr>';
-                                }
-
-                                alert(data.message);
-
-                                // Trigger custom event agar dropdown di tab-ras juga bisa ikut update
-                                document.dispatchEvent(new CustomEvent('tipeTernakDeleted', {
-                                    detail: {
-                                        id: id
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // 1. Cari elemen <tr> berdasarkan ID yang kita buat sebelumnya
+                                    let tr = document.getElementById(`row-tipe-${id}`);
+                                    if (tr) {
+                                        // Hapus elemen dari DOM HTML secara langsung
+                                        tr.remove();
                                     }
-                                }));
-                            } else {
-                                alert('Gagal menghapus data.');
+                                    if (window.tipePagination) window.tipePagination.update();
+
+                                    // 2. Cek apakah tabel sekarang kosong, jika ya, tampilkan pesan kosong
+                                    if (tableBody.querySelectorAll('tr').length === 0) {
+                                        tableBody.innerHTML =
+                                            '<tr><td colspan="4" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Tipe Ternak</h6><p class="small text-muted mb-0">Klik tombol "Tambah Tipe" untuk mendaftarkan kategori baru.</p></td></tr>';
+                                    }
+
+                                    Swal.fire({
+                                        title: 'Berhasil',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonColor: '#428475'
+                                    });
+
+                                    // Trigger custom event agar dropdown di tab-ras juga bisa ikut update
+                                    document.dispatchEvent(new CustomEvent('tipeTernakDeleted', {
+                                        detail: {
+                                            id: id
+                                        }
+                                    }));
+                                } else {
+                                    Swal.fire({
+                                        title: 'Gagal',
+                                        text: 'Gagal menghapus data.',
+                                        icon: 'error',
+                                        confirmButtonColor: '#428475'
+                                    });
+                                    btnDelete.innerHTML = originalIcon;
+                                    btnDelete.disabled = false;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Terjadi kesalahan saat menghubungi server.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#428475'
+                                });
                                 btnDelete.innerHTML = originalIcon;
                                 btnDelete.disabled = false;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan saat menghubungi server.');
-                            btnDelete.innerHTML = originalIcon;
-                            btnDelete.disabled = false;
-                        });
-                }
+                            });
+                    }
+                });
             }
         });
     });

@@ -76,7 +76,7 @@ class KesehatanController extends Controller
         $validated = $request->validate([
             // Tabel Log Kesehatan
             'ternak_id'              => 'required|exists:ternaks,id',
-            'tanggal_rekam'          => 'required|date',
+            'tanggal_rekam'          => 'required|date|before_or_equal:today',
             'gejala'                 => 'required|string|max:1000',
             'foto_gejala'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             

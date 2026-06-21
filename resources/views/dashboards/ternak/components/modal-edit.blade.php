@@ -82,7 +82,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3" id="edit_container_harga_beli">
                                     <label class="form-label small fw-bold text-muted">Harga Beli Awal (Rp)</label>
-                                    <input type="number" step="0.01" class="form-control" name="harga_beli_awal" id="edit_harga_beli_awal" placeholder="Contoh: 15000000">
+                                    <input type="number" min="0" step="0.01" class="form-control" name="harga_beli_awal" id="edit_harga_beli_awal" placeholder="Contoh: 15000000">
                                     <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_harga_beli_awal" style="font-size: 0.75rem;"></div>
                                 </div>
                                 <div class="col-md-6 mb-3 d-none" id="edit_container_tanggal_lahir">
@@ -147,6 +147,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const editContainerTanggalLahir = document.getElementById('edit_container_tanggal_lahir');
     const editInputHargaBeli = document.getElementById('edit_harga_beli_awal');
     const editInputTanggalLahir = document.getElementById('edit_tanggal_lahir');
+
+    if (editInputTanggalLahir) {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        editInputTanggalLahir.setAttribute('max', `${y}-${m}-${d}`);
+    }
 
     window.editToggleAsalUsul = function() {
         if (editRadioAsalBeli && editRadioAsalBeli.checked) {
@@ -303,12 +311,30 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (editInputHargaBeli) editInputHargaBeli.classList.add('is-invalid');
                     return;
                 }
+                if (editInputHargaBeli && parseFloat(editInputHargaBeli.value) < 0) {
+                    let errEl = document.getElementById('error_edit_harga_beli_awal');
+                    if (errEl) errEl.innerText = 'Harga beli awal tidak boleh bernilai negatif.';
+                    if (editInputHargaBeli) editInputHargaBeli.classList.add('is-invalid');
+                    return;
+                }
             } else if (editRadioAsalLahir && editRadioAsalLahir.checked) {
                 if (editInputTanggalLahir && !editInputTanggalLahir.value) {
                     let errEl = document.getElementById('error_edit_tanggal_lahir');
                     if (errEl) errEl.innerText = 'Tanggal lahir wajib diisi jika lahir di peternakan.';
                     if (editInputTanggalLahir) editInputTanggalLahir.classList.add('is-invalid');
                     return;
+                }
+                if (editInputTanggalLahir && editInputTanggalLahir.value) {
+                    const selectedDate = new Date(editInputTanggalLahir.value);
+                    selectedDate.setHours(0,0,0,0);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    if (selectedDate > today) {
+                        let errEl = document.getElementById('error_edit_tanggal_lahir');
+                        if (errEl) errEl.innerText = 'Tanggal lahir tidak boleh di masa depan.';
+                        if (editInputTanggalLahir) editInputTanggalLahir.classList.add('is-invalid');
+                        return;
+                    }
                 }
             }
 

@@ -4,7 +4,7 @@
             <h5 class="mb-1 fw-bold text-dark"><i class="bi bi-shield-check me-2 text-primary"></i>Kriteria Syariat</h5>
             <p class="text-muted small mb-0">Kelola daftar kriteria kelayakan hewan qurban berdasarkan hukum syariat Islam.</p>
         </div>
-        <button class="btn btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKriteria">
+        <button class="btn btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKriteria">
             <i class="bi bi-plus-lg me-1"></i> Tambah Kriteria
         </button>
     </div>
@@ -301,48 +301,73 @@
             if (btnDelete) {
                 let id = btnDelete.getAttribute('data-id');
 
-                if (confirm('Apakah Anda yakin ingin menghapus kriteria ini?')) {
+                Swal.fire({
+                    title: 'Hapus Kriteria?',
+                    text: "Apakah Anda yakin ingin menghapus kriteria ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#D9534F',
+                    cancelButtonColor: '#6C757D',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let originalIcon = btnDelete.innerHTML;
+                        btnDelete.innerHTML =
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                        btnDelete.disabled = true;
 
-                    let originalIcon = btnDelete.innerHTML;
-                    btnDelete.innerHTML =
-                        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-                    btnDelete.disabled = true;
-
-                    fetch(`/master/kriteria/${id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                let tr = document.getElementById(`row-kriteria-${id}`);
-                                if (tr) {
-                                    tr.remove();
+                        fetch(`/master/kriteria/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json'
                                 }
-                                if (window.kriteriaPagination) window.kriteriaPagination.update();
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    let tr = document.getElementById(`row-kriteria-${id}`);
+                                    if (tr) {
+                                        tr.remove();
+                                    }
+                                    if (window.kriteriaPagination) window.kriteriaPagination.update();
 
-                                if (tableBodyKriteria.querySelectorAll('tr').length === 0) {
-                                    tableBodyKriteria.innerHTML =
-                                        '<tr><td colspan="3" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kriteria Syariat</h6><p class="small text-muted mb-0">Klik tombol "Tambah Kriteria" untuk mendaftarkan kriteria syariat baru.</p></td></tr>';
+                                    if (tableBodyKriteria.querySelectorAll('tr').length === 0) {
+                                        tableBodyKriteria.innerHTML =
+                                            '<tr><td colspan="3" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kriteria Syariat</h6><p class="small text-muted mb-0">Klik tombol "Tambah Kriteria" untuk mendaftarkan kriteria syariat baru.</p></td></tr>';
+                                    }
+
+                                    Swal.fire({
+                                        title: 'Berhasil',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonColor: '#428475'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Gagal',
+                                        text: 'Gagal menghapus data.',
+                                        icon: 'error',
+                                        confirmButtonColor: '#428475'
+                                    });
+                                    btnDelete.innerHTML = originalIcon;
+                                    btnDelete.disabled = false;
                                 }
-
-                                alert(data.message);
-                            } else {
-                                alert('Gagal menghapus data.');
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Terjadi kesalahan saat menghubungi server.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#428475'
+                                });
                                 btnDelete.innerHTML = originalIcon;
                                 btnDelete.disabled = false;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan saat menghubungi server.');
-                            btnDelete.innerHTML = originalIcon;
-                            btnDelete.disabled = false;
-                        });
-                }
+                            });
+                    }
+                });
             }
         });
     });

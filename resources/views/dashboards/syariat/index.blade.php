@@ -42,7 +42,7 @@
 @section('content')
 <div class="container-fluid">
 
-    <div class="card shadow-sm border-0 mb-4">
+    <div class="card shadow border-1 mb-4">
         <div class="card-body">
             <h3 class="fw-bold mb-0 text-dark">Kelayakan Syariat & SKKH</h3>
             <p class="text-muted mb-0">Kelola proses *screening* kecacatan hewan dan arsip legalitas kesehatan (SKKH).
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Main Tabs Card Wrapper -->
-    <div class="card shadow border-0">
+    <div class="card shadow border-1">
         <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
             <!-- Navigasi Tabs -->
             <ul class="nav nav-tabs fw-bold mb-0 border-bottom-0" id="syariatTab" role="tablist">

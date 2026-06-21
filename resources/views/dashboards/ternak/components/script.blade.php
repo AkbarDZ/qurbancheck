@@ -10,7 +10,7 @@
         const hasLog = (data.log_kesehatans_count ?? 0) > 0;
         let healthStatusHTML = '';
         if (!hasLog) {
-            healthStatusHTML = `<span class="badge bg-secondary rounded-pill px-3 py-2">Belum diperiksa</span>`;
+            healthStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2">Belum diperiksa</span>`;
         } else if (data.is_karantina) {
             healthStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2">Di Karantina</span>`;
         } else {
@@ -25,7 +25,7 @@
 
         let qurbanStatusHTML = '';
         if (!latestSyariat) {
-            qurbanStatusHTML = `<span class="badge bg-secondary rounded-pill px-3 py-2">Belum dicek</span>`;
+            qurbanStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2">Belum dicek</span>`;
         } else if (isLayak) {
             qurbanStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2">Layak Qurban</span>`;
         } else {
@@ -132,10 +132,12 @@
                                     <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
                                 </a>
                             `}
+                            @if(Auth::user()->role === 'owner/admin')
                             <button class="btn btn-outline-primary btn-sm btn-keuangan-ternak" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-title="Kartu Rapor Keuangan">
                                 <i class="bi bi-receipt"></i>
                             </button>
                             <button class="btn btn-outline-danger btn-sm ms-auto btn-delete-ternak" data-id="${data.id}"><i class="bi bi-trash"></i></button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -463,27 +465,43 @@
                         kandangId = btnEdit.getAttribute('data-kandang');
                     }
                 }
-                if (confirm("Apakah Anda yakin ingin menghapus data hewan ini?")) {
-                    btnDelete.disabled = true;
-                    fetch(`/ternak/${id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                document.getElementById(`card-ternak-${id}`).remove();
-                                window.updateCounter(-1);
-                                if (kandangId) {
-                                    window.decrementKandangCount(kandangId);
+                Swal.fire({
+                    title: 'Hapus Ternak?',
+                    text: "Apakah Anda yakin ingin menghapus data hewan ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#D9534F',
+                    cancelButtonColor: '#6C757D',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        btnDelete.disabled = true;
+                        fetch(`/ternak/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json'
                                 }
-                                alert(data.message);
-                            }
-                        });
-                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    document.getElementById(`card-ternak-${id}`).remove();
+                                    window.updateCounter(-1);
+                                    if (kandangId) {
+                                        window.decrementKandangCount(kandangId);
+                                    }
+                                    Swal.fire({
+                                        title: 'Berhasil',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonColor: '#428475'
+                                    });
+                                }
+                            });
+                    }
+                });
             }
             // C. Pemicu Tombol Perkembangan Berat
             let btnBerat = e.target.closest('.btn-perkembangan-berat');
@@ -607,14 +625,30 @@
             
             let id = document.getElementById('berat_ternak_id').value;
             let btnSubmit = document.getElementById('btnSimpanBerat');
+            let inputBeratKg = document.getElementById('input_berat_kg');
+            
+            document.getElementById('berat_global_error').classList.add('d-none');
+            document.querySelectorAll('#formTambahBerat .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            
+            if (inputBeratKg) {
+                if (!inputBeratKg.value.trim()) {
+                    let errEl = document.getElementById('error_berat_kg');
+                    if (errEl) errEl.innerText = 'Berat badan wajib diisi.';
+                    inputBeratKg.classList.add('is-invalid');
+                    return;
+                }
+                if (parseFloat(inputBeratKg.value) < 1) {
+                    let errEl = document.getElementById('error_berat_kg');
+                    if (errEl) errEl.innerText = 'Berat badan harus minimal 1 Kg.';
+                    inputBeratKg.classList.add('is-invalid');
+                    return;
+                }
+            }
             
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
             
             let formData = new FormData(this);
-            
-            document.getElementById('berat_global_error').classList.add('d-none');
-            document.querySelectorAll('#formTambahBerat .is-invalid').forEach(el => el.classList.remove('is-invalid'));
             
             fetch(`/ternak/${id}/log-berat`, {
                 method: 'POST',

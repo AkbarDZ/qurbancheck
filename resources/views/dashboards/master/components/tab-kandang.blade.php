@@ -4,7 +4,7 @@
             <h5 class="mb-1 fw-bold text-dark"><i class="bi bi-house-door me-2 text-primary"></i>Data Kandang</h5>
             <p class="text-muted small mb-0">Kelola kandang ternak, kapasitas maksimal, dan status keterisian.</p>
         </div>
-        <button class="btn btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKandang">
+        <button class="btn btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKandang">
             <i class="bi bi-plus-lg me-1"></i> Tambah Kandang
         </button>
     </div>
@@ -306,48 +306,73 @@
             if (btnDelete) {
                 let id = btnDelete.getAttribute('data-id');
 
-                if (confirm('Apakah Anda yakin ingin menghapus kandang ini?')) {
+                Swal.fire({
+                    title: 'Hapus Kandang?',
+                    text: "Apakah Anda yakin ingin menghapus kandang ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#D9534F',
+                    cancelButtonColor: '#6C757D',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let originalIcon = btnDelete.innerHTML;
+                        btnDelete.innerHTML =
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                        btnDelete.disabled = true;
 
-                    let originalIcon = btnDelete.innerHTML;
-                    btnDelete.innerHTML =
-                        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-                    btnDelete.disabled = true;
-
-                    fetch(`/master/kandang/${id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                let tr = document.getElementById(`row-kandang-${id}`);
-                                if (tr) {
-                                    tr.remove();
+                        fetch(`/master/kandang/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json'
                                 }
-                                if (window.kandangPagination) window.kandangPagination.update();
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    let tr = document.getElementById(`row-kandang-${id}`);
+                                    if (tr) {
+                                        tr.remove();
+                                    }
+                                    if (window.kandangPagination) window.kandangPagination.update();
 
-                                if (tableBodyKandang.querySelectorAll('tr').length === 0) {
-                                    tableBodyKandang.innerHTML =
-                                        '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kandang</h6><p class="small text-muted mb-0">Klik tombol "Tambah Kandang" untuk mendaftarkan kandang baru.</p></td></tr>';
+                                    if (tableBodyKandang.querySelectorAll('tr').length === 0) {
+                                        tableBodyKandang.innerHTML =
+                                            '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kandang</h6><p class="small text-muted mb-0">Klik tombol "Tambah Kandang" untuk mendaftarkan kandang baru.</p></td></tr>';
+                                    }
+
+                                    Swal.fire({
+                                        title: 'Berhasil',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonColor: '#428475'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Gagal',
+                                        text: 'Gagal menghapus data.',
+                                        icon: 'error',
+                                        confirmButtonColor: '#428475'
+                                    });
+                                    btnDelete.innerHTML = originalIcon;
+                                    btnDelete.disabled = false;
                                 }
-
-                                alert(data.message);
-                            } else {
-                                alert('Gagal menghapus data.');
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Terjadi kesalahan saat menghubungi server.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#428475'
+                                });
                                 btnDelete.innerHTML = originalIcon;
                                 btnDelete.disabled = false;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan saat menghubungi server.');
-                            btnDelete.innerHTML = originalIcon;
-                            btnDelete.disabled = false;
-                        });
-                }
+                            });
+                    }
+                });
             }
         });
     });

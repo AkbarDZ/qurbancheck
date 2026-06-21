@@ -5,19 +5,19 @@
 @section('content')
 <div class="container-fluid">
 
-    <div class="card shadow border-0 mb-4">
+    <div class="card shadow border-1 mb-4">
         <div class="card-body d-flex justify-content-between align-items-center">
             <div>
                 <h3 class="fw-bold mb-0 text-dark">Kesehatan Ternak Qurban</h3>
                 <p class="text-muted mb-0">Kelola riwayat medis, gejala, dan tindakan pengobatan hewan.</p>
             </div>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambahKesehatan">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahKesehatan">
                 <i class="bi bi-plus-lg me-1"></i> Tambah Pemeriksaan
             </button>
         </div>
     </div>
 
-    <div class="card shadow border-0 mb-4" style="background-color: #5aa17f;">
+    <div class="card shadow border-0 mb-4 bg-success">
         <div class="card-body p-3">
             <form action="{{ url('/kesehatan') }}" method="GET" class="row g-3 align-items-center" id="formFilter">
                 <div class="col-md-7">
@@ -42,13 +42,13 @@
         </div>
     </div>
 
-    <div class="card shadow border-0">
+    <div class="card shadow border-1">
         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h6 class="mb-0 fw-bold">Riwayat Pemeriksaan & Pengobatan</h6>
             
             <div class="d-flex align-items-center flex-wrap gap-2 ms-auto">
                 <!-- Sorting select -->
-                <select class="form-select form-select-sm border bg-light text-dark fw-semibold" id="filterSort" style="width: 140px; cursor: pointer;">
+                <select class="form-select form-select-sm border border-light-subtle bg-white text-dark fw-semibold" id="filterSort" style="width: 140px; cursor: pointer;">
                     <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
                     <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
                     <option value="az" {{ request('sort') == 'az' ? 'selected' : '' }}>Eartag (A-Z)</option>
@@ -57,9 +57,9 @@
 
                 <!-- Custom Date Range -->
                 <div class="input-group input-group-sm" style="width: 280px;">
-                    <input type="date" class="form-control border bg-light text-dark" id="filterStartDate" value="{{ request('start_date') }}" title="Tanggal Mulai">
-                    <span class="input-group-text bg-light text-muted border border-start-0 border-end-0 small">s/d</span>
-                    <input type="date" class="form-control border bg-light text-dark" id="filterEndDate" value="{{ request('end_date') }}" title="Tanggal Selesai">
+                    <input type="date" class="form-control border border-light-subtle bg-white text-dark" id="filterStartDate" value="{{ request('start_date') }}" title="Tanggal Mulai">
+                    <span class="input-group-text bg-white text-muted border border-light-subtle border-start-0 border-end-0 small">s/d</span>
+                    <input type="date" class="form-control border border-light-subtle bg-white text-dark" id="filterEndDate" value="{{ request('end_date') }}" title="Tanggal Selesai">
                 </div>
 
                 <span class="badge bg-primary px-3 py-2" id="totalLogBadge">Total:
@@ -118,10 +118,12 @@
                                     data-id="{{ $log->id }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
                                     <i class="bi bi-eye"></i>
                                 </button>
+                                @if(Auth::user()->role === 'owner/admin')
                                 <button class="btn btn-sm btn-outline-danger btn-delete-kesehatan"
                                     data-id="{{ $log->id }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Log">
                                     <i class="bi bi-trash"></i>
                                 </button>
+                                @endif
                             </td>
                         </tr>
                         @empty
@@ -212,9 +214,11 @@
                 <button class="btn btn-sm btn-outline-secondary me-1 btn-detail-kesehatan" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Lihat Detail">
                     <i class="bi bi-eye"></i>
                 </button>
+                @if(Auth::user()->role === 'owner/admin')
                 <button class="btn btn-sm btn-outline-danger btn-delete-kesehatan" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Log">
                     <i class="bi bi-trash"></i>
                 </button>
+                @endif
             </td>
         `;
     };
@@ -370,44 +374,63 @@
             let btnDelete = e.target.closest('.btn-delete-kesehatan');
             if (btnDelete) {
                 let id = btnDelete.getAttribute('data-id');
-                if (confirm(
-                        "Hapus catatan pemeriksaan ini? Semua data tindakan dan pengobatan di dalamnya juga akan terhapus secara permanen."
-                        )) {
-                    btnDelete.disabled = true;
+                Swal.fire({
+                    title: 'Hapus Pemeriksaan?',
+                    text: "Hapus catatan pemeriksaan ini? Semua data tindakan dan pengobatan di dalamnya juga akan terhapus secara permanen.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#D9534F',
+                    cancelButtonColor: '#6C757D',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        btnDelete.disabled = true;
 
-                    fetch(`/kesehatan/${id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                document.getElementById(`row-kesehatan-${id}`).remove();
-                                window.updateCounterKesehatan(-1);
-
-                                // Tampilkan state kosong jika tabel habis
-                                if (containerKesehatan.querySelectorAll('tr').length === 0) {
-                                    containerKesehatan.innerHTML = `
-                                    <tr id="emptyStateKesehatan">
-                                        <td colspan="6" class="text-center py-5 text-muted">
-                                            <i class="bi bi-clipboard2-pulse fs-1 d-block mb-2"></i>
-                                            Belum ada riwayat kesehatan yang dicatat.
-                                        </td>
-                                    </tr>`;
+                        fetch(`/kesehatan/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
                                 }
-                                alert(data.message);
-                            }
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            alert("Gagal menghapus data.");
-                            btnDelete.disabled = false;
-                        });
-                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    document.getElementById(`row-kesehatan-${id}`).remove();
+                                    window.updateCounterKesehatan(-1);
+
+                                    // Tampilkan state kosong jika tabel habis
+                                    if (containerKesehatan.querySelectorAll('tr').length === 0) {
+                                        containerKesehatan.innerHTML = `
+                                        <tr id="emptyStateKesehatan">
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <i class="bi bi-clipboard2-pulse fs-1 d-block mb-2"></i>
+                                                Belum ada riwayat kesehatan yang dicatat.
+                                            </td>
+                                        </tr>`;
+                                    }
+                                    Swal.fire({
+                                        title: 'Berhasil',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonColor: '#428475'
+                                    });
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                Swal.fire({
+                                    title: 'Gagal',
+                                    text: "Gagal menghapus data.",
+                                    icon: 'error',
+                                    confirmButtonColor: '#428475'
+                                });
+                                btnDelete.disabled = false;
+                            });
+                    }
+                });
             }
 
             // TOMBOL DETAIL KESEHATAN

@@ -1,0 +1,170 @@
+:root {
+    --bs-primary: #4647AE;
+    --bs-primary-rgb: 70, 71, 174;
+    
+    --bs-success: #428475;
+    --bs-success-rgb: 66, 132, 117;
+    
+    --bs-info: #4382DF;
+    --bs-info-rgb: 67, 130, 223;
+
+    --bs-warning: #F39C12;
+    --bs-warning-rgb: 243, 156, 18;
+
+    --bs-danger: #D9534F;
+    --bs-danger-rgb: 217, 83, 79;
+}
+
+/* Override button colors to align with root variables */
+.btn-primary {
+    --bs-btn-bg: #4647AE;
+    --bs-btn-border-color: #4647AE;
+    --bs-btn-hover-bg: #373891;
+    --bs-btn-hover-border-color: #373891;
+    --bs-btn-active-bg: #2d2e77;
+    --bs-btn-active-border-color: #2d2e77;
+}
+.btn-success {
+    --bs-btn-bg: #428475;
+    --bs-btn-border-color: #428475;
+    --bs-btn-hover-bg: #346b5e;
+    --bs-btn-hover-border-color: #346b5e;
+    --bs-btn-active-bg: #2b564c;
+    --bs-btn-active-border-color: #2b564c;
+}
+.btn-info {
+    --bs-btn-bg: #4382DF;
+    --bs-btn-border-color: #4382DF;
+    --bs-btn-hover-bg: #296dc8;
+    --bs-btn-hover-border-color: #296dc8;
+    --bs-btn-active-bg: #1e59ab;
+    --bs-btn-active-border-color: #1e59ab;
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+}
+.btn-outline-primary {
+    --bs-btn-color: #4647AE;
+    --bs-btn-border-color: #4647AE;
+    --bs-btn-hover-bg: #4647AE;
+    --bs-btn-hover-border-color: #4647AE;
+    --bs-btn-active-bg: #4647AE;
+    --bs-btn-active-border-color: #4647AE;
+}
+.btn-outline-success {
+    --bs-btn-color: #428475;
+    --bs-btn-border-color: #428475;
+    --bs-btn-hover-bg: #428475;
+    --bs-btn-hover-border-color: #428475;
+    --bs-btn-active-bg: #428475;
+    --bs-btn-active-border-color: #428475;
+}
+.btn-outline-info {
+    --bs-btn-color: #4382DF;
+    --bs-btn-border-color: #4382DF;
+    --bs-btn-hover-bg: #4382DF;
+    --bs-btn-hover-border-color: #4382DF;
+    --bs-btn-active-bg: #4382DF;
+    --bs-btn-active-border-color: #4382DF;
+}
+
+.btn-warning {
+    --bs-btn-bg: #F39C12;
+    --bs-btn-border-color: #F39C12;
+    --bs-btn-hover-bg: #d6850f;
+    --bs-btn-hover-border-color: #d6850f;
+    --bs-btn-active-bg: #b7710a;
+    --bs-btn-active-border-color: #b7710a;
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+}
+.btn-danger {
+    --bs-btn-bg: #D9534F;
+    --bs-btn-border-color: #D9534F;
+    --bs-btn-hover-bg: #c9302c;
+    --bs-btn-hover-border-color: #c9302c;
+    --bs-btn-active-bg: #ac2925;
+    --bs-btn-active-border-color: #ac2925;
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+}
+.btn-outline-warning {
+    --bs-btn-color: #F39C12;
+    --bs-btn-border-color: #F39C12;
+    --bs-btn-hover-bg: #F39C12;
+    --bs-btn-hover-border-color: #F39C12;
+    --bs-btn-active-bg: #F39C12;
+    --bs-btn-active-border-color: #F39C12;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+}
+.btn-outline-danger {
+    --bs-btn-color: #D9534F;
+    --bs-btn-border-color: #D9534F;
+    --bs-btn-hover-bg: #D9534F;
+    --bs-btn-hover-border-color: #D9534F;
+    --bs-btn-active-bg: #D9534F;
+    --bs-btn-active-border-color: #D9534F;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+}
+
+/* Styling minimal untuk mengatur layout Flexbox */
+body {
+    background-color: #f4f6f9; /* Warna latar belakang abu-abu terang */
+}
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: #1A312C; /* Dark theme untuk sidebar */
+    transition: width 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.sidebar .nav-link {
+    color: #adb5bd;
+    border-radius: 0.375rem;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+}
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    color: #fff;
+    background-color: #428475; /* Warna primary Bootstrap */
+}
+.main-content {
+    width: calc(100% - 260px); /* Sisa ruang setelah sidebar */
+    transition: width 0.3s ease;
+    background-color: #FFFFFF;
+}
+
+/* Collapsed sidebar */
+.sidebar.collapsed {
+    width: 70px;
+    padding: 1rem 0.5rem !important;
+}
+.sidebar.collapsed .sidebar-text,
+.sidebar.collapsed .sidebar-brand span {
+    display: none;
+}
+.sidebar.collapsed .sidebar-brand {
+    justify-content: center;
+}
+.sidebar.collapsed .nav-link {
+    text-align: center;
+    padding: 0.5rem;
+}
+.sidebar.collapsed .nav-link i {
+    margin-right: 0 !important;
+    font-size: 1.2rem;
+}
+.sidebar.collapsed .dropdown-toggle {
+    justify-content: center;
+}
+.sidebar.collapsed .dropdown-toggle i {
+    margin-right: 0 !important;
+}
+.main-content.expanded {
+    width: calc(100% - 70px);
+}
