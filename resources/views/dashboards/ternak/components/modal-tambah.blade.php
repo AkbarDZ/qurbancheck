@@ -91,6 +91,11 @@
                                     <input type="number" min="0" step="0.01" class="form-control" name="harga_beli_awal" id="tambah_harga_beli_awal" placeholder="Contoh: 15000000">
                                     <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_harga_beli_awal" style="font-size: 0.75rem;"></div>
                                 </div>
+                                <div class="col-md-6 mb-3" id="tambah_container_umur_bulan_beli">
+                                    <label class="form-label small fw-bold text-muted">Usia Saat Beli (Bulan)</label>
+                                    <input type="number" min="1" class="form-control" name="umur_bulan_beli" id="tambah_umur_bulan_beli" placeholder="Contoh: 18">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_umur_bulan_beli" style="font-size: 0.75rem;"></div>
+                                </div>
                                 <div class="col-md-6 mb-3 d-none" id="tambah_container_tanggal_lahir">
                                     <label class="form-label small fw-bold text-muted">Tanggal Lahir</label>
                                     <input type="date" class="form-control" name="tanggal_lahir" id="tambah_tanggal_lahir">
@@ -165,6 +170,9 @@
     }
 
     function toggleAsalUsul() {
+        const containerUmurBeli = document.getElementById('tambah_container_umur_bulan_beli');
+        const inputUmurBeli = document.getElementById('tambah_umur_bulan_beli');
+
         if (radioAsalBeli && radioAsalBeli.checked) {
             if (containerHargaBeli) containerHargaBeli.classList.remove('d-none');
             if (inputHargaBeli) {
@@ -173,6 +181,11 @@
                 if (inputHargaBeli.value === '0') {
                     inputHargaBeli.value = '';
                 }
+            }
+            if (containerUmurBeli) containerUmurBeli.classList.remove('d-none');
+            if (inputUmurBeli) {
+                inputUmurBeli.disabled = false;
+                inputUmurBeli.required = true;
             }
             if (containerTanggalLahir) containerTanggalLahir.classList.add('d-none');
             if (inputTanggalLahir) {
@@ -186,6 +199,12 @@
                 inputHargaBeli.disabled = true;
                 inputHargaBeli.required = false;
                 inputHargaBeli.value = '0';
+            }
+            if (containerUmurBeli) containerUmurBeli.classList.add('d-none');
+            if (inputUmurBeli) {
+                inputUmurBeli.disabled = true;
+                inputUmurBeli.required = false;
+                inputUmurBeli.value = '';
             }
             if (containerTanggalLahir) containerTanggalLahir.classList.remove('d-none');
             if (inputTanggalLahir) {
@@ -306,6 +325,19 @@
                 let errEl = document.getElementById('error_harga_beli_awal');
                 if (errEl) errEl.innerText = 'Harga beli awal tidak boleh bernilai negatif.';
                 if (inputHargaBeli) inputHargaBeli.classList.add('is-invalid');
+                return;
+            }
+            const inputUmurBeli = document.getElementById('tambah_umur_bulan_beli');
+            if (inputUmurBeli && !inputUmurBeli.value.trim()) {
+                let errEl = document.getElementById('error_umur_bulan_beli');
+                if (errEl) errEl.innerText = 'Usia wajib diisi jika asal usul adalah Beli.';
+                if (inputUmurBeli) inputUmurBeli.classList.add('is-invalid');
+                return;
+            }
+            if (inputUmurBeli && parseInt(inputUmurBeli.value) < 1) {
+                let errEl = document.getElementById('error_umur_bulan_beli');
+                if (errEl) errEl.innerText = 'Usia harus minimal 1 Bulan.';
+                if (inputUmurBeli) inputUmurBeli.classList.add('is-invalid');
                 return;
             }
         } else if (radioAsalLahir && radioAsalLahir.checked) {

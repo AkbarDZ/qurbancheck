@@ -71,6 +71,11 @@
 
                                     <div id="containerCheckboxTernak">
                                         @forelse($ternakBelumDiperiksa as $ternak)
+                                        @php
+                                            $minUmur = $ternak->ras->tipeTernak->umur_minimal_qurban ?? 0;
+                                            $isUnderAge = $ternak->umur_bulan < $minUmur;
+                                            $isDisabled = $ternak->is_karantina || $isUnderAge;
+                                        @endphp
                                         <div class="form-check mb-1 ps-4 py-1.5 hover-bg-light rounded-2 ternak-row"
                                              data-tipe-id="{{ $ternak->ras->tipeTernak->id ?? '' }}"
                                              data-kandang-id="{{ $ternak->kandang->id ?? '' }}"
@@ -78,16 +83,22 @@
                                             <input class="form-check-input ternak-checkbox text-primary" type="checkbox"
                                                 name="ternak_id[]" value="{{ $ternak->id }}"
                                                 id="ternak_{{ $ternak->id }}"
-                                                @if($ternak->is_karantina) disabled @endif
-                                                style="cursor: @if($ternak->is_karantina) not-allowed @else pointer @endif;">
+                                                @if($isDisabled) disabled @endif
+                                                style="cursor: @if($isDisabled) not-allowed @else pointer @endif;">
                                             <label class="form-check-label ms-2 d-flex align-items-center flex-wrap" for="ternak_{{ $ternak->id }}"
-                                                style="cursor: @if($ternak->is_karantina) not-allowed @else pointer @endif; @if($ternak->is_karantina) opacity: 0.55; @endif">
+                                                style="cursor: @if($isDisabled) not-allowed @else pointer @endif; @if($isDisabled) opacity: 0.55; @endif">
                                                 <span class="fw-bold text-primary me-2">{{ $ternak->nomor_eartag }}</span>
                                                 <span class="text-secondary small">{{ $ternak->nama_panggilan ? '('.$ternak->nama_panggilan.')' : '' }}</span>
                                                 
                                                 @if($ternak->is_karantina)
                                                 <span class="badge bg-danger-subtle text-danger border border-danger ms-2 py-1 px-2 rounded-pill fw-semibold" style="font-size: 0.65rem;">
                                                     <i class="bi bi-exclamation-triangle-fill"></i> Karantina
+                                                </span>
+                                                @endif
+
+                                                @if($isUnderAge)
+                                                <span class="badge bg-warning-subtle text-warning border border-warning ms-2 py-1 px-2 rounded-pill fw-semibold" style="font-size: 0.65rem;">
+                                                    <i class="bi bi-exclamation-triangle-fill"></i> Belum Cukup Umur ({{ $ternak->umur_bulan }}/{{ $minUmur }} bln)
                                                 </span>
                                                 @endif
                                             </label>

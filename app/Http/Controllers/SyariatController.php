@@ -110,6 +110,23 @@ class SyariatController extends Controller
             }
 
             foreach ($ternakIds as $t_id) {
+                $ternak = Ternak::with('ras.tipeTernak')->findOrFail($t_id);
+                if ($ternak->is_karantina) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Hewan dengan Tag {$ternak->nomor_eartag} sedang dikarantina dan tidak boleh diperiksa kelayakan."
+                    ], 422);
+                }
+                $minUmur = $ternak->ras->tipeTernak->umur_minimal_qurban ?? 0;
+                if ($ternak->umur_bulan < $minUmur) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Hewan dengan Tag {$ternak->nomor_eartag} belum cukup umur untuk kelayakan kurban ({$ternak->umur_bulan} dari minimal {$minUmur} bulan)."
+                    ], 422);
+                }
+            }
+
+            foreach ($ternakIds as $t_id) {
                 
                 $pemeriksaan = PemeriksaanSyariat::create([
                     'ternak_id'           => $t_id,

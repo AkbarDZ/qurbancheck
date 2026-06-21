@@ -99,6 +99,10 @@
                                 <strong class="text-asal">${Number(data.harga_beli_awal) > 0 ? 'Pembelian' : 'Lahir di Peternakan'}</strong>
                             </div>
                             <div class="col-sm-6 mb-3">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Usia</small>
+                                <strong class="text-usia">${data.umur_bulan} Bulan</strong>
+                            </div>
+                            <div class="col-sm-6 mb-3">
                                 <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">${Number(data.harga_beli_awal) > 0 ? 'Harga Beli' : 'Tanggal Lahir'}</small>
                                 <strong class="${Number(data.harga_beli_awal) > 0 ? 'text-primary' : ''}">
                                     ${Number(data.harga_beli_awal) > 0 ? 'Rp ' + Number(data.harga_beli_awal).toLocaleString('id-ID') : (data.tanggal_lahir ? new Date(data.tanggal_lahir).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-')}
@@ -115,7 +119,8 @@
                                 data-gender="${data.jenis_kelamin}"
                                 data-foto="${data.dir_foto_hewan ? '/storage/' + data.dir_foto_hewan : ''}"
                                 data-harga-beli="${data.harga_beli_awal || ''}"
-                                data-tanggal-lahir="${data.tanggal_lahir ? (typeof data.tanggal_lahir === 'string' ? data.tanggal_lahir.substring(0, 10) : new Date(data.tanggal_lahir).toISOString().substring(0,10)) : ''}">
+                                data-tanggal-lahir="${data.tanggal_lahir ? (typeof data.tanggal_lahir === 'string' ? data.tanggal_lahir.substring(0, 10) : new Date(data.tanggal_lahir).toISOString().substring(0,10)) : ''}"
+                                data-umur-bulan="${data.umur_bulan}">
                                 <i class="bi bi-pencil"></i> Edit
                             </button>
                             <button class="btn btn-outline-info btn-sm btn-perkembangan-berat"
@@ -369,24 +374,27 @@
                  document.getElementById('edit_jenis_kelamin').value = btnEdit.getAttribute(
                      'data-gender');
  
-                 // Populate Asal Usul fields
-                 let price = btnEdit.getAttribute('data-harga-beli');
-                 let dob = btnEdit.getAttribute('data-tanggal-lahir');
- 
-                 let editRadioAsalBeli = document.getElementById('edit_asal_beli');
-                 let editRadioAsalLahir = document.getElementById('edit_asal_lahir');
-                 let editInputHargaBeli = document.getElementById('edit_harga_beli_awal');
-                 let editInputTanggalLahir = document.getElementById('edit_tanggal_lahir');
- 
-                 if (price && Number(price) > 0) {
-                     if (editRadioAsalBeli) editRadioAsalBeli.checked = true;
-                     if (editInputHargaBeli) editInputHargaBeli.value = price;
-                 } else if (dob) {
-                     if (editRadioAsalLahir) editRadioAsalLahir.checked = true;
-                     if (editInputTanggalLahir) editInputTanggalLahir.value = dob;
-                 } else {
-                     if (editRadioAsalBeli) editRadioAsalBeli.checked = true;
-                 }
+                  // Populate Asal Usul fields
+                  let price = btnEdit.getAttribute('data-harga-beli');
+                  let dob = btnEdit.getAttribute('data-tanggal-lahir');
+                  let umurBulan = btnEdit.getAttribute('data-umur-bulan');
+  
+                  let editRadioAsalBeli = document.getElementById('edit_asal_beli');
+                  let editRadioAsalLahir = document.getElementById('edit_asal_lahir');
+                  let editInputHargaBeli = document.getElementById('edit_harga_beli_awal');
+                  let editInputTanggalLahir = document.getElementById('edit_tanggal_lahir');
+                  let editInputUmurBeli = document.getElementById('edit_umur_bulan_beli');
+  
+                  if (price && Number(price) > 0) {
+                      if (editRadioAsalBeli) editRadioAsalBeli.checked = true;
+                      if (editInputHargaBeli) editInputHargaBeli.value = price;
+                      if (editInputUmurBeli) editInputUmurBeli.value = umurBulan;
+                  } else if (dob) {
+                      if (editRadioAsalLahir) editRadioAsalLahir.checked = true;
+                      if (editInputTanggalLahir) editInputTanggalLahir.value = dob;
+                  } else {
+                      if (editRadioAsalBeli) editRadioAsalBeli.checked = true;
+                  }
                  
                  if (typeof window.editToggleAsalUsul === 'function') {
                      window.editToggleAsalUsul();

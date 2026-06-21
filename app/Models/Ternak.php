@@ -26,6 +26,18 @@ class Ternak extends Model
         'is_karantina' => 'boolean',
     ];
 
+    protected $appends = [
+        'umur_bulan',
+    ];
+
+    public function getUmurBulanAttribute()
+    {
+        if (!$this->tanggal_lahir) {
+            return 0;
+        }
+        return (int) $this->tanggal_lahir->diffInMonths(now());
+    }
+
     public function kandang()
     {
         return $this->belongsTo(Kandang::class);

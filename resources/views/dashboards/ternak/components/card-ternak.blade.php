@@ -35,6 +35,11 @@
                         <strong>{{ $ternak->harga_beli_awal > 0 ? 'Pembelian' : 'Lahir di Peternakan' }}</strong>
                     </div>
                     <div class="col-sm-6 mb-3">
+                        <small class="text-muted d-block text-uppercase fw-bold"
+                            style="font-size: 0.7rem;">Usia</small>
+                        <strong>{{ $ternak->umur_bulan }} Bulan</strong>
+                    </div>
+                    <div class="col-sm-6 mb-3">
                         @if($ternak->harga_beli_awal > 0)
                             <small class="text-muted d-block text-uppercase fw-bold"
                                 style="font-size: 0.7rem;">Harga Beli</small>
@@ -54,7 +59,8 @@
                         data-gender="{{ $ternak->jenis_kelamin }}"
                         data-foto="{{ $ternak->dir_foto_hewan ? asset('storage/'.$ternak->dir_foto_hewan) : '' }}"
                         data-harga-beli="{{ $ternak->harga_beli_awal }}"
-                        data-tanggal-lahir="{{ $ternak->tanggal_lahir ? $ternak->tanggal_lahir->format('Y-m-d') : '' }}">
+                        data-tanggal-lahir="{{ $ternak->tanggal_lahir ? $ternak->tanggal_lahir->format('Y-m-d') : '' }}"
+                        data-umur-bulan="{{ $ternak->umur_bulan }}">
                         <i class="bi bi-pencil"></i> Edit
                     </button>
                     <button class="btn btn-outline-info btn-sm btn-perkembangan-berat"

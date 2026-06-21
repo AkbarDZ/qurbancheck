@@ -102,13 +102,16 @@ class TernakController extends Controller
             'jenis_kelamin'   => 'required|in:jantan,betina',
             'berat_awal'      => 'required|numeric|min:1',
             'foto'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maksimal 2MB
-            'harga_beli_awal' => 'nullable|numeric|min:0',
-            'tanggal_lahir'   => 'nullable|date|before_or_equal:today',
+            'harga_beli_awal' => 'required_if:asal_hewan,beli|nullable|numeric|min:0',
+            'umur_bulan_beli' => 'required_if:asal_hewan,beli|nullable|integer|min:1',
+            'tanggal_lahir'   => 'required_if:asal_hewan,lahir|nullable|date|before_or_equal:today',
         ], [
             // Kustomisasi pesan error agar lebih ramah dibaca
             'nomor_eartag.unique' => 'Nomor eartag ini sudah terdaftar di sistem.',
             'foto.image'          => 'File harus berupa gambar.',
-            'foto.max'            => 'Ukuran foto tidak boleh lebih dari 2MB.'
+            'foto.max'            => 'Ukuran foto tidak boleh lebih dari 2MB.',
+            'umur_bulan_beli.required_if' => 'Usia hewan wajib diisi jika asal usul adalah Beli.',
+            'tanggal_lahir.required_if' => 'Tanggal lahir wajib diisi jika lahir di peternakan.',
         ]);
 
         try {
@@ -132,7 +135,12 @@ class TernakController extends Controller
             }
 
             $hargaBeli = $request->input('asal_hewan') === 'beli' ? $request->input('harga_beli_awal') : 0;
-            $tanggalLahir = $request->input('asal_hewan') === 'lahir' ? $request->input('tanggal_lahir') : null;
+            if ($request->input('asal_hewan') === 'beli') {
+                $umurBulan = (int) $request->input('umur_bulan_beli');
+                $tanggalLahir = now()->subMonths($umurBulan)->startOfMonth()->toDateString();
+            } else {
+                $tanggalLahir = $request->input('tanggal_lahir');
+            }
 
             // 3. Simpan Data ke Tabel Ternak
             $ternak = Ternak::create([
@@ -212,13 +220,16 @@ class TernakController extends Controller
             'kandang_id'      => 'required|exists:kandangs,id',
             'jenis_kelamin'   => 'required|in:jantan,betina',
             'foto'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'harga_beli_awal' => 'nullable|numeric|min:0',
-            'tanggal_lahir'   => 'nullable|date|before_or_equal:today',
+            'harga_beli_awal' => 'required_if:asal_hewan,beli|nullable|numeric|min:0',
+            'umur_bulan_beli' => 'required_if:asal_hewan,beli|nullable|integer|min:1',
+            'tanggal_lahir'   => 'required_if:asal_hewan,lahir|nullable|date|before_or_equal:today',
         ], [
             // Pesan ramah user
             'nomor_eartag.unique' => 'nomor tag sudah digunakan',
             'foto.image'          => 'File yang diunggah harus berupa gambar.',
-            'foto.max'            => 'gambar terlalu besar, maks 2MB'
+            'foto.max'            => 'gambar terlalu besar, maks 2MB',
+            'umur_bulan_beli.required_if' => 'Usia hewan wajib diisi jika asal usul adalah Beli.',
+            'tanggal_lahir.required_if' => 'Tanggal lahir wajib diisi jika lahir di peternakan.',
         ]);
 
         try {
@@ -245,10 +256,16 @@ class TernakController extends Controller
             }
 
             $hargaBeli = $request->input('asal_hewan') === 'beli' ? $request->input('harga_beli_awal') : 0;
-            $tanggalLahir = $request->input('asal_hewan') === 'lahir' ? $request->input('tanggal_lahir') : null;
+            if ($request->input('asal_hewan') === 'beli') {
+                $umurBulan = (int) $request->input('umur_bulan_beli');
+                $tanggalLahir = now()->subMonths($umurBulan)->startOfMonth()->toDateString();
+            } else {
+                $tanggalLahir = $request->input('tanggal_lahir');
+            }
 
             $validated['harga_beli_awal'] = $hargaBeli;
             $validated['tanggal_lahir'] = $tanggalLahir;
+            unset($validated['umur_bulan_beli']);
 
             $ternak->update($validated);
 
