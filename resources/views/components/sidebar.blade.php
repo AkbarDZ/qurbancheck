@@ -55,10 +55,34 @@
                 <i class="fa-solid fa-bars me-2"></i><span class="sidebar-text">Tutup Menu</span>
             </a>
         </li>
+
+        <!-- User dropdown for mobile / small screens -->
+        <li class="nav-item d-md-none mt-2">
+            <hr class="text-secondary mb-2">
+            <div class="dropdown dropup px-2">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUserMobile" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle fs-4 me-2"></i>
+                    <strong class="sidebar-text">{{ Auth::user() ? Auth::user()->name : 'Tamu' }}</strong>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUserMobile">
+                    <li><a class="dropdown-item {{ request()->is('profil*') ? 'active' : '' }}" href="{{ route('profile.edit') }}">Profil</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();">
+                            Keluar
+                        </a>
+                        <form id="logout-form-mobile" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </li>
     </ul>
 
-    <hr class="text-secondary">
-    <div class="dropdown dropup">
+    <!-- Bottom user dropdown for desktop / larger screens -->
+    <hr class="text-secondary d-none d-md-block">
+    <div class="dropdown dropup d-none d-md-block">
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle px-2" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-person-circle fs-4 me-2"></i>
             <strong class="sidebar-text">{{ Auth::user() ? Auth::user()->name : 'Tamu' }}</strong>

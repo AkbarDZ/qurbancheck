@@ -52,7 +52,7 @@
                     </div>
                 </div>
 
-                <div class="mt-auto d-flex gap-2">
+                <div class="mt-auto d-flex gap-2 flex-wrap">
                     <button class="btn btn-outline-secondary btn-sm btn-edit-ternak"
                         data-id="{{ $ternak->id }}" data-eartag="{{ $ternak->nomor_eartag }}"
                         data-ras="{{ $ternak->ras_id }}" data-kandang="{{ $ternak->kandang_id }}"
@@ -60,36 +60,42 @@
                         data-foto="{{ $ternak->dir_foto_hewan ? Storage::disk('s3')->url($ternak->dir_foto_hewan) : '' }}"
                         data-harga-beli="{{ $ternak->harga_beli_awal }}"
                         data-tanggal-lahir="{{ $ternak->tanggal_lahir ? $ternak->tanggal_lahir->format('Y-m-d') : '' }}"
-                        data-umur-bulan="{{ $ternak->umur_bulan }}">
-                        <i class="bi bi-pencil"></i> Edit
+                        data-umur-bulan="{{ $ternak->umur_bulan }}"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Ternak">
+                        <i class="bi bi-pencil"></i><span class="btn-text-responsive ms-1">Edit</span>
                     </button>
                     <button class="btn btn-outline-info btn-sm btn-perkembangan-berat"
-                        data-id="{{ $ternak->id }}" data-eartag="{{ $ternak->nomor_eartag }}">
-                        <i class="bi bi-bar-chart-line"></i> Perkembangan Berat
+                        data-id="{{ $ternak->id }}" data-eartag="{{ $ternak->nomor_eartag }}"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Perkembangan Berat">
+                        <i class="bi bi-bar-chart-line"></i><span class="btn-text-responsive ms-1">Perkembangan Berat</span>
                     </button>
-                    <a href="{{ url('/kesehatan?tambah_ternak_id=' . $ternak->id) }}" class="btn btn-outline-warning btn-sm">
-                        <i class="bi bi-heart-pulse"></i> Data Kesehatan
+                    <a href="{{ url('/kesehatan?tambah_ternak_id=' . $ternak->id) }}" class="btn btn-outline-warning btn-sm"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Data Kesehatan">
+                        <i class="bi bi-heart-pulse"></i><span class="btn-text-responsive ms-1">Data Kesehatan</span>
                     </a>
                     @php
                         $latestPemeriksaan = $ternak->pemeriksaanSyariat->sortByDesc('id')->first();
                     @endphp
                     @if ($latestPemeriksaan)
-                        <a href="{{ url('/syariat?show_pemeriksaan_id=' . $latestPemeriksaan->id) }}" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
+                        <a href="{{ url('/syariat?show_pemeriksaan_id=' . $latestPemeriksaan->id) }}" class="btn btn-outline-success btn-sm"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Kelayakan Kurban">
+                            <i class="bi bi-clipboard-pulse"></i><span class="btn-text-responsive ms-1">Kelayakan Kurban</span>
                         </a>
                     @else
-                        <a href="{{ url('/syariat?tambah_ternak_id=' . $ternak->id) }}" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
+                        <a href="{{ url('/syariat?tambah_ternak_id=' . $ternak->id) }}" class="btn btn-outline-success btn-sm"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Kelayakan Kurban">
+                            <i class="bi bi-clipboard-pulse"></i><span class="btn-text-responsive ms-1">Kelayakan Kurban</span>
                         </a>
                     @endif
                     @if(Auth::user()->role === 'owner/admin')
                     <button class="btn btn-outline-primary btn-sm btn-keuangan-ternak"
-                        data-id="{{ $ternak->id }}" data-bs-toggle="tooltip" data-bs-title="Kartu Rapor Keuangan">
+                        data-id="{{ $ternak->id }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Kartu Rapor Keuangan">
                         <i class="bi bi-receipt"></i>
                     </button>
                     <button class="btn btn-outline-danger btn-sm ms-auto btn-delete-ternak"
-                        data-id="{{ $ternak->id }}">
-                        <i class="bi bi-trash"></i> Hapus
+                        data-id="{{ $ternak->id }}"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Ternak">
+                        <i class="bi bi-trash"></i><span class="btn-text-responsive ms-1">Hapus</span>
                     </button>
                     @endif
                 </div>

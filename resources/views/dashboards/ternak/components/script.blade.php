@@ -10,11 +10,11 @@
         const hasLog = (data.log_kesehatans_count ?? 0) > 0;
         let healthStatusHTML = '';
         if (!hasLog) {
-            healthStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2">Belum diperiksa</span>`;
+            healthStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2"><span class="badge-text-full">Belum diperiksa</span><span class="badge-text-compact">Belum Cek</span></span>`;
         } else if (data.is_karantina) {
-            healthStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2">Di Karantina</span>`;
+            healthStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2"><span class="badge-text-full">Di Karantina</span><span class="badge-text-compact">Karantina</span></span>`;
         } else {
-            healthStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2">Tersedia</span>`;
+            healthStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2"><span class="badge-text-full">Tersedia</span><span class="badge-text-compact">Tersedia</span></span>`;
         }
 
         // Qurban evaluation
@@ -25,11 +25,11 @@
 
         let qurbanStatusHTML = '';
         if (!latestSyariat) {
-            qurbanStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2">Belum dicek</span>`;
+            qurbanStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2"><span class="badge-text-full">Belum dicek</span><span class="badge-text-compact">Belum Cek</span></span>`;
         } else if (isLayak) {
-            qurbanStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2">Layak Qurban</span>`;
+            qurbanStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2"><span class="badge-text-full">Layak Qurban</span><span class="badge-text-compact">Layak</span></span>`;
         } else {
-            qurbanStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2">Tidak Layak</span>`;
+            qurbanStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2"><span class="badge-text-full">Tidak Layak</span><span class="badge-text-compact">T. Layak</span></span>`;
         }
 
         const skkhHTML = hasSkkh ? `
@@ -54,7 +54,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                             <div class="d-flex align-items-center">
                                 <h4 class="card-title fw-bold mb-0 text-primary">
-                                    <i class="bi bi-tag-fill me-2"></i>Tag No: ${data.nomor_eartag}
+                                    <i class="bi bi-tag-fill me-2"></i><span class="btn-text-responsive">Tag No: </span>${data.nomor_eartag}
                                 </h4>
                                 <div class="ms-3 container-nama-panggilan" id="nama-container-${data.id}">
                                     ${data.nama_panggilan ? `
@@ -120,28 +120,38 @@
                                 data-foto="${data.dir_foto_hewan ? window.storageBaseUrl + '/' + data.dir_foto_hewan : ''}"
                                 data-harga-beli="${data.harga_beli_awal || ''}"
                                 data-tanggal-lahir="${data.tanggal_lahir ? (typeof data.tanggal_lahir === 'string' ? data.tanggal_lahir.substring(0, 10) : new Date(data.tanggal_lahir).toISOString().substring(0,10)) : ''}"
-                                data-umur-bulan="${data.umur_bulan}">
-                                <i class="bi bi-pencil"></i> Edit
+                                data-umur-bulan="${data.umur_bulan}"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Ternak">
+                                <i class="bi bi-pencil"></i><span class="btn-text-responsive ms-1">Edit</span>
                             </button>
                             <button class="btn btn-outline-info btn-sm btn-perkembangan-berat"
-                                data-id="${data.id}" data-eartag="${data.nomor_eartag}">
-                                <i class="bi bi-bar-chart-line"></i> Perkembangan Berat
+                                data-id="${data.id}" data-eartag="${data.nomor_eartag}"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Perkembangan Berat">
+                                <i class="bi bi-bar-chart-line"></i><span class="btn-text-responsive ms-1">Perkembangan Berat</span>
                             </button>
-                            <a href="/kesehatan?tambah_ternak_id=${data.id}" class="btn btn-outline-warning btn-sm"><i class="bi bi-heart-pulse"></i> Data Kesehatan</a>
+                            <a href="/kesehatan?tambah_ternak_id=${data.id}" class="btn btn-outline-warning btn-sm"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Data Kesehatan">
+                                <i class="bi bi-heart-pulse"></i><span class="btn-text-responsive ms-1">Data Kesehatan</span>
+                            </a>
                             ${latestSyariat ? `
-                                <a href="/syariat?show_pemeriksaan_id=${latestSyariat.id}" class="btn btn-outline-success btn-sm">
-                                    <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
+                                <a href="/syariat?show_pemeriksaan_id=${latestSyariat.id}" class="btn btn-outline-success btn-sm"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Kelayakan Kurban">
+                                    <i class="bi bi-clipboard-pulse"></i><span class="btn-text-responsive ms-1">Kelayakan Kurban</span>
                                 </a>
                             ` : `
-                                <a href="/syariat?tambah_ternak_id=${data.id}" class="btn btn-outline-success btn-sm">
-                                    <i class="bi bi-clipboard-pulse"></i> Kelayakan Kurban
+                                <a href="/syariat?tambah_ternak_id=${data.id}" class="btn btn-outline-success btn-sm"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Kelayakan Kurban">
+                                    <i class="bi bi-clipboard-pulse"></i><span class="btn-text-responsive ms-1">Kelayakan Kurban</span>
                                 </a>
                             `}
                             @if(Auth::user()->role === 'owner/admin')
-                            <button class="btn btn-outline-primary btn-sm btn-keuangan-ternak" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-title="Kartu Rapor Keuangan">
+                            <button class="btn btn-outline-primary btn-sm btn-keuangan-ternak" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Kartu Rapor Keuangan">
                                 <i class="bi bi-receipt"></i>
                             </button>
-                            <button class="btn btn-outline-danger btn-sm ms-auto btn-delete-ternak" data-id="${data.id}"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-outline-danger btn-sm ms-auto btn-delete-ternak" data-id="${data.id}"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Ternak">
+                                <i class="bi bi-trash"></i><span class="btn-text-responsive ms-1">Hapus</span>
+                            </button>
                             @endif
                         </div>
                     </div>

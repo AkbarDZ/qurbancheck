@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
     <div class="d-flex align-items-center">
         <h4 class="card-title fw-bold mb-0 text-primary">
-            <i class="bi bi-tag-fill me-2"></i>Tag No: {{ $ternak->nomor_eartag }}
+            <i class="bi bi-tag-fill me-2"></i><span class="btn-text-responsive">Tag No: </span>{{ $ternak->nomor_eartag }}
         </h4>
 
         <div class="ms-3 container-nama-panggilan" id="nama-container-{{ $ternak->id }}">
@@ -32,20 +32,38 @@
 
         {{-- kelayakan kurban --}}
         @if (!$latestPemeriksaan)
-            <span class="badge bg-warning rounded-pill px-3 py-2">Belum dicek</span>
+            <span class="badge bg-warning rounded-pill px-3 py-2">
+                <span class="badge-text-full">Belum dicek</span>
+                <span class="badge-text-compact">Belum Cek</span>
+            </span>
         @elseif ($isLayak)
-            <span class="badge bg-success rounded-pill px-3 py-2">Layak Qurban</span>
+            <span class="badge bg-success rounded-pill px-3 py-2">
+                <span class="badge-text-full">Layak Qurban</span>
+                <span class="badge-text-compact">Layak</span>
+            </span>
         @else
-            <span class="badge bg-danger rounded-pill px-3 py-2">Tidak Layak</span>
+            <span class="badge bg-danger rounded-pill px-3 py-2">
+                <span class="badge-text-full">Tidak Layak</span>
+                <span class="badge-text-compact">T. Layak</span>
+            </span>
         @endif
 
         {{-- status kesehatan --}}
         @if (!$hasLog)
-            <span class="badge bg-warning rounded-pill px-3 py-2">Belum diperiksa</span>
+            <span class="badge bg-warning rounded-pill px-3 py-2">
+                <span class="badge-text-full">Belum diperiksa</span>
+                <span class="badge-text-compact">Belum Cek</span>
+            </span>
         @elseif ($ternak->is_karantina)
-            <span class="badge bg-danger rounded-pill px-3 py-2">Di Karantina</span>
+            <span class="badge bg-danger rounded-pill px-3 py-2">
+                <span class="badge-text-full">Di Karantina</span>
+                <span class="badge-text-compact">Karantina</span>
+            </span>
         @else
-            <span class="badge bg-success rounded-pill px-3 py-2">Tersedia</span>
+            <span class="badge bg-success rounded-pill px-3 py-2">
+                <span class="badge-text-full">Tersedia</span>
+                <span class="badge-text-compact">Tersedia</span>
+            </span>
         @endif
 
         {{-- skkh verifikasi --}}

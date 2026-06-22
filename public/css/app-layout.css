@@ -175,3 +175,27 @@ body {
         padding-bottom: 95px !important; /* Elevate account/dropdown section on mobile screens */
     }
 }
+
+/* Responsive adjustments for smaller screens (under 1080px) */
+@media (max-width: 1079px) {
+    .btn-text-responsive {
+        display: none !important;
+    }
+    .badge-text-full {
+        display: none !important;
+    }
+    .badge-text-compact {
+        display: inline !important;
+    }
+}
+@media (min-width: 1080px) {
+    .btn-text-responsive {
+        display: inline !important;
+    }
+    .badge-text-full {
+        display: inline !important;
+    }
+    .badge-text-compact {
+        display: none !important;
+    }
+}
