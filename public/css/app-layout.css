@@ -176,8 +176,8 @@ body {
     }
 }
 
-/* Responsive adjustments for smaller screens (under 1080px) */
-@media (max-width: 1079px) {
+/* Responsive adjustments for 1366x768 and smaller screens (under 1367px) */
+@media (max-width: 1366px) {
     .btn-text-responsive {
         display: none !important;
     }
@@ -188,7 +188,7 @@ body {
         display: inline !important;
     }
 }
-@media (min-width: 1080px) {
+@media (min-width: 1367px) {
     .btn-text-responsive {
         display: inline !important;
     }
