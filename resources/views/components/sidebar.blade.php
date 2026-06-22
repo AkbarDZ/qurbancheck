@@ -58,7 +58,7 @@
     </ul>
 
     <hr class="text-secondary">
-    <div class="dropdown">
+    <div class="dropdown dropup">
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle px-2" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-person-circle fs-4 me-2"></i>
             <strong class="sidebar-text">{{ Auth::user() ? Auth::user()->name : 'Tamu' }}</strong>

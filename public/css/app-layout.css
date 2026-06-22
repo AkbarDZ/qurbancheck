@@ -118,6 +118,7 @@ body {
 .sidebar {
     width: 260px;
     height: 100vh;
+    height: 100dvh;
     background-color: #1A312C; /* Dark theme untuk sidebar */
     transition: width 0.3s ease;
     overflow-y: auto;
@@ -167,4 +168,10 @@ body {
 }
 .main-content.expanded {
     width: calc(100% - 70px);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        padding-bottom: 95px !important; /* Elevate account/dropdown section on mobile screens */
+    }
 }

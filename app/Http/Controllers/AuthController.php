@@ -26,6 +26,8 @@ class AuthController extends Controller
         $remember = $request->has('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            Auth::logoutOtherDevices($request->password);
+
             $request->session()->regenerate();
 
             return redirect()->intended('/')
