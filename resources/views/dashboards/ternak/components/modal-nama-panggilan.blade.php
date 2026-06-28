@@ -81,7 +81,10 @@
 <div class="modal fade" id="modalNamaPanggilan" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <form id="formNamaPanggilan">
+            <form id="formNamaPanggilan" method="POST">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="id" value="{{ old('id') }}">
                 <div class="modal-header border-bottom-0 pb-0">
                     <h1 class="modal-title fs-6 fw-bold text-muted">Nama Panggilan Hewan</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -152,6 +155,7 @@
                 // Isi form di modal
                 inputIdTernak.value = id;
                 inputNama.value = nama;
+                formNama.action = `/ternak/${id}/nama-panggilan`;
 
                 // Tampilkan tombol tong sampah HANYA jika nama sudah ada
                 if (nama.trim() !== '') {
@@ -171,85 +175,10 @@
             }
         });
 
-        // Fungsi utama untuk submit AJAX (Update & Delete pakai fungsi ini)
-        function submitNamaPanggilan(idTernak, namaBaru) {
-            // UX Loading
-            btnSimpanNama.disabled = true;
-            btnHapusNama.disabled = true;
-            loadingNama.classList.remove('d-none');
-
-            let formData = new FormData();
-            formData.append('nama_panggilan', namaBaru);
-            formData.append('_method', 'PATCH'); // Spoofing PATCH method
-
-            fetch(`/ternak/${idTernak}/nama-panggilan`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update UI di Card HTML secara dinamis
-                        let containerHtml = document.getElementById(`nama-container-${idTernak}`);
-
-                        if (data.data.nama_panggilan) {
-                            // Jika ada namanya, render Badge
-                            containerHtml.innerHTML = `
-                        <span class="badge bg-light text-dark border rounded-pill trigger-nama" 
-                              style="cursor: pointer; font-size: 0.85rem;"
-                              data-id="${data.data.id}" 
-                              data-nama="${data.data.nama_panggilan}"
-                              data-bs-toggle="tooltip" 
-                              data-bs-placement="top"
-                              title="Klik untuk ubah/hapus nama">
-                            "${data.data.nama_panggilan}" <i class="bi bi-pencil-square ms-1 text-muted"></i>
-                        </span>
-                    `;
-                        } else {
-                            // Jika dikosongkan/dihapus, render tombol Add
-                            containerHtml.innerHTML = `
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 trigger-nama"
-                                data-id="${data.data.id}" 
-                                data-nama=""
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="top"
-                                title="Tambah nama panggilan hewan">
-                            <i class="bi bi-plus"></i> Nama
-                        </button>
-                    `;
-                        }
-
-                        // Inisialisasi ulang tooltip untuk elemen yang baru dirender
-                        let newTrigger = containerHtml.querySelector('.trigger-nama');
-                        new bootstrap.Tooltip(newTrigger);
-
-                        modalNamaInstance.hide();
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    alert('Terjadi kesalahan saat mengubah nama.');
-                })
-                .finally(() => {
-                    btnSimpanNama.disabled = false;
-                    btnHapusNama.disabled = false;
-                    loadingNama.classList.add('d-none');
-                });
-        }
-
-        // Submit dari tombol Simpan / Enter
-        formNama.addEventListener('submit', function (e) {
-            e.preventDefault();
-            submitNamaPanggilan(inputIdTernak.value, inputNama.value);
-        });
-
         // Submit khusus tombol hapus (mengirim string kosong)
         btnHapusNama.addEventListener('click', function () {
-            submitNamaPanggilan(inputIdTernak.value, '');
+            inputNama.value = '';
+            formNama.submit();
         });
 
     });

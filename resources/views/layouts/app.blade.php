@@ -54,6 +54,17 @@
                 mainContent.classList.toggle('expanded');
                 localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
             });
+
+            // Auto-dismiss success alerts after 5 seconds
+            setTimeout(function () {
+                let successAlerts = document.querySelectorAll('.alert-success');
+                successAlerts.forEach(function (alert) {
+                    let bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    if (bsAlert) {
+                        bsAlert.close();
+                    }
+                });
+            }, 5000);
         });
 
         // Global SweetAlert2 overrides

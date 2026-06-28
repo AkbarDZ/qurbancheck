@@ -64,7 +64,8 @@
 <div class="modal fade" id="modalTambahKandang" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formTambahKandang">
+            <form id="formTambahKandang" action="{{ url('/master/kandang') }}" method="POST">
+                @csrf
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Tambah Kandang</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -72,14 +73,18 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Nama Kandang</label>
-                        <input type="text" class="form-control" id="nama_kandang" name="nama_kandang" required>
-                        <div class="invalid-feedback" id="error_nama_kandang"></div>
+                        <input type="text" class="form-control @error('nama_kandang') is-invalid @enderror" id="nama_kandang" name="nama_kandang" value="{{ old('nama_kandang') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nama_kandang" style="font-size: 0.75rem;">
+                            @error('nama_kandang') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Kapasitas Maksimal</label>
-                        <input type="number" class="form-control" id="kapasitas_maksimal" name="kapasitas_maksimal"
-                            required>
-                        <div class="invalid-feedback" id="error_kapasitas_maksimal"></div>
+                        <input type="number" class="form-control @error('kapasitas_maksimal') is-invalid @enderror" id="kapasitas_maksimal" name="kapasitas_maksimal"
+                            value="{{ old('kapasitas_maksimal') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_kapasitas_maksimal" style="font-size: 0.75rem;">
+                            @error('kapasitas_maksimal') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -98,24 +103,30 @@
 <div class="modal fade" id="modalEditKandang" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formEditKandang">
+            <form id="formEditKandang" method="POST">
+                @csrf
+                @method('PUT')
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Edit Kandang</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="edit_id_kandang" name="id">
+                    <input type="hidden" id="edit_id_kandang" name="id_kandang" value="{{ old('id_kandang') }}">
 
                     <div class="mb-3">
                         <label class="form-label">Nama Kandang</label>
-                        <input type="text" class="form-control" id="edit_nama_kandang" name="nama_kandang" required>
-                        <div class="invalid-feedback" id="error_edit_nama_kandang"></div>
+                        <input type="text" class="form-control @error('nama_kandang') is-invalid @enderror" id="edit_nama_kandang" name="nama_kandang" value="{{ old('nama_kandang') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_nama_kandang" style="font-size: 0.75rem;">
+                            @error('nama_kandang') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Kapasitas Maksimal</label>
-                        <input type="number" class="form-control" id="edit_kapasitas_maksimal" name="kapasitas_maksimal"
-                            required>
-                        <div class="invalid-feedback" id="error_edit_kapasitas_maksimal"></div>
+                        <input type="number" class="form-control @error('kapasitas_maksimal') is-invalid @enderror" id="edit_kapasitas_maksimal" name="kapasitas_maksimal"
+                            value="{{ old('kapasitas_maksimal') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_kapasitas_maksimal" style="font-size: 0.75rem;">
+                            @error('kapasitas_maksimal') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -138,81 +149,11 @@
         window.kandangPagination = window.initTablePagination('tableBodyKandang', 'paginationKandang', 5);
 
         // --- Handler Form Kandang ---
-        const formKandang = document.getElementById('formTambahKandang');
-        const tableBodyKandang = document.getElementById('tableBodyKandang');
-        const btnSimpanKandang = document.getElementById('btnSimpanKandang');
-        const loadingKandang = document.getElementById('loadingKandang');
-
-        formKandang.addEventListener('submit', function (e) {
-            e.preventDefault();
-            btnSimpanKandang.disabled = true;
-            loadingKandang.classList.remove('d-none');
-            document.querySelectorAll('#formTambahKandang .is-invalid').forEach(el => el.classList
-                .remove('is-invalid'));
-
-            fetch('/master/kandang', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: new FormData(formKandang)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let emptyRow = tableBodyKandang.querySelector('td[colspan]');
-                        if (emptyRow && (emptyRow.innerText.toLowerCase().includes('kosong') || emptyRow.innerText.toLowerCase().includes('belum ada'))) {
-                            emptyRow.parentElement.remove();
-                        }
-                        let tr = document.createElement('tr');
-                        tr.id = `row-kandang-${data.data.id}`;
-                        tr.innerHTML = `
-                        <td class="py-3 px-3 fw-semibold text-secondary">Baru</td>
-                        <td class="py-3 px-3 col-nama fw-bold text-dark">${data.data.nama_kandang}</td>
-                        <td class="py-3 px-3 col-kapasitas">
-                            <span class="fw-semibold text-dark">${data.data.kapasitas_maksimal}</span> <span class="text-muted small">ekor</span>
-                        </td>
-                        <td class="py-3 px-3 text-center col-status">
-                            <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tersedia</span>
-                        </td>
-                        <td class="py-3 px-3 text-end">
-                            <button class="btn btn-sm btn-outline-secondary btn-edit-kandang" data-id="${data.data.id}" data-nama="${data.data.nama_kandang}" data-kapasitas="${data.data.kapasitas_maksimal}" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Kandang"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete-kandang" data-id="${data.data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Kandang"><i class="bi bi-trash"></i></button>
-                        </td>
-                    `;
-                        tableBodyKandang.insertAdjacentElement('afterbegin', tr);
-                        if (window.kandangPagination) window.kandangPagination.update();
-                        bootstrap.Modal.getInstance(document.getElementById('modalTambahKandang'))
-                            .hide();
-                        formKandang.reset();
-                        alert(data.message);
-                    } else if (data.message) {
-                        for (const [key, messages] of Object.entries(data.errors || {})) {
-                            let inputEl = document.getElementById(key);
-                            let errorEl = document.getElementById(`error_${key}`);
-                            if (inputEl && errorEl) {
-                                inputEl.classList.add('is-invalid');
-                                errorEl.innerText = messages[0];
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan.');
-                })
-                .finally(() => {
-                    btnSimpanKandang.disabled = false;
-                    loadingKandang.classList.add('d-none');
-                });
-        });
+        // AJAX submit removed. Form submits normally using standard HTTP POST.
 
         // edit
         const formEditKandang = document.getElementById('formEditKandang');
-        const btnUpdateKandang = document.getElementById('btnUpdateKandang');
-        const loadingEditKandang = document.getElementById('loadingEditKandang');
-        const modalEditKandangInstance = new bootstrap.Modal(document.getElementById('modalEditKandang'));
+        const modalEditKandangInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditKandang'));
 
         tableBodyKandang.addEventListener('click', function (e) {
             let btnEdit = e.target.closest('.btn-edit-kandang');
@@ -232,72 +173,9 @@
 
         formEditKandang.addEventListener('submit', function (e) {
             e.preventDefault();
-
             let id = document.getElementById('edit_id_kandang').value;
-
-            btnUpdateKandang.disabled = true;
-            loadingEditKandang.classList.remove('d-none');
-            document.querySelectorAll('#formEditKandang .is-invalid').forEach(el => el.classList.remove(
-                'is-invalid'));
-
-            const formData = new FormData(formEditKandang);
-            formData.append('_method', 'PUT');
-
-            fetch(`/master/kandang/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let tr = document.getElementById(`row-kandang-${id}`);
-                        tr.querySelector('.col-nama').innerText = data.data.nama_kandang;
-                        
-                        let kapasitasCol = tr.querySelector('.col-kapasitas');
-                        if (kapasitasCol) {
-                            kapasitasCol.innerHTML = `<span class="fw-semibold text-dark">${data.data.kapasitas_maksimal}</span> <span class="text-muted small">ekor</span>`;
-                        }
-
-                        let count = data.data.ternaks_count || 0;
-                        let max = data.data.kapasitas_maksimal || 0;
-                        let statusTd = tr.querySelector('.col-status');
-                        if (statusTd) {
-                            if (count >= max) {
-                                statusTd.innerHTML = '<span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Penuh</span>';
-                            } else {
-                                statusTd.innerHTML = '<span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">Tersedia</span>';
-                            }
-                        }
-
-                        let btnEdit = tr.querySelector('.btn-edit-kandang');
-                        btnEdit.setAttribute('data-nama', data.data.nama_kandang);
-                        btnEdit.setAttribute('data-kapasitas', data.data.kapasitas_maksimal);
-
-                        modalEditKandangInstance.hide();
-                        alert(data.message);
-                    } else if (data.errors) {
-                        for (const [key, messages] of Object.entries(data.errors || {})) {
-                            let inputEl = document.getElementById(`edit_${key}`);
-                            let errorEl = document.getElementById(`error_edit_${key}`);
-                            if (inputEl && errorEl) {
-                                inputEl.classList.add('is-invalid');
-                                errorEl.innerText = messages[0];
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan.');
-                })
-                .finally(() => {
-                    btnUpdateKandang.disabled = false;
-                    loadingEditKandang.classList.add('d-none');
-                });
+            formEditKandang.action = `/master/kandang/${id}`;
+            formEditKandang.submit();
         });
         // ====== FITUR HAPUS KANDANG ====== //
         tableBodyKandang.addEventListener('click', function (e) {
@@ -317,60 +195,20 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        let originalIcon = btnDelete.innerHTML;
-                        btnDelete.innerHTML =
-                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-                        btnDelete.disabled = true;
-
-                        fetch(`/master/kandang/${id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    let tr = document.getElementById(`row-kandang-${id}`);
-                                    if (tr) {
-                                        tr.remove();
-                                    }
-                                    if (window.kandangPagination) window.kandangPagination.update();
-
-                                    if (tableBodyKandang.querySelectorAll('tr').length === 0) {
-                                        tableBodyKandang.innerHTML =
-                                            '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Kandang</h6><p class="small text-muted mb-0">Klik tombol "Tambah Kandang" untuk mendaftarkan kandang baru.</p></td></tr>';
-                                    }
-
-                                    Swal.fire({
-                                        title: 'Berhasil',
-                                        text: data.message,
-                                        icon: 'success',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: 'Gagal',
-                                        text: 'Gagal menghapus data.',
-                                        icon: 'error',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                    btnDelete.innerHTML = originalIcon;
-                                    btnDelete.disabled = false;
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Terjadi kesalahan saat menghubungi server.',
-                                    icon: 'error',
-                                    confirmButtonColor: '#428475'
-                                });
-                                btnDelete.innerHTML = originalIcon;
-                                btnDelete.disabled = false;
-                            });
+                        let deleteForm = document.getElementById('formDeleteKandang');
+                        if (!deleteForm) {
+                            deleteForm = document.createElement('form');
+                            deleteForm.id = 'formDeleteKandang';
+                            deleteForm.method = 'POST';
+                            deleteForm.style.display = 'none';
+                            deleteForm.innerHTML = `
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="_method" value="DELETE">
+                            `;
+                            document.body.appendChild(deleteForm);
+                        }
+                        deleteForm.action = `/master/kandang/${id}`;
+                        deleteForm.submit();
                     }
                 });
             }

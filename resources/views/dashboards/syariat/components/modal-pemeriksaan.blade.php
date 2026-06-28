@@ -2,6 +2,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <form class="modal-content border-0 shadow" action="{{ url('/syariat/pemeriksaan') }}"
             enctype="multipart/form-data" id="formTambahPemeriksaan" method="POST">
+            @csrf
             <div class="modal-header bg-light border-bottom-0">
                 <h1 class="modal-title fs-5 fw-bold text-dark"><i class="bi bi-clipboard2-check me-2"></i> Form
                     Pemeriksaan Syariat</h1>
@@ -111,7 +112,9 @@
                                         @endforelse
                                     </div>
                                 </div>
-                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_ternak_id" style="font-size: 0.75rem;"></div>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_ternak_id" style="font-size: 0.75rem;">
+                                    @error('ternak_id') {{ $message }} @enderror
+                                </div>
 
                                 <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark rounded-3 p-3 mt-3 d-flex gap-2 align-items-start mb-0" style="font-size: 0.75rem;">
                                     <i class="bi bi-info-circle-fill text-warning fs-6"></i>
@@ -128,9 +131,11 @@
                                     <div class="input-group shadow-sm rounded-3 overflow-hidden">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-calendar3"></i></span>
                                         <input type="date" class="form-control border-start-0 ps-0 fw-semibold text-dark" name="tanggal_pemeriksaan" id="tambah_tanggal_pemeriksaan"
-                                            value="{{ date('Y-m-d') }}" required>
+                                            value="{{ old('tanggal_pemeriksaan', date('Y-m-d')) }}" required>
                                     </div>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_pemeriksaan" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_pemeriksaan" style="font-size: 0.75rem;">
+                                        @error('tanggal_pemeriksaan') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 
                                 {{-- <div class="card bg-light border-0 rounded-3 p-3 mt-3 d-none d-md-block">
@@ -328,129 +333,7 @@
             });
         });
 
-        // 2. LOGIKA AJAX SUBMIT (AUTO-CALCULATE)
-        const form = document.getElementById('formTambahPemeriksaan');
-        const btnSimpan = document.getElementById('btnSimpanPemeriksaan');
-        const containerTabel = document.getElementById('pemeriksaanContainer');
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-        const inputTanggalPem = document.getElementById('tambah_tanggal_pemeriksaan');
-        if (inputTanggalPem) {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            inputTanggalPem.setAttribute('max', `${y}-${m}-${d}`);
-        }
-
-        if (form) {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                let originalText = btnSimpan.innerHTML;
-
-                if (inputTanggalPem && inputTanggalPem.value) {
-                    const selectedDate = new Date(inputTanggalPem.value);
-                    selectedDate.setHours(0,0,0,0);
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-                    if (selectedDate > today) {
-                        inputTanggalPem.classList.add('is-invalid');
-                        let errorEl = document.getElementById('error_tanggal_pemeriksaan');
-                        if (errorEl) {
-                            errorEl.innerText = 'Tanggal pemeriksaan tidak boleh di masa depan.';
-                        }
-                        return;
-                    }
-                }
-
-                btnSimpan.innerHTML =
-                    '<span class="spinner-border spinner-border-sm"></span> Menganalisa...';
-                btnSimpan.disabled = true;
-
-                document.getElementById('error_global_pemeriksaan').classList.add('d-none');
-                document.querySelectorAll('#formTambahPemeriksaan .is-invalid').forEach(el => el
-                    .classList.remove('is-invalid'));
-
-                const formData = new FormData(form);
-
-                fetch('/syariat/pemeriksaan', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: formData
-                    })
-                    .then(async response => {
-                        const isJson = response.headers.get('content-type')?.includes(
-                            'application/json');
-                        if (!response.ok) {
-                            if (response.status === 422 && isJson) {
-                                const errData = await response.json();
-                                return Promise.reject({
-                                    type: 'validation',
-                                    errors: errData.errors
-                                });
-                            }
-                            let errorMsg = 'Terjadi kesalahan internal pada server.';
-                            if (isJson) {
-                                const errData = await response.json();
-                                errorMsg = errData.message || errorMsg;
-                            }
-                            return Promise.reject({
-                                type: 'server',
-                                message: errorMsg
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            // Tutup modal dan reset
-                            let modalInstance = bootstrap.Modal.getOrCreateInstance(document
-                                .getElementById('modalTambahPemeriksaan'));
-                            modalInstance.hide();
-                            form.reset();
-
-                            // Kembalikan semua toggle UI ke hijau
-                            switches.forEach(toggle => {
-                                let ev = new Event('change');
-                                toggle.dispatchEvent(ev);
-                            });
-
-                            // Tampilkan notifikasi pintar dari sistem
-                            alert(data.message);
-
-                            // Refresh halaman secara halus agar dropdown sapi yang sudah dicek hilang dari modal
-                            window.location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        if (error.type === 'validation') {
-                            for (const [key, messages] of Object.entries(error.errors || {})) {
-                                let inputEl = document.querySelector(
-                                    `#formTambahPemeriksaan [name="${key}"], #formTambahPemeriksaan [name="${key}[]"]`
-                                    );
-                                let errorEl = document.getElementById(`error_${key}`);
-                                if (errorEl) errorEl.innerText = messages[0];
-                                if (inputEl) inputEl.classList.add('is-invalid');
-                            }
-                        } else {
-                            document.getElementById('error_msg_pemeriksaan').innerText = error
-                                .message;
-                            document.getElementById('error_global_pemeriksaan').classList.remove(
-                                'd-none');
-                        }
-                    })
-                    .finally(() => {
-                        btnSimpan.innerHTML = originalText;
-                        btnSimpan.disabled = false;
-                    });
-            });
-        }
+        // 2. Form submits normally via standard HTTP POST, JS AJAX submission removed.
     });
-
 </script>
 @endpush

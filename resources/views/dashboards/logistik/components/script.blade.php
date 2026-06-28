@@ -42,61 +42,7 @@
         }
 
 
-        // --- 2. LOGIKA AJAX SUBMIT DISTRIBUSI ---
-        const formDistribusi = document.getElementById('formDistribusi');
-        const btnSimpan = document.getElementById('btnSimpanDistribusi');
-        const errorAlert = document.getElementById('error_distribusi');
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-        if (formDistribusi) {
-            formDistribusi.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                errorAlert.classList.add('d-none');
-                let originalText = btnSimpan.innerHTML;
-                btnSimpan.innerHTML =
-                    '<span class="spinner-border spinner-border-sm"></span> Memproses...';
-                btnSimpan.disabled = true;
-
-                const formData = new FormData(formDistribusi);
-
-                fetch('/logistik/distribusi', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: formData
-                    })
-                    .then(async response => {
-                        const isJson = response.headers.get('content-type')?.includes('application/json');
-                        if (!response.ok) {
-                            let errorMsg = 'Terjadi kesalahan sistem.';
-                            if (isJson) {
-                                const errData = await response.json();
-                                errorMsg = errData.message || Object.values(errData.errors)[0][0] || errorMsg;
-                            }
-                            return Promise.reject(errorMsg);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            // Refresh halaman untuk mengupdate stok gudang dan riwayat tabel
-                            window.location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        errorAlert.innerText = error;
-                        errorAlert.classList.remove('d-none');
-                    })
-                    .finally(() => {
-                        btnSimpan.innerHTML = originalText;
-                        btnSimpan.disabled = false;
-                    });
-            });
-        }
+        // --- 2. LOGIKA AJAX SUBMIT DISTRIBUSI (AJAX Removed, Form submits normally) ---
 
         // --- 3. LOGIKA CLIENT-SIDE PAGINATION ---
         window.initTablePagination = function (tableBodyId, paginationId, itemsPerPage = 4) {
@@ -201,6 +147,14 @@
 
         window.initTablePagination('tbodyGudang', 'paginationGudang', 4);
         window.initTablePagination('tbodyRiwayat', 'paginationRiwayat', 4);
+
+        // Auto-open modalTambahPakan if validation fails for pakan
+        @if ($errors->has('nama_pakan') || $errors->has('harga_per_kg') || $errors->has('stok_kg'))
+            const modalTambahPakan = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTambahPakan'));
+            if (modalTambahPakan) {
+                modalTambahPakan.show();
+            }
+        @endif
 
     });
 </script>

@@ -50,6 +50,20 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <!-- Main Tabs Card Wrapper -->
     <div class="card shadow border-1">
         <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
@@ -175,6 +189,26 @@
 @include('dashboards.syariat.components.modal-detail')
 @include('dashboards.syariat.components.modal-skkh')
 @include('dashboards.syariat.components.modal-detail-skkh')
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if ($errors->any())
+            @if ($errors->has('ternak_id') || $errors->has('tanggal_pemeriksaan'))
+                let modalTambah = new bootstrap.Modal(document.getElementById('modalTambahPemeriksaan'));
+                modalTambah.show();
+            @elseif ($errors->has('nama_dokter_pemeriksa') || $errors->has('file_skkh') || $errors->has('pemeriksaan_ids') || $errors->has('nomor_surat'))
+                let skkhTab = document.querySelector('#skkh-tab');
+                if (skkhTab) {
+                    skkhTab.click();
+                }
+                let modalSkkh = new bootstrap.Modal(document.getElementById('modalUploadSKKH'));
+                modalSkkh.show();
+            @endif
+        @endif
+    });
+</script>
+@endpush
 
 @endsection
 

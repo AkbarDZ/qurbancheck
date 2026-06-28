@@ -17,6 +17,20 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card shadow border-0 mb-4 bg-success">
         <div class="card-body p-3">
             <form action="{{ url('/kesehatan') }}" method="GET" class="row g-3 align-items-center" id="formFilter">
@@ -223,14 +237,6 @@
         `;
     };
 
-    window.updateCounterKesehatan = function (amount) {
-        let badgeTotal = document.getElementById('totalLogBadge');
-        if (badgeTotal) {
-            let currentNum = parseInt(badgeTotal.innerText.replace(/\D/g, '')) || 0;
-            badgeTotal.innerText = `Total: ${currentNum + amount} Catatan`;
-        }
-    };
-
     document.addEventListener("DOMContentLoaded", function () {
         const containerKesehatan = document.getElementById('kesehatanContainer');
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
@@ -385,50 +391,20 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        btnDelete.disabled = true;
-
-                        fetch(`/kesehatan/${id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    document.getElementById(`row-kesehatan-${id}`).remove();
-                                    window.updateCounterKesehatan(-1);
-
-                                    // Tampilkan state kosong jika tabel habis
-                                    if (containerKesehatan.querySelectorAll('tr').length === 0) {
-                                        containerKesehatan.innerHTML = `
-                                        <tr id="emptyStateKesehatan">
-                                            <td colspan="6" class="text-center py-5 text-muted">
-                                                <i class="bi bi-clipboard2-pulse fs-1 d-block mb-2"></i>
-                                                Belum ada riwayat kesehatan yang dicatat.
-                                            </td>
-                                        </tr>`;
-                                    }
-                                    Swal.fire({
-                                        title: 'Berhasil',
-                                        text: data.message,
-                                        icon: 'success',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                }
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                Swal.fire({
-                                    title: 'Gagal',
-                                    text: "Gagal menghapus data.",
-                                    icon: 'error',
-                                    confirmButtonColor: '#428475'
-                                });
-                                btnDelete.disabled = false;
-                            });
+                        let deleteForm = document.getElementById('formDeleteKesehatan');
+                        if (!deleteForm) {
+                            deleteForm = document.createElement('form');
+                            deleteForm.id = 'formDeleteKesehatan';
+                            deleteForm.method = 'POST';
+                            deleteForm.style.display = 'none';
+                            deleteForm.innerHTML = `
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="_method" value="DELETE">
+                            `;
+                            document.body.appendChild(deleteForm);
+                        }
+                        deleteForm.action = `/kesehatan/${id}`;
+                        deleteForm.submit();
                     }
                 });
             }
@@ -541,6 +517,14 @@
                 });
             }
         });
+
+        // Auto-open modal if validation fails
+        @if ($errors->any())
+            const modalTambah = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTambahKesehatan'));
+            if (modalTambah) {
+                modalTambah.show();
+            }
+        @endif
 
         // Auto-open modal if redirected with action=tambah or a specific ternak ID
         const urlParams = new URLSearchParams(window.location.search);

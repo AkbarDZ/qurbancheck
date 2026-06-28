@@ -112,17 +112,23 @@ class SyariatController extends Controller
             foreach ($ternakIds as $t_id) {
                 $ternak = Ternak::with('ras.tipeTernak')->findOrFail($t_id);
                 if ($ternak->is_karantina) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Hewan dengan Tag {$ternak->nomor_eartag} sedang dikarantina dan tidak boleh diperiksa kelayakan."
-                    ], 422);
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Hewan dengan Tag {$ternak->nomor_eartag} sedang dikarantina dan tidak boleh diperiksa kelayakan."
+                        ], 422);
+                    }
+                    return redirect()->back()->withErrors(['ternak_id' => "Hewan dengan Tag {$ternak->nomor_eartag} sedang dikarantina dan tidak boleh diperiksa kelayakan."])->withInput();
                 }
                 $minUmur = $ternak->ras->tipeTernak->umur_minimal_qurban ?? 0;
                 if ($ternak->umur_bulan < $minUmur) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Hewan dengan Tag {$ternak->nomor_eartag} belum cukup umur untuk kelayakan kurban ({$ternak->umur_bulan} dari minimal {$minUmur} bulan)."
-                    ], 422);
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Hewan dengan Tag {$ternak->nomor_eartag} belum cukup umur untuk kelayakan kurban ({$ternak->umur_bulan} dari minimal {$minUmur} bulan)."
+                        ], 422);
+                    }
+                    return redirect()->back()->withErrors(['ternak_id' => "Hewan dengan Tag {$ternak->nomor_eartag} belum cukup umur untuk kelayakan kurban ({$ternak->umur_bulan} dari minimal {$minUmur} bulan)."])->withInput();
                 }
             }
 
@@ -164,17 +170,23 @@ class SyariatController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => "Pemeriksaan untuk $jumlahTernak ekor hewan berhasil diproses."
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Pemeriksaan untuk $jumlahTernak ekor hewan berhasil diproses."
+                ]);
+            }
+            return redirect()->route('syariat.index')->with('success', "Pemeriksaan untuk $jumlahTernak ekor hewan berhasil diproses.");
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -213,17 +225,23 @@ class SyariatController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Dokumen SKKH berhasil diunggah dan ditautkan ke ' . count($request->pemeriksaan_ids) . ' ekor hewan.'
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Dokumen SKKH berhasil diunggah dan ditautkan ke ' . count($request->pemeriksaan_ids) . ' ekor hewan.'
+                ]);
+            }
+            return redirect()->route('syariat.index')->with('success', 'Dokumen SKKH berhasil diunggah dan ditautkan ke ' . count($request->pemeriksaan_ids) . ' ekor hewan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengunggah SKKH: ' . $e->getMessage()
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengunggah SKKH: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal mengunggah SKKH: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -254,7 +272,7 @@ class SyariatController extends Controller
         ]);
     }
 
-    public function destroyPemeriksaan($id)
+    public function destroyPemeriksaan(Request $request, $id)
     {
         $pemeriksaan = PemeriksaanSyariat::findOrFail($id);
 
@@ -263,19 +281,25 @@ class SyariatController extends Controller
             // menghapus induknya akan otomatis membersihkan semua checklist-nya juga.
             $pemeriksaan->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pemeriksaan dibatalkan. Sapi telah dikembalikan ke daftar Belum Diperiksa.'
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pemeriksaan dibatalkan. Sapi telah dikembalikan ke daftar Belum Diperiksa.'
+                ]);
+            }
+            return redirect()->route('syariat.index')->with('success', 'Pemeriksaan dibatalkan. Sapi telah dikembalikan ke daftar Belum Diperiksa.');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal membatalkan pemeriksaan: ' . $e->getMessage()
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membatalkan pemeriksaan: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal membatalkan pemeriksaan: ' . $e->getMessage());
         }
     }
 
-    public function destroySkkh($id)
+    public function destroySkkh(Request $request, $id)
     {
         $skkh = DokumenSkkh::findOrFail($id);
 
@@ -292,16 +316,22 @@ class SyariatController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Dokumen SKKH berhasil dihapus. Hubungan dengan hewan yang tertaut telah dilepas.'
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Dokumen SKKH berhasil dihapus. Hubungan dengan hewan yang tertaut telah dilepas.'
+                ]);
+            }
+            return redirect()->route('syariat.index')->with('success', 'Dokumen SKKH berhasil dihapus. Hubungan dengan hewan yang tertaut telah dilepas.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus dokumen SKKH: ' . $e->getMessage()
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus dokumen SKKH: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal menghapus dokumen SKKH: ' . $e->getMessage());
         }
     }
 }

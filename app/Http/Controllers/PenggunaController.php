@@ -27,11 +27,15 @@ class PenggunaController extends Controller
 
         $user = User::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pengguna berhasil ditambahkan',
-            'data' => $user
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengguna berhasil ditambahkan',
+                'data' => $user
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Pengguna berhasil ditambahkan');
     }
 
     public function update(Request $request, $id)
@@ -58,21 +62,29 @@ class PenggunaController extends Controller
 
         $user->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pengguna berhasil diperbarui',
-            'data' => $user
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengguna berhasil diperbarui',
+                'data' => $user
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Pengguna berhasil diperbarui');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $user = User::findOrFail($id);
         $user->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pengguna berhasil dihapus'
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengguna berhasil dihapus'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Pengguna berhasil dihapus');
     }
 }

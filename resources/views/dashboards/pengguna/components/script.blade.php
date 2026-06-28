@@ -131,107 +131,12 @@ document.addEventListener("DOMContentLoaded", function () {
     window.initPenggunaTooltips();
 
     // ====== TAMBAH PENGGUNA ====== //
-    const formTambah = document.getElementById('formTambahPengguna');
-    const btnSimpan = document.getElementById('btnSimpanPengguna');
-    const loadingTambah = document.getElementById('loadingTambah');
-
-    formTambah.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        btnSimpan.disabled = true;
-        loadingTambah.classList.remove('d-none');
-        
-        // Reset validation errors
-        document.querySelectorAll('#formTambahPengguna .is-invalid').forEach(el => el.classList.remove('is-invalid'));
-
-        const formData = new FormData(formTambah);
-
-        fetch("{{ route('pengguna.store') }}", {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: formData
-        })
-        .then(response => {
-            if (response.status === 422) {
-                return response.json().then(data => {
-                    for (const [key, messages] of Object.entries(data.errors || {})) {
-                        let inputEl = document.getElementById(key);
-                        let errorEl = document.getElementById(`error_${key}`);
-                        if (inputEl && errorEl) {
-                            inputEl.classList.add('is-invalid');
-                            errorEl.innerText = messages[0];
-                        }
-                    }
-                    throw new Error('Validation failed');
-                });
-            }
-            if (!response.ok) throw new Error('Server error');
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Remove empty state if any
-                const emptyRow = tableBody.querySelector('td[colspan]');
-                if (emptyRow) {
-                    tableBody.innerHTML = '';
-                }
-
-                // Add new row to table
-                const newIndex = tableBody.querySelectorAll('tr').length + 1;
-                const roleBadge = data.data.role === 'owner/admin' 
-                    ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold"><i class="bi bi-shield-fill-check me-1"></i> Owner/Admin</span>`
-                    : `<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold"><i class="bi bi-person me-1"></i> Pekerja</span>`;
-
-                const newRow = document.createElement('tr');
-                newRow.id = `row-pengguna-${data.data.id}`;
-                newRow.innerHTML = `
-                    <td class="py-3 px-3 fw-semibold text-secondary">${newIndex}</td>
-                    <td class="py-3 px-3 col-name fw-bold text-dark">${data.data.name}</td>
-                    <td class="py-3 px-3 col-email fw-semibold text-secondary">${data.data.email}</td>
-                    <td class="py-3 px-3 col-role">${roleBadge}</td>
-                    <td class="py-3 px-3 text-end">
-                        <button class="btn btn-sm btn-outline-secondary btn-edit-pengguna" data-id="${data.data.id}"
-                            data-name="${data.data.name}" data-email="${data.data.email}" data-role="${data.data.role}"
-                            data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Pengguna">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger btn-delete-pengguna" data-id="${data.data.id}"
-                            data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Pengguna">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(newRow);
-
-                // Update pagination
-                if (window.penggunaPagination) window.penggunaPagination.update();
-
-                // Close Modal
-                bootstrap.Modal.getInstance(document.getElementById('modalTambahPengguna')).hide();
-                formTambah.reset();
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            if (error.message !== 'Validation failed') {
-                console.error(error);
-                alert('Terjadi kesalahan pada server.');
-            }
-        })
-        .finally(() => {
-            btnSimpan.disabled = false;
-            loadingTambah.classList.add('d-none');
-        });
-    });
+    // AJAX submit removed. Form submits normally using standard HTTP POST.
 
     // ====== EDIT PENGGUNA ====== //
     const formEdit = document.getElementById('formEditPengguna');
     const btnUpdate = document.getElementById('btnUpdatePengguna');
-    const loadingEdit = document.getElementById('loadingEdit');
-    const modalEditInstance = new bootstrap.Modal(document.getElementById('modalEditPengguna'));
+    const modalEditInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditPengguna'));
 
     tableBody.addEventListener('click', function (e) {
         let btnEdit = e.target.closest('.btn-edit-pengguna');
@@ -257,76 +162,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     formEdit.addEventListener('submit', function (e) {
         e.preventDefault();
-
         let id = document.getElementById('edit_id_pengguna').value;
-
-        btnUpdate.disabled = true;
-        loadingEdit.classList.remove('d-none');
-        
-        document.querySelectorAll('#formEditPengguna .is-invalid').forEach(el => el.classList.remove('is-invalid'));
-
-        const formData = new FormData(formEdit);
-        formData.append('_method', 'PUT');
-
-        fetch(`/pengguna/${id}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: formData
-        })
-        .then(response => {
-            if (response.status === 422) {
-                return response.json().then(data => {
-                    for (const [key, messages] of Object.entries(data.errors || {})) {
-                        let inputEl = document.getElementById(`edit_${key}`);
-                        let errorEl = document.getElementById(`error_edit_${key}`);
-                        if (inputEl && errorEl) {
-                            inputEl.classList.add('is-invalid');
-                            errorEl.innerText = messages[0];
-                        }
-                    }
-                    throw new Error('Validation failed');
-                });
-            }
-            if (!response.ok) throw new Error('Server error');
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                const row = document.getElementById(`row-pengguna-${id}`);
-                if (row) {
-                    row.querySelector('.col-name').innerText = data.data.name;
-                    row.querySelector('.col-email').innerText = data.data.email;
-                    
-                    const roleBadge = data.data.role === 'owner/admin' 
-                        ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold"><i class="bi bi-shield-fill-check me-1"></i> Owner/Admin</span>`
-                        : `<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold"><i class="bi bi-person me-1"></i> Pekerja</span>`;
-                    
-                    row.querySelector('.col-role').innerHTML = roleBadge;
-
-                    // Update data attributes of edit button
-                    const btnEdit = row.querySelector('.btn-edit-pengguna');
-                    btnEdit.setAttribute('data-name', data.data.name);
-                    btnEdit.setAttribute('data-email', data.data.email);
-                    btnEdit.setAttribute('data-role', data.data.role);
-                }
-
-                modalEditInstance.hide();
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            if (error.message !== 'Validation failed') {
-                console.error(error);
-                alert('Terjadi kesalahan pada server.');
-            }
-        })
-        .finally(() => {
-            btnUpdate.disabled = false;
-            loadingEdit.classList.add('d-none');
-        });
+        formEdit.action = `/pengguna/${id}`;
+        formEdit.submit();
     });
 
     // ====== HAPUS PENGGUNA ====== //
@@ -347,65 +185,43 @@ document.addEventListener("DOMContentLoaded", function () {
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/pengguna/${id}`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ _method: 'DELETE' })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const row = document.getElementById(`row-pengguna-${id}`);
-                            if (row) row.remove();
-
-                            // Update pagination
-                            if (window.penggunaPagination) window.penggunaPagination.update();
-
-                            Swal.fire({
-                                title: 'Berhasil',
-                                text: data.message,
-                                icon: 'success',
-                                confirmButtonColor: '#428475'
-                            });
-
-                            // If table is now empty, render empty state
-                            if (tableBody.querySelectorAll('tr').length === 0) {
-                                tableBody.innerHTML = `
-                                    <tr>
-                                        <td colspan="5" class="text-center py-5 text-muted">
-                                            <i class="bi bi-people fs-2 d-block mb-3 text-muted opacity-50"></i>
-                                            <h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Pengguna</h6>
-                                            <p class="small text-muted mb-0">Klik tombol "Tambah Pengguna" untuk mendaftarkan user baru.</p>
-                                        </td>
-                                    </tr>
-                                `;
-                            }
-                        } else {
-                            Swal.fire({
-                                title: 'Gagal',
-                                text: data.message,
-                                icon: 'error',
-                                confirmButtonColor: '#428475'
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Terjadi kesalahan saat menghapus data.',
-                            icon: 'error',
-                            confirmButtonColor: '#428475'
-                        });
-                    });
+                    let deleteForm = document.getElementById('formDeletePengguna');
+                    if (!deleteForm) {
+                        deleteForm = document.createElement('form');
+                        deleteForm.id = 'formDeletePengguna';
+                        deleteForm.method = 'POST';
+                        deleteForm.style.display = 'none';
+                        deleteForm.innerHTML = `
+                            <input type="hidden" name="_token" value="${csrfToken}">
+                            <input type="hidden" name="_method" value="DELETE">
+                        `;
+                        document.body.appendChild(deleteForm);
+                    }
+                    deleteForm.action = `/pengguna/${id}`;
+                    deleteForm.submit();
                 }
             });
         }
     });
+
+    // Auto-open modal if validation fails
+    @if ($errors->any())
+        @if (old('_method') === 'PUT')
+            const editId = "{{ old('id_pengguna') }}";
+            const row = document.getElementById(`row-pengguna-${editId}`);
+            if (row) {
+                const btnEdit = row.querySelector('.btn-edit-pengguna');
+                if (btnEdit) {
+                    btnEdit.click();
+                }
+            }
+        @else
+            const modalTambah = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTambahPengguna'));
+            if (modalTambah) {
+                modalTambah.show();
+            }
+        @endif
+    @endif
 });
 </script>
 @endpush

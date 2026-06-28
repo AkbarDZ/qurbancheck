@@ -118,10 +118,13 @@ class TernakController extends Controller
             // Check capacity first
             $kandang = Kandang::withCount('ternaks')->findOrFail($validated['kandang_id']);
             if ($kandang->ternaks_count >= $kandang->kapasitas_maksimal) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kandang ' . $kandang->nama_kandang . ' sudah penuh (Kapasitas: ' . $kandang->kapasitas_maksimal . ' ekor).'
-                ], 422);
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Kandang ' . $kandang->nama_kandang . ' sudah penuh (Kapasitas: ' . $kandang->kapasitas_maksimal . ' ekor).'
+                    ], 422);
+                }
+                return redirect()->back()->withErrors(['kandang_id' => 'Kandang ' . $kandang->nama_kandang . ' sudah penuh (Kapasitas: ' . $kandang->kapasitas_maksimal . ' ekor).'])->withInput();
             }
 
             // Memulai Transaksi Database
@@ -163,28 +166,29 @@ class TernakController extends Controller
             // Commit (Setujui semua perubahan ke database)
             DB::commit();
 
-            // 5. Eager Load Relasi untuk Response AJAX (Agar bisa langsung dirender di UI Card)
-            $ternak->load(['ras.tipeTernak', 'kandang' => function($q) {
-                $q->withCount('ternaks');
-            }, 'logBerats' => function($query) {
-                $query->latest('tanggal_timbang')->take(1);
-            }, 'pemeriksaanSyariat'])->loadCount('logKesehatans');
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data ternak berhasil ditambahkan!',
+                    'data'    => $ternak
+                ]);
+            }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data ternak berhasil ditambahkan!',
-                'data'    => $ternak
-            ]);
+            return redirect()->route('ternak.index')->with('success', 'Data ternak berhasil ditambahkan!');
 
         } catch (\Exception $e) {
             // Rollback (Batalkan semua) jika terjadi error (misal: storage penuh atau error SQL)
             DB::rollBack();
             \Illuminate\Support\Facades\Log::error('Error store Ternak: ' . $e->getMessage());
             
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat menyimpan data.')->withInput();
         }
     }
 
@@ -200,14 +204,18 @@ class TernakController extends Controller
             'nama_panggilan' => $request->nama_panggilan
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Nama panggilan berhasil diperbarui',
-            'data' => [
-                'id' => $ternak->id,
-                'nama_panggilan' => $ternak->nama_panggilan
-            ]
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Nama panggilan berhasil diperbarui',
+                'data' => [
+                    'id' => $ternak->id,
+                    'nama_panggilan' => $ternak->nama_panggilan
+                ]
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Nama panggilan berhasil diperbarui');
     }
 
     public function update(Request $request, $id)
@@ -237,10 +245,13 @@ class TernakController extends Controller
             if ($ternak->kandang_id !== (int) $validated['kandang_id']) {
                 $kandang = Kandang::withCount('ternaks')->findOrFail($validated['kandang_id']);
                 if ($kandang->ternaks_count >= $kandang->kapasitas_maksimal) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Kandang ' . $kandang->nama_kandang . ' sudah penuh (Kapasitas: ' . $kandang->kapasitas_maksimal . ' ekor).'
-                    ], 422);
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Kandang ' . $kandang->nama_kandang . ' sudah penuh (Kapasitas: ' . $kandang->kapasitas_maksimal . ' ekor).'
+                        ], 422);
+                    }
+                    return redirect()->back()->withErrors(['kandang_id' => 'Kandang ' . $kandang->nama_kandang . ' sudah penuh (Kapasitas: ' . $kandang->kapasitas_maksimal . ' ekor).'])->withInput();
                 }
             }
 
@@ -271,22 +282,22 @@ class TernakController extends Controller
 
             DB::commit();
 
-            // Load relasi agar data di UI langsung berganti nama ras/kandangnya
-            $ternak->load(['ras.tipeTernak', 'kandang' => function($q) {
-                $q->withCount('ternaks');
-            }, 'logBerats' => function($query) {
-                $query->orderBy('tanggal_timbang', 'desc')->orderBy('id', 'desc'); // Ambil semua secara menurun, blade/js ambil [0] atau first()
-            }, 'pemeriksaanSyariat'])->loadCount('logKesehatans');
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data ternak berhasil diperbarui',
+                    'data'    => $ternak
+                ]);
+            }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data ternak berhasil diperbarui',
-                'data'    => $ternak
-            ]);
+            return redirect()->route('ternak.index')->with('success', 'Data ternak berhasil diperbarui');
         } catch (\Exception $e) {
             DB::rollBack();
             \Illuminate\Support\Facades\Log::error('Error update Ternak: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat memperbarui data.'], 500);
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat memperbarui data.'], 500);
+            }
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat memperbarui data.')->withInput();
         }
     }
 
@@ -364,7 +375,7 @@ class TernakController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $ternak = Ternak::findOrFail($id);
 
@@ -383,14 +394,20 @@ class TernakController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data ternak berhasil dihapus'
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data ternak berhasil dihapus'
+                ]);
+            }
+            return redirect()->route('ternak.index')->with('success', 'Data ternak berhasil dihapus');
         } catch (\Exception $e) {
             DB::rollBack();
             \Illuminate\Support\Facades\Log::error('Error destroy Ternak: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat menghapus data.'], 500);
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat menghapus data.'], 500);
+            }
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat menghapus data.');
         }
     }
 }

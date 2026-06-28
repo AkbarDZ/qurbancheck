@@ -10,6 +10,20 @@
     </div>
 </div>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <div class="card shadow border-1">
     <div class="card-header bg-white pt-4 pb-3 border-bottom-0">
         <div class="d-flex justify-content-between align-items-center">
@@ -84,7 +98,8 @@
 <div class="modal fade" id="modalTambahPengguna" tabindex="-1" aria-labelledby="modalTambahPenggunaLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formTambahPengguna">
+            <form id="formTambahPengguna" action="{{ route('pengguna.store') }}" method="POST">
+                @csrf
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTambahPenggunaLabel"><i class="bi bi-person-plus-fill me-2 text-success"></i>Tambah Pengguna</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -92,27 +107,35 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="name" class="form-label">Nama Lengkap</label>
-                        <input type="text" class="form-control" id="name" name="name" placeholder="Masukkan nama lengkap" required>
-                        <div class="invalid-feedback" id="error_name"></div>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_name" style="font-size: 0.75rem;">
+                            @error('name') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="contoh@qurban.com" required>
-                        <div class="invalid-feedback" id="error_email"></div>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="contoh@qurban.com" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_email" style="font-size: 0.75rem;">
+                            @error('email') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="role" class="form-label">Role Akses</label>
-                        <select class="form-select" id="role" name="role" required>
-                            <option value="" disabled selected>Pilih Role</option>
-                            <option value="owner/admin">Owner/Admin</option>
-                            <option value="pekerja">Pekerja</option>
+                        <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                            <option value="" disabled {{ old('role') ? '' : 'selected' }}>Pilih Role</option>
+                            <option value="owner/admin" {{ old('role') == 'owner/admin' ? 'selected' : '' }}>Owner/Admin</option>
+                            <option value="pekerja" {{ old('role') == 'pekerja' ? 'selected' : '' }}>Pekerja</option>
                         </select>
-                        <div class="invalid-feedback" id="error_role"></div>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_role" style="font-size: 0.75rem;">
+                            @error('role') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Minimal 6 karakter" required>
-                        <div class="invalid-feedback" id="error_password"></div>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Minimal 6 karakter" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_password" style="font-size: 0.75rem;">
+                            @error('password') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -131,8 +154,10 @@
 <div class="modal fade" id="modalEditPengguna" tabindex="-1" aria-labelledby="modalEditPenggunaLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formEditPengguna">
-                <input type="hidden" id="edit_id_pengguna">
+            <form id="formEditPengguna" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="edit_id_pengguna" name="id_pengguna" value="{{ old('id_pengguna') }}">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalEditPenggunaLabel"><i class="bi bi-pencil-square me-2 text-primary"></i>Edit Pengguna</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -140,26 +165,34 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="edit_name" class="form-label">Nama Lengkap</label>
-                        <input type="text" class="form-control" id="edit_name" name="name" required>
-                        <div class="invalid-feedback" id="error_edit_name"></div>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="edit_name" name="name" value="{{ old('name') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_name" style="font-size: 0.75rem;">
+                            @error('name') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="edit_email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="edit_email" name="email" required>
-                        <div class="invalid-feedback" id="error_edit_email"></div>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="edit_email" name="email" value="{{ old('email') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_email" style="font-size: 0.75rem;">
+                            @error('email') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="edit_role" class="form-label">Role Akses</label>
-                        <select class="form-select" id="edit_role" name="role" required>
-                            <option value="owner/admin">Owner/Admin</option>
-                            <option value="pekerja">Pekerja</option>
+                        <select class="form-select @error('role') is-invalid @enderror" id="edit_role" name="role" required>
+                            <option value="owner/admin" {{ old('role') == 'owner/admin' ? 'selected' : '' }}>Owner/Admin</option>
+                            <option value="pekerja" {{ old('role') == 'pekerja' ? 'selected' : '' }}>Pekerja</option>
                         </select>
-                        <div class="invalid-feedback" id="error_edit_role"></div>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_role" style="font-size: 0.75rem;">
+                            @error('role') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="edit_password" class="form-label">Password Baru <span class="text-muted small">(Opsional)</span></label>
-                        <input type="password" class="form-control" id="edit_password" name="password" placeholder="Biarkan kosong jika tidak ingin diubah">
-                        <div class="invalid-feedback" id="error_edit_password"></div>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" id="edit_password" name="password" placeholder="Biarkan kosong jika tidak ingin diubah">
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_password" style="font-size: 0.75rem;">
+                            @error('password') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -10,6 +10,20 @@
     </div>
 </div>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <div class="card shadow border-1">
     <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
         <ul class="nav nav-tabs" id="masterDataTab" role="tablist">
@@ -169,6 +183,77 @@ window.initTablePagination = function (tableBodyId, paginationId, itemsPerPage =
 
 document.addEventListener("DOMContentLoaded", function () {
     window.initMasterTooltips();
+
+    // Auto-open validation modal & select active tab
+    @if ($errors->any())
+        let activeTabId = 'tipe-tab';
+        let modalId = '';
+        
+        @if ($errors->has('nama_jenis') || $errors->has('umur_minimal_qurban'))
+            activeTabId = 'tipe-tab';
+            modalId = "{{ old('_method') === 'PUT' ? 'modalEditTipe' : 'modalTambahTipe' }}";
+        @elseif ($errors->has('tipe_ternak_id') || $errors->has('nama_ras') || $errors->has('deskripsi'))
+            @if (old('tipe_ternak_id') || old('nama_ras'))
+                activeTabId = 'ras-tab';
+                modalId = "{{ old('_method') === 'PUT' ? 'modalEditRas' : 'modalTambahRas' }}";
+            @else
+                activeTabId = 'kriteria-tab';
+                modalId = "{{ old('_method') === 'PUT' ? 'modalEditKriteria' : 'modalTambahKriteria' }}";
+            @endif
+        @elseif ($errors->has('nama_kandang') || $errors->has('kapasitas_maksimal'))
+            activeTabId = 'kandang-tab';
+            modalId = "{{ old('_method') === 'PUT' ? 'modalEditKandang' : 'modalTambahKandang' }}";
+        @elseif ($errors->has('nama_kriteria'))
+            activeTabId = 'kriteria-tab';
+            modalId = "{{ old('_method') === 'PUT' ? 'modalEditKriteria' : 'modalTambahKriteria' }}";
+        @endif
+
+        // Activate Tab
+        const tabEl = document.getElementById(activeTabId);
+        if (tabEl) {
+            const tabInstance = bootstrap.Tab.getOrCreateInstance(tabEl);
+            tabInstance.show();
+        }
+
+        // Show Modal
+        if (modalId) {
+            setTimeout(() => {
+                const modalEl = document.getElementById(modalId);
+                if (modalEl) {
+                    if (modalId.includes('Edit')) {
+                        let editId = '';
+                        let btnClass = '';
+                        @if ($errors->has('nama_jenis') || $errors->has('umur_minimal_qurban'))
+                            editId = "{{ old('id_tipe') }}";
+                            btnClass = '.btn-edit-tipe';
+                        @elseif ($errors->has('tipe_ternak_id') || $errors->has('nama_ras'))
+                            editId = "{{ old('id_ras') }}";
+                            btnClass = '.btn-edit-ras';
+                        @elseif ($errors->has('nama_kandang') || $errors->has('kapasitas_maksimal'))
+                            editId = "{{ old('id_kandang') }}";
+                            btnClass = '.btn-edit-kandang';
+                        @elseif ($errors->has('nama_kriteria'))
+                            editId = "{{ old('id_kriteria') }}";
+                            btnClass = '.btn-edit-kriteria';
+                        @endif
+                        
+                        if (editId && btnClass) {
+                            const btn = document.querySelector(`${btnClass}[data-id="${editId}"]`);
+                            if (btn) {
+                                btn.click();
+                            } else {
+                                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                            }
+                        } else {
+                            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                        }
+                    } else {
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    }
+                }
+            }, 150);
+        }
+    @endif
 });
 </script>
 @endpush

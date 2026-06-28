@@ -42,17 +42,23 @@ class LogBeratController extends Controller
                 'tanggal_timbang' => $validated['tanggal_timbang']
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berat berhasil ditambahkan',
-                'data' => $log
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data berat berhasil ditambahkan',
+                    'data' => $log
+                ]);
+            }
+            return redirect()->back()->with('success', 'Data berat berhasil ditambahkan');
         } catch (\Exception $e) {
             Log::error('Error store LogBerat: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat menyimpan data.')->withInput();
         }
     }
 }

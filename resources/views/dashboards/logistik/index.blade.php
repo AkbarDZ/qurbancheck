@@ -17,6 +17,13 @@
 </div>
 @endif
 
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <div class="card shadow border-1">
     <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
         <ul class="nav nav-tabs" id="logistikTab" role="tablist">
@@ -43,43 +50,56 @@
                 <div class="row justify-content-center">
                     <div class="col-md-8 col-lg-6">
                         <div class="alert alert-danger d-none py-2 small" id="error_distribusi"></div>
-                        <form id="formDistribusi">
+                        <form id="formDistribusi" action="{{ url('/logistik/distribusi') }}" method="POST">
+                            @csrf
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted">Tanggal Distribusi</label>
-                                <input type="date" class="form-control" name="tanggal_pemberian" value="{{ date('Y-m-d') }}"
+                                <input type="date" class="form-control @error('tanggal_pemberian') is-invalid @enderror" name="tanggal_pemberian" value="{{ old('tanggal_pemberian', date('Y-m-d')) }}"
                                     required>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_pemberian" style="font-size: 0.75rem;">
+                                    @error('tanggal_pemberian') {{ $message }} @enderror
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted">Pilih Pakan</label>
-                                <select class="form-select" name="pakan_id" id="selectPakan" required>
-                                    <option value="" selected disabled>-- Pilih Pakan dari Gudang --</option>
+                                <select class="form-select @error('pakan_id') is-invalid @enderror" name="pakan_id" id="selectPakan" required>
+                                    <option value="" disabled {{ old('pakan_id') ? '' : 'selected' }}>-- Pilih Pakan dari Gudang --</option>
                                     @foreach($pakans as $pakan)
                                     <option value="{{ $pakan->id }}" data-harga="{{ $pakan->harga_per_kg }}"
-                                        data-stok="{{ $pakan->stok_kg }}">
+                                        data-stok="{{ $pakan->stok_kg }}" {{ old('pakan_id') == $pakan->id ? 'selected' : '' }}>
                                         {{ $pakan->nama_pakan }} (Stok: {{ $pakan->stok_kg }} Kg)
                                     </option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_pakan_id" style="font-size: 0.75rem;">
+                                    @error('pakan_id') {{ $message }} @enderror
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted">Tujuan Kandang</label>
-                                <select class="form-select" name="kandang_id" required>
-                                    <option value="" selected disabled>-- Pilih Kandang --</option>
+                                <select class="form-select @error('kandang_id') is-invalid @enderror" name="kandang_id" required>
+                                    <option value="" disabled {{ old('kandang_id') ? '' : 'selected' }}>-- Pilih Kandang --</option>
                                     @foreach($kandangs as $kandang)
-                                    <option value="{{ $kandang->id }}">{{ $kandang->nama_kandang }} (Isi:
+                                    <option value="{{ $kandang->id }}" {{ old('kandang_id') == $kandang->id ? 'selected' : '' }}>{{ $kandang->nama_kandang }} (Isi:
                                         {{ $kandang->ternaks_count }} Ekor)</option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_kandang_id" style="font-size: 0.75rem;">
+                                    @error('kandang_id') {{ $message }} @enderror
+                                </div>
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label small fw-bold text-muted">Jumlah Pakan (Kg)</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control" name="jumlah_kg" id="inputJumlah"
-                                        placeholder="0" required>
+                                    <input type="number" step="0.1" class="form-control @error('jumlah_kg') is-invalid @enderror" name="jumlah_kg" id="inputJumlah"
+                                        placeholder="0" value="{{ old('jumlah_kg') }}" required>
                                     <span class="input-group-text bg-light">Kg</span>
+                                </div>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_jumlah_kg" style="font-size: 0.75rem;">
+                                    @error('jumlah_kg') {{ $message }} @enderror
                                 </div>
                             </div>
 
@@ -194,21 +214,30 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Nama Pakan</label>
-                    <input type="text" class="form-control" name="nama_pakan" placeholder="Misal: Konsentrat Pedaging" required>
+                    <input type="text" class="form-control @error('nama_pakan') is-invalid @enderror" name="nama_pakan" value="{{ old('nama_pakan') }}" placeholder="Misal: Konsentrat Pedaging" required>
+                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nama_pakan" style="font-size: 0.75rem;">
+                        @error('nama_pakan') {{ $message }} @enderror
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-6 mb-3">
                         <label class="form-label small fw-bold text-muted">Harga Beli per Kg</label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
-                            <input type="number" class="form-control" name="harga_per_kg" placeholder="0" required>
+                            <input type="number" class="form-control @error('harga_per_kg') is-invalid @enderror" name="harga_per_kg" value="{{ old('harga_per_kg') }}" placeholder="0" required>
+                        </div>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_harga_per_kg" style="font-size: 0.75rem;">
+                            @error('harga_per_kg') {{ $message }} @enderror
                         </div>
                     </div>
                     <div class="col-6 mb-3">
                         <label class="form-label small fw-bold text-muted">Jumlah Stok Masuk</label>
                         <div class="input-group">
-                            <input type="number" step="0.1" class="form-control" name="stok_kg" placeholder="0" required>
+                            <input type="number" step="0.1" class="form-control @error('stok_kg') is-invalid @enderror" name="stok_kg" value="{{ old('stok_kg') }}" placeholder="0" required>
                             <span class="input-group-text">Kg</span>
+                        </div>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_stok_kg" style="font-size: 0.75rem;">
+                            @error('stok_kg') {{ $message }} @enderror
                         </div>
                     </div>
                 </div>

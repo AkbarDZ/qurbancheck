@@ -2,6 +2,7 @@
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <form class="modal-content border-0 shadow" id="formUploadSKKH" action="{{ url('/syariat/skkh') }}"
             method="POST" enctype="multipart/form-data">
+            @csrf
             <div class="modal-header bg-success bg-opacity-10 border-bottom-0">
                 <h1 class="modal-title fs-5 fw-bold text-success"><i class="bi bi-cloud-arrow-up me-2"></i> Upload Arsip
                     SKKH Baru</h1>
@@ -22,35 +23,47 @@
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Nomor Surat SKKH <span
                                             class="fw-normal text-secondary">(Opsional)</span></label>
-                                    <input type="text" class="form-control" name="nomor_surat"
-                                        placeholder="Misal: 524/123/DISNAK">
-                                    <div class="invalid-feedback" id="error_nomor_surat"></div>
+                                    <input type="text" class="form-control @error('nomor_surat') is-invalid @enderror" name="nomor_surat"
+                                        placeholder="Misal: 524/123/DISNAK" value="{{ old('nomor_surat') }}">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nomor_surat" style="font-size: 0.75rem;">
+                                        @error('nomor_surat') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Instansi Penerbit <span
                                             class="fw-normal text-secondary">(Opsional)</span></label>
-                                    <input type="text" class="form-control" name="instansi_penerbit"
-                                        placeholder="Misal: Dinas Peternakan Kab. Sleman">
+                                    <input type="text" class="form-control @error('instansi_penerbit') is-invalid @enderror" name="instansi_penerbit"
+                                        placeholder="Misal: Dinas Peternakan Kab. Sleman" value="{{ old('instansi_penerbit') }}">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_instansi_penerbit" style="font-size: 0.75rem;">
+                                        @error('instansi_penerbit') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Nama Dokter Pemeriksa <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="nama_dokter_pemeriksa"
-                                        placeholder="Drh. Budi Santoso" required>
+                                    <input type="text" class="form-control @error('nama_dokter_pemeriksa') is-invalid @enderror" name="nama_dokter_pemeriksa"
+                                        placeholder="Drh. Budi Santoso" value="{{ old('nama_dokter_pemeriksa') }}" required>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nama_dokter_pemeriksa" style="font-size: 0.75rem;">
+                                        @error('nama_dokter_pemeriksa') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Tanggal Terbit <span
                                             class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" name="tanggal_terbit" id="tambah_tanggal_terbit"
-                                         value="{{ date('Y-m-d') }}" required>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_terbit" style="font-size: 0.75rem;"></div>
+                                    <input type="date" class="form-control @error('tanggal_terbit') is-invalid @enderror" name="tanggal_terbit" id="tambah_tanggal_terbit"
+                                         value="{{ old('tanggal_terbit', date('Y-m-d')) }}" required>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_terbit" style="font-size: 0.75rem;">
+                                        @error('tanggal_terbit') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">File Scan Dokumen (PDF/JPG/PNG)
                                         <span class="text-danger">*</span></label>
-                                    <input type="file" class="form-control" name="file_skkh" accept=".pdf,image/*"
+                                    <input type="file" class="form-control @error('file_skkh') is-invalid @enderror" name="file_skkh" accept=".pdf,image/*"
                                         required>
-                                    <div class="invalid-feedback" id="error_file_skkh"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_file_skkh" style="font-size: 0.75rem;">
+                                        @error('file_skkh') {{ $message }} @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>

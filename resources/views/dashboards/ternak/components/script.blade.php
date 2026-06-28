@@ -1,167 +1,8 @@
 @push('scripts')
 <script>
-    // 1. FUNGSI GLOBAL: Template Tunggal untuk Card Sapi/Ternak
-    // Ditaruh di objek 'window' agar bisa dipanggil dari file modal-tambah atau modal-edit mana pun
-    window.renderTernakCardHTML = function (data, fotoUrl) {
-        const isKandangPenuh = data.kandang && (data.kandang.ternaks_count ?? 0) >= (data.kandang.kapasitas_maksimal ?? 0);
-        const hasFoto = data.dir_foto_hewan ? true : false;
-        
-        // Health status evaluation
-        const hasLog = (data.log_kesehatans_count ?? 0) > 0;
-        let healthStatusHTML = '';
-        if (!hasLog) {
-            healthStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2"><span class="badge-text-full">Belum diperiksa</span><span class="badge-text-compact">Belum Cek</span></span>`;
-        } else if (data.is_karantina) {
-            healthStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2"><span class="badge-text-full">Di Karantina</span><span class="badge-text-compact">Karantina</span></span>`;
-        } else {
-            healthStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2"><span class="badge-text-full">Tersedia</span><span class="badge-text-compact">Tersedia</span></span>`;
-        }
+    // Unused AJAX helper functions removed.
 
-        // Qurban evaluation
-        const syariats = data.pemeriksaan_syariat || [];
-        const latestSyariat = syariats.length > 0 ? [...syariats].sort((a,b) => b.id - a.id)[0] : null;
-        const isLayak = latestSyariat && latestSyariat.status === 'layak_qurban';
-        const hasSkkh = latestSyariat && latestSyariat.dokumen_skkh_id ? true : false;
-
-        let qurbanStatusHTML = '';
-        if (!latestSyariat) {
-            qurbanStatusHTML = `<span class="badge bg-warning rounded-pill px-3 py-2"><span class="badge-text-full">Belum dicek</span><span class="badge-text-compact">Belum Cek</span></span>`;
-        } else if (isLayak) {
-            qurbanStatusHTML = `<span class="badge bg-success rounded-pill px-3 py-2"><span class="badge-text-full">Layak Qurban</span><span class="badge-text-compact">Layak</span></span>`;
-        } else {
-            qurbanStatusHTML = `<span class="badge bg-danger rounded-pill px-3 py-2"><span class="badge-text-full">Tidak Layak</span><span class="badge-text-compact">T. Layak</span></span>`;
-        }
-
-        const skkhHTML = hasSkkh ? `
-            <span class="badge bg-info text-white rounded-pill px-2 py-1" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Terverifikasi SKKH">
-                <i class="bi bi-check-lg"></i>
-            </span>
-        ` : '';
-
-        const rightColumnHTML = hasFoto ? `
-            <div class="col-md-4 col-lg-4 p-0">
-                <img src="${fotoUrl}" class="img-fluid h-100 w-100 object-fit-cover" alt="Foto Ternak ${data.nomor_eartag}" style="min-height: 250px;">
-            </div>
-        ` : `
-            <div class="col-md-4 col-lg-4 p-0">
-                <img src="${fotoUrl}" class="img-fluid h-100 w-100 object-fit-cover" alt="Foto Ternak ${data.nomor_eartag}" style="min-height: 250px;">
-            </div>
-        `;
-        return `
-            <div class="row g-0">
-                <div class="col-md-8 col-lg-8">
-                    <div class="card-body d-flex flex-column h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                            <div class="d-flex align-items-center">
-                                <h4 class="card-title fw-bold mb-0 text-primary">
-                                    <i class="bi bi-tag-fill me-2"></i><span class="btn-text-responsive">Tag No: </span>${data.nomor_eartag}
-                                </h4>
-                                <div class="ms-3 container-nama-panggilan" id="nama-container-${data.id}">
-                                    ${data.nama_panggilan ? `
-                                        <span class="badge bg-light text-dark border rounded-pill trigger-nama" style="cursor: pointer; font-size: 0.85rem;" data-id="${data.id}" data-nama="${data.nama_panggilan}" data-bs-toggle="tooltip" data-bs-placement="top" title="Klik untuk ubah/hapus nama">
-                                            "${data.nama_panggilan}" <i class="bi bi-pencil-square ms-1 text-muted"></i>
-                                        </span>
-                                    ` : `
-                                        <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 trigger-nama" data-id="${data.id}" data-nama="" data-bs-toggle="tooltip" data-bs-placement="top" title="Tambah nama panggilan hewan">
-                                            <i class="bi bi-plus"></i> Nama
-                                        </button>
-                                    `}
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                ${qurbanStatusHTML}
-                                ${healthStatusHTML}
-                                ${skkhHTML}
-                            </div>
-                        </div>
-
-                        <div class="row text-dark mb-4">
-                            <div class="col-sm-6 mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Kategori Ternak</small>
-                                <strong class="text-kategori">${data.ras.tipe_ternak.nama_jenis} | ${data.ras.nama_ras}</strong>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Lokasi Kandang</small>
-                                <strong class="text-kandang ${isKandangPenuh ? 'text-danger' : ''}">${data.kandang.nama_kandang}</strong>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Jenis Kelamin</small>
-                                <strong class="text-gender text-capitalize">${data.jenis_kelamin}</strong>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Berat Terakhir</small>
-                                <strong class="fs-5 text-success text-berat">
-                                    ${data.log_berats && data.log_berats.length > 0 ? data.log_berats[0].berat_kg + ' Kg' : 'Belum ditimbang'}
-                                </strong>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Asal Usul</small>
-                                <strong class="text-asal">${Number(data.harga_beli_awal) > 0 ? 'Pembelian' : 'Lahir di Peternakan'}</strong>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Usia</small>
-                                <strong class="text-usia">${data.umur_bulan} Bulan</strong>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">${Number(data.harga_beli_awal) > 0 ? 'Harga Beli' : 'Tanggal Lahir'}</small>
-                                <strong class="${Number(data.harga_beli_awal) > 0 ? 'text-primary' : ''}">
-                                    ${Number(data.harga_beli_awal) > 0 ? 'Rp ' + Number(data.harga_beli_awal).toLocaleString('id-ID') : (data.tanggal_lahir ? new Date(data.tanggal_lahir).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-')}
-                                </strong>
-                            </div>
-                        </div>
-
-                        <div class="mt-auto d-flex gap-2 flex-wrap">
-                            <button class="btn btn-outline-secondary btn-sm btn-edit-ternak" 
-                                data-id="${data.id}" 
-                                data-eartag="${data.nomor_eartag}" 
-                                data-ras="${data.ras_id}" 
-                                data-kandang="${data.kandang_id}" 
-                                data-gender="${data.jenis_kelamin}"
-                                data-foto="${data.dir_foto_hewan ? window.storageBaseUrl + '/' + data.dir_foto_hewan : ''}"
-                                data-harga-beli="${data.harga_beli_awal || ''}"
-                                data-tanggal-lahir="${data.tanggal_lahir ? (typeof data.tanggal_lahir === 'string' ? data.tanggal_lahir.substring(0, 10) : new Date(data.tanggal_lahir).toISOString().substring(0,10)) : ''}"
-                                data-umur-bulan="${data.umur_bulan}"
-                                data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Ternak">
-                                <i class="bi bi-pencil"></i><span class="btn-text-responsive ms-1">Edit</span>
-                            </button>
-                            <button class="btn btn-outline-info btn-sm btn-perkembangan-berat"
-                                data-id="${data.id}" data-eartag="${data.nomor_eartag}"
-                                data-bs-toggle="tooltip" data-bs-placement="top" title="Perkembangan Berat">
-                                <i class="bi bi-bar-chart-line"></i><span class="btn-text-responsive ms-1">Perkembangan Berat</span>
-                            </button>
-                            <a href="/kesehatan?tambah_ternak_id=${data.id}" class="btn btn-outline-warning btn-sm"
-                                data-bs-toggle="tooltip" data-bs-placement="top" title="Data Kesehatan">
-                                <i class="bi bi-heart-pulse"></i><span class="btn-text-responsive ms-1">Data Kesehatan</span>
-                            </a>
-                            ${latestSyariat ? `
-                                <a href="/syariat?show_pemeriksaan_id=${latestSyariat.id}" class="btn btn-outline-success btn-sm"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Kelayakan Kurban">
-                                    <i class="bi bi-clipboard-pulse"></i><span class="btn-text-responsive ms-1">Kelayakan Kurban</span>
-                                </a>
-                            ` : `
-                                <a href="/syariat?tambah_ternak_id=${data.id}" class="btn btn-outline-success btn-sm"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Kelayakan Kurban">
-                                    <i class="bi bi-clipboard-pulse"></i><span class="btn-text-responsive ms-1">Kelayakan Kurban</span>
-                                </a>
-                            `}
-                            @if(Auth::user()->role === 'owner/admin')
-                            <button class="btn btn-outline-primary btn-sm btn-keuangan-ternak" data-id="${data.id}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Kartu Rapor Keuangan">
-                                <i class="bi bi-receipt"></i>
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm ms-auto btn-delete-ternak" data-id="${data.id}"
-                                data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Ternak">
-                                <i class="bi bi-trash"></i><span class="btn-text-responsive ms-1">Hapus</span>
-                            </button>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                ${rightColumnHTML}
-            </div>
-        `;
-    };
-
-    // 2. FUNGSI GLOBAL: Inisialisasi Tooltip & Update Counter Total
+    // 2. FUNGSI GLOBAL: Inisialisasi Tooltip
     window.initTooltips = function (context) {
         let triggers = context.querySelectorAll('[data-bs-toggle="tooltip"]');
         [...triggers].map(el => {
@@ -169,64 +10,6 @@
             if (instance) instance.dispose();
             new bootstrap.Tooltip(el);
         });
-    };
-
-    window.updateCounter = function (amount) {
-        let badgeTotal = document.getElementById('totalEkorBadge');
-        if (badgeTotal) {
-            let currentNum = parseInt(badgeTotal.innerText.replace(/\D/g, '')) || 0;
-            badgeTotal.innerText = `Total: ${currentNum + amount} Ekor`;
-        }
-    };
-
-    window.updateKandangCapacity = function (kandangId, newCount, maxVal = null) {
-        // Tambah modal
-        let selectTambah = document.querySelector('#modalTambahTernak select[name="kandang_id"]');
-        if (selectTambah) {
-            let option = selectTambah.querySelector(`option[value="${kandangId}"]`);
-            if (option) {
-                let max = maxVal !== null ? maxVal : (parseInt(option.getAttribute('data-max')) || 0);
-                let baseNama = option.getAttribute('data-nama') || option.text.split(' (')[0];
-                
-                option.setAttribute('data-count', newCount);
-                option.setAttribute('data-max', max);
-                option.setAttribute('data-nama', baseNama);
-                
-                if (newCount >= max) {
-                    option.disabled = true;
-                    option.text = `${baseNama} (${newCount}/${max}) - [Penuh]`;
-                } else {
-                    option.disabled = false;
-                    option.text = `${baseNama} (${newCount}/${max})`;
-                }
-            }
-        }
-        
-        // Edit modal
-        let selectEdit = document.querySelector('#modalEditTernak select[name="kandang_id"]');
-        if (selectEdit) {
-            let option = selectEdit.querySelector(`option[value="${kandangId}"]`);
-            if (option) {
-                let max = maxVal !== null ? maxVal : (parseInt(option.getAttribute('data-max')) || 0);
-                let baseNama = option.getAttribute('data-nama') || option.text;
-                
-                option.setAttribute('data-count', newCount);
-                option.setAttribute('data-max', max);
-                option.setAttribute('data-nama', baseNama);
-            }
-        }
-    };
-
-    window.decrementKandangCount = function (kandangId) {
-        let selectEdit = document.querySelector('#modalEditTernak select[name="kandang_id"]');
-        if (selectEdit) {
-            let option = selectEdit.querySelector(`option[value="${kandangId}"]`);
-            if (option) {
-                let currentCount = parseInt(option.getAttribute('data-count')) || 0;
-                let newCount = Math.max(0, currentCount - 1);
-                window.updateKandangCapacity(kandangId, newCount);
-            }
-        }
     };
 
     // Jalankan tooltip saat halaman pertama kali dibuka
@@ -370,8 +153,10 @@
             // A. Pemicu Tombol Edit
             let btnEdit = e.target.closest('.btn-edit-ternak');
             if (btnEdit) {
+                let id = btnEdit.getAttribute('data-id');
                 let currentKandangId = btnEdit.getAttribute('data-kandang');
-                document.getElementById('edit_ternak_id').value = btnEdit.getAttribute('data-id');
+                document.getElementById('edit_ternak_id').value = id;
+                document.getElementById('formEditTernak').action = `/ternak/${id}`;
                 document.getElementById('edit_nomor_eartag').value = btnEdit.getAttribute(
                 'data-eartag');
                 
@@ -475,14 +260,6 @@
             let btnDelete = e.target.closest('.btn-delete-ternak');
             if (btnDelete) {
                 let id = btnDelete.getAttribute('data-id');
-                let kandangId = null;
-                let card = document.getElementById(`card-ternak-${id}`);
-                if (card) {
-                    let btnEdit = card.querySelector('.btn-edit-ternak');
-                    if (btnEdit) {
-                        kandangId = btnEdit.getAttribute('data-kandang');
-                    }
-                }
                 Swal.fire({
                     title: 'Hapus Ternak?',
                     text: "Apakah Anda yakin ingin menghapus data hewan ini?",
@@ -494,32 +271,23 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        btnDelete.disabled = true;
-                        fetch(`/ternak/${id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    document.getElementById(`card-ternak-${id}`).remove();
-                                    window.updateCounter(-1);
-                                    if (kandangId) {
-                                        window.decrementKandangCount(kandangId);
-                                    }
-                                    Swal.fire({
-                                        title: 'Berhasil',
-                                        text: data.message,
-                                        icon: 'success',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                }
-                            });
+                        let deleteForm = document.getElementById('formDeleteTernak');
+                        if (!deleteForm) {
+                            deleteForm = document.createElement('form');
+                            deleteForm.id = 'formDeleteTernak';
+                            deleteForm.method = 'POST';
+                            deleteForm.style.display = 'none';
+                            deleteForm.innerHTML = `
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="_method" value="DELETE">
+                            `;
+                            document.body.appendChild(deleteForm);
+                        }
+                        deleteForm.action = `/ternak/${id}`;
+                        deleteForm.submit();
                     }
                 });
+                return;
             }
             // C. Pemicu Tombol Perkembangan Berat
             let btnBerat = e.target.closest('.btn-perkembangan-berat');
@@ -528,6 +296,7 @@
                 let eartag = btnBerat.getAttribute('data-eartag');
                 
                 document.getElementById('berat_ternak_id').value = id;
+                document.getElementById('formTambahBerat').action = `/ternak/${id}/log-berat`;
                 document.getElementById('label_eartag_berat').innerText = eartag;
                 
                 // Reset form & error
@@ -638,93 +407,7 @@
         };
 
         // 5. Submit form tambah berat
-        document.getElementById('formTambahBerat').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            let id = document.getElementById('berat_ternak_id').value;
-            let btnSubmit = document.getElementById('btnSimpanBerat');
-            let inputBeratKg = document.getElementById('input_berat_kg');
-            
-            document.getElementById('berat_global_error').classList.add('d-none');
-            document.querySelectorAll('#formTambahBerat .is-invalid').forEach(el => el.classList.remove('is-invalid'));
-            
-            if (inputBeratKg) {
-                if (!inputBeratKg.value.trim()) {
-                    let errEl = document.getElementById('error_berat_kg');
-                    if (errEl) errEl.innerText = 'Berat badan wajib diisi.';
-                    inputBeratKg.classList.add('is-invalid');
-                    return;
-                }
-                if (parseFloat(inputBeratKg.value) < 1) {
-                    let errEl = document.getElementById('error_berat_kg');
-                    if (errEl) errEl.innerText = 'Berat badan harus minimal 1 Kg.';
-                    inputBeratKg.classList.add('is-invalid');
-                    return;
-                }
-            }
-            
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-            
-            let formData = new FormData(this);
-            
-            fetch(`/ternak/${id}/log-berat`, {
-                method: 'POST',
-                headers: { 
-                    'X-CSRF-TOKEN': csrfToken, 
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(async res => {
-                const isJson = res.headers.get('content-type')?.includes('application/json');
-                if (!res.ok) {
-                    if (res.status === 422 && isJson) {
-                        const errData = await res.json();
-                        return Promise.reject({ type: 'validation', errors: errData.errors });
-                    }
-                    let errorMsg = 'Terjadi kesalahan internal pada server.';
-                    if (isJson) {
-                        const errData = await res.json();
-                        errorMsg = errData.message || errorMsg;
-                    }
-                    return Promise.reject({ type: 'server', message: errorMsg });
-                }
-                if (!isJson) return Promise.reject({ type: 'server', message: 'Sesi anda mungkin telah berakhir.' });
-                return res.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('formTambahBerat').reset();
-                    loadLogBerat(id);
-                    
-                    // Update the card UI berat terakhir
-                    let card = document.getElementById(`card-ternak-${id}`);
-                    if (card) {
-                        let textBerat = card.querySelector('.text-berat');
-                        if (textBerat) textBerat.innerText = data.data.berat_kg + ' Kg';
-                    }
-                }
-            })
-            .catch(err => {
-                if (err.type === 'validation') {
-                    for (const [key, messages] of Object.entries(err.errors || {})) {
-                        let inputEl = document.getElementById(`input_${key}`);
-                        let errorEl = document.getElementById(`error_${key}`);
-                        if (inputEl) inputEl.classList.add('is-invalid');
-                        if (errorEl) errorEl.innerText = messages[0];
-                    }
-                } else {
-                    document.getElementById('berat_global_error_msg').innerText = err.message || 'Terjadi kesalahan.';
-                    document.getElementById('berat_global_error').classList.remove('d-none');
-                }
-            })
-            .finally(() => {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="bi bi-plus-lg"></i>';
-            });
-        });
+        // Form submits normally via standard HTTP POST, JS AJAX submission removed.
         // ========== KARTU RAPOR KEUANGAN ==========
         document.addEventListener('click', function(e) {
             if (e.target.closest('.btn-keuangan-ternak')) {

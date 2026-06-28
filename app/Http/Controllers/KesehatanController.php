@@ -132,18 +132,25 @@ class KesehatanController extends Controller
 
             $log->load(['ternak', 'pengobatans']);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Data pemeriksaan dan ' . count($request->nama_obat_tindakan) . ' tindakan berhasil disimpan!',
-                'data'    => $log
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data pemeriksaan dan ' . count($request->nama_obat_tindakan) . ' tindakan berhasil disimpan!',
+                    'data'    => $log
+                ]);
+            }
+
+            return redirect()->route('kesehatan.index')->with('success', 'Data pemeriksaan dan ' . count($request->nama_obat_tindakan) . ' tindakan berhasil disimpan!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false, 
-                'message' => 'Gagal menyimpan data: ' . $e->getMessage()
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Gagal menyimpan data: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -157,22 +164,28 @@ class KesehatanController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $log = LogKesehatan::findOrFail($id);
 
         try {
             $log->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Catatan pemeriksaan berhasil dihapus.'
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Catatan pemeriksaan berhasil dihapus.'
+                ]);
+            }
+            return redirect()->route('kesehatan.index')->with('success', 'Catatan pemeriksaan berhasil dihapus.');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false, 
-                'message' => 'Gagal menghapus data: ' . $e->getMessage()
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Gagal menghapus data: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
 }

@@ -1,6 +1,7 @@
 <div class="modal fade" id="modalTambahKesehatan" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <form class="modal-content border-0 shadow" id="formTambahKesehatan" method="POST" enctype="multipart/form-data">
+        <form class="modal-content border-0 shadow" id="formTambahKesehatan" action="{{ url('/kesehatan') }}" method="POST" enctype="multipart/form-data">
+            @csrf
             <div class="modal-header bg-light border-bottom-0">
                 <h1 class="modal-title fs-5 fw-bold text-dark">Catat Pemeriksaan & Pengobatan</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -17,25 +18,49 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold text-muted">Pilih Hewan (Eartag) <span class="text-danger">*</span></label>
-                                <select class="form-select select2-ternak" name="ternak_id" required>
+                                <select class="form-select select2-ternak @error('ternak_id') is-invalid @enderror" name="ternak_id" required>
                                     <option value="">-- Pilih Eartag Hewan --</option>
                                     @foreach($ternaks as $ternak)
-                                        <option value="{{ $ternak->id }}">{{ $ternak->nomor_eartag }} {{ $ternak->nama_panggilan ? '('.$ternak->nama_panggilan.')' : '' }}</option>
+                                        <option value="{{ $ternak->id }}" {{ old('ternak_id') == $ternak->id ? 'selected' : '' }}>{{ $ternak->nomor_eartag }} {{ $ternak->nama_panggilan ? '('.$ternak->nama_panggilan.')' : '' }}</option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_ternak_id" style="font-size: 0.75rem;">
+                                    @error('ternak_id') {{ $message }} @enderror
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold text-muted">Tanggal Rekam <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" name="tanggal_rekam" id="tambah_tanggal_rekam" value="{{ date('Y-m-d') }}" required>
-                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_rekam" style="font-size: 0.75rem;"></div>
+                                <input type="date" class="form-control @error('tanggal_rekam') is-invalid @enderror" name="tanggal_rekam" id="tambah_tanggal_rekam" value="{{ old('tanggal_rekam', date('Y-m-d')) }}" required>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_rekam" style="font-size: 0.75rem;">
+                                    @error('tanggal_rekam') {{ $message }} @enderror
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold text-muted">Gejala Klinis <span class="text-danger">*</span></label>
-                                <textarea class="form-control" name="gejala" rows="2" placeholder="Deskripsikan gejala..." required></textarea>
+                                <textarea class="form-control @error('gejala') is-invalid @enderror" name="gejala" rows="2" placeholder="Deskripsikan gejala..." required>{{ old('gejala') }}</textarea>
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_gejala" style="font-size: 0.75rem;">
+                                    @error('gejala') {{ $message }} @enderror
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold text-muted">Foto Gejala <span class="fw-normal text-secondary">(Opsional)</span></label>
-                                <input type="file" class="form-control" name="foto_gejala" accept="image/*">
+                                <input type="file" class="form-control @error('foto_gejala') is-invalid @enderror" name="foto_gejala" id="tambah_foto_gejala" accept="image/*">
+                                <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_foto_gejala" style="font-size: 0.75rem;">
+                                    @error('foto_gejala') {{ $message }} @enderror
+                                </div>
+                                <div class="form-text text-muted" style="font-size: 0.7rem;">
+                                    Format gambar (JPG, PNG, WEBP). <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill"></i> Ukuran foto maksimal 2MB.</span>
+                                </div>
+                                
+                                <div class="mt-3 d-none" id="tambah_foto_preview_container">
+                                    <label class="form-label small text-muted fw-bold d-block">Preview Foto:</label>
+                                    <div class="position-relative d-inline-block rounded border overflow-hidden bg-light shadow-sm" style="width: 150px; height: 112px; border: 2px dashed #dee2e6 !important;">
+                                        <img src="" id="tambah_foto_preview" class="w-100 h-100 object-fit-cover">
+                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 py-0 px-1" id="btnRemoveFotoTambah" style="font-size: 0.75rem; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-md-12 mt-2">
@@ -171,125 +196,53 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =======================================================================
-    // 2. LOGIKA AJAX SUBMIT FORM
+    // 2. Form submits normally via standard HTTP POST, JS AJAX submission removed.
     // =======================================================================
-    if (formKesehatan) {
-        formKesehatan.addEventListener('submit', function (e) {
-            e.preventDefault();
+
+    // === Preview Foto & Validasi Ukuran (2MB) ===
+    const fileInput = document.getElementById('tambah_foto_gejala');
+    const previewContainer = document.getElementById('tambah_foto_preview_container');
+    const previewImg = document.getElementById('tambah_foto_preview');
+    const btnRemoveFoto = document.getElementById('btnRemoveFotoTambah');
+    const errorFoto = document.getElementById('error_foto_gejala');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            fileInput.classList.remove('is-invalid');
+            if (errorFoto) errorFoto.innerText = '';
             
-            let originalText = btnSimpan.innerHTML;
-            
-            if (inputTanggalRekam && inputTanggalRekam.value) {
-                const selectedDate = new Date(inputTanggalRekam.value);
-                selectedDate.setHours(0,0,0,0);
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                if (selectedDate > today) {
-                    inputTanggalRekam.classList.add('is-invalid');
-                    let errorEl = document.getElementById('error_tanggal_rekam');
-                    if (errorEl) {
-                        errorEl.innerText = 'Tanggal rekam tidak boleh di masa depan.';
-                    }
+            if (file) {
+                // Check size (2MB = 2 * 1024 * 1024 bytes)
+                if (file.size > 2 * 1024 * 1024) {
+                    fileInput.classList.add('is-invalid');
+                    if (errorFoto) errorFoto.innerText = 'Ukuran foto melebihi 2MB. Silakan pilih file yang lebih kecil.';
+                    fileInput.value = ''; // Reset input
+                    if (previewContainer) previewContainer.classList.add('d-none');
+                    if (previewImg) previewImg.src = '';
                     return;
                 }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (previewImg) previewImg.src = e.target.result;
+                    if (previewContainer) previewContainer.classList.remove('d-none');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                if (previewContainer) previewContainer.classList.add('d-none');
+                if (previewImg) previewImg.src = '';
             }
+        });
+    }
 
-            btnSimpan.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
-            btnSimpan.disabled = true;
-
-            globalErrorAlert.classList.add('d-none');
-            document.querySelectorAll('#formTambahKesehatan .is-invalid').forEach(el => el.classList.remove('is-invalid'));
-            document.querySelectorAll('#formTambahKesehatan .invalid-feedback').forEach(el => el.innerText = '');
-
-            const formData = new FormData(formKesehatan);
-
-            fetch('/kesehatan', {
-                method: 'POST',
-                headers: { 
-                    'X-CSRF-TOKEN': csrfToken, 
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(async response => {
-                const isJson = response.headers.get('content-type')?.includes('application/json');
-                if (!response.ok) {
-                    if (response.status === 422 && isJson) {
-                        const errData = await response.json();
-                        return Promise.reject({ type: 'validation', errors: errData.errors });
-                    }
-                    let errorMsg = 'Terjadi kesalahan internal pada server.';
-                    if (isJson) {
-                        const errData = await response.json();
-                        errorMsg = errData.message || errorMsg;
-                    }
-                    return Promise.reject({ type: 'server', message: errorMsg });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    let emptyState = document.getElementById('emptyStateKesehatan');
-                    if (emptyState) emptyState.remove();
-
-                    let newRow = document.createElement('tr');
-                    newRow.id = `row-kesehatan-${data.data.id}`;
-                    newRow.innerHTML = window.renderKesehatanRowHTML(data.data);
-
-                    containerKesehatan.insertAdjacentElement('afterbegin', newRow);
-                    if (typeof window.updateCounterKesehatan === 'function') window.updateCounterKesehatan(1);
-
-                    let modalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTambahKesehatan'));
-                    if (modalInstance) modalInstance.hide();
-                    
-                    formKesehatan.reset();
-                    $('#modalTambahKesehatan .select2-ternak').val('').trigger('change');
-
-                    let container = document.getElementById('container-pengobatan');
-                    let items = container.querySelectorAll('.pengobatan-item');
-                    for(let i = 1; i < items.length; i++) { 
-                        items[i].remove(); 
-                    }
-
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                if (error.type === 'validation') {
-                    for (const [key, messages] of Object.entries(error.errors || {})) {
-                        let indexMatch = key.match(/\.(\d+)$/); 
-                        
-                        if(indexMatch) {
-                            let cleanName = key.split('.')[0] + '[]'; 
-                            let index = parseInt(indexMatch[1]);
-                            let inputs = document.querySelectorAll(`#formTambahKesehatan [name="${cleanName}"]`);
-                            
-                            if(inputs[index]) {
-                                inputs[index].classList.add('is-invalid');
-                                let container = inputs[index].closest('div');
-                                let errorEl = container.querySelector('.invalid-feedback') || container.nextElementSibling;
-                                if(errorEl) errorEl.innerText = messages[0];
-                            }
-                        } else {
-                            let inputEl = document.querySelector(`#formTambahKesehatan [name="${key}"]`);
-                            if (inputEl) {
-                                inputEl.classList.add('is-invalid');
-                                let container = inputEl.closest('div');
-                                let errorEl = container.querySelector('.invalid-feedback') || container.nextElementSibling;
-                                if (errorEl) errorEl.innerText = messages[0];
-                            }
-                        }
-                    }
-                } else {
-                    globalErrorMsg.innerText = error.message;
-                    globalErrorAlert.classList.remove('d-none');
-                }
-            })
-            .finally(() => {
-                btnSimpan.innerHTML = originalText;
-                btnSimpan.disabled = false;
-            });
+    if (btnRemoveFoto) {
+        btnRemoveFoto.addEventListener('click', function () {
+            if (fileInput) fileInput.value = '';
+            if (previewContainer) previewContainer.classList.add('d-none');
+            if (previewImg) previewImg.src = '';
+            if (fileInput) fileInput.classList.remove('is-invalid');
+            if (errorFoto) errorFoto.innerText = '';
         });
     }
 });

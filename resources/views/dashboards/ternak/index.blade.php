@@ -3,6 +3,20 @@
 @section('title', 'Manajemen Ternak - Sistem Qurban')
 
 @section('content')
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <div class="card shadow border-1 mb-4">
     <div class="card-body d-flex justify-content-between align-items-center">
         <div>
@@ -149,5 +163,81 @@
 @endpush
 
 @include('dashboards.ternak.components.script')
+
+@push('scripts')
+@if ($errors->any())
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        @if (old('_method') === 'PUT')
+            let editModal = new bootstrap.Modal(document.getElementById('modalEditTernak'));
+            editModal.show();
+            let ternakId = "{{ old('id') }}";
+            let btn = document.querySelector(`.btn-edit-ternak[data-id="${ternakId}"]`);
+            if (btn) {
+                setTimeout(() => {
+                    btn.click();
+                    setTimeout(() => {
+                        @if(old('nomor_eartag')) document.getElementById('edit_nomor_eartag').value = "{{ old('nomor_eartag') }}"; @endif
+                        @if(old('ras_id')) 
+                            document.getElementById('edit_ras_id').value = "{{ old('ras_id') }}";
+                            $('#edit_ras_id').trigger('change');
+                        @endif
+                        @if(old('jenis_kelamin')) document.getElementById('edit_jenis_kelamin').value = "{{ old('jenis_kelamin') }}"; @endif
+                        @if(old('kandang_id')) 
+                            document.getElementById('edit_kandang_id').value = "{{ old('kandang_id') }}";
+                            $('#edit_kandang_id').trigger('change');
+                        @endif
+                        @if(old('asal_hewan'))
+                            let oldAsal = "{{ old('asal_hewan') }}";
+                            if (oldAsal === 'beli') {
+                                document.getElementById('edit_asal_beli').checked = true;
+                            } else {
+                                document.getElementById('edit_asal_lahir').checked = true;
+                            }
+                            if (typeof window.editToggleAsalUsul === 'function') {
+                                window.editToggleAsalUsul();
+                            }
+                        @endif
+                        @if(old('harga_beli_awal')) document.getElementById('edit_harga_beli_awal').value = "{{ old('harga_beli_awal') }}"; @endif
+                        @if(old('umur_bulan_beli')) document.getElementById('edit_umur_bulan_beli').value = "{{ old('umur_bulan_beli') }}"; @endif
+                        @if(old('tanggal_lahir')) document.getElementById('edit_tanggal_lahir').value = "{{ old('tanggal_lahir') }}"; @endif
+                    }, 150);
+                }, 100);
+            }
+        @elseif (old('_method') === 'PATCH')
+            let modalNama = new bootstrap.Modal(document.getElementById('modalNamaPanggilan'));
+            modalNama.show();
+            let ternakId = "{{ old('id') }}";
+            let trigger = document.querySelector(`.trigger-nama[data-id="${ternakId}"]`);
+            if (trigger) {
+                setTimeout(() => {
+                    trigger.click();
+                    setTimeout(() => {
+                        @if(old('nama_panggilan')) document.getElementById('input_nama_panggilan').value = "{{ old('nama_panggilan') }}"; @endif
+                    }, 150);
+                }, 100);
+            }
+        @elseif ($errors->has('berat_kg') || $errors->has('tanggal_timbang'))
+            let modalBerat = new bootstrap.Modal(document.getElementById('modalPerkembanganBerat'));
+            modalBerat.show();
+            let ternakId = "{{ old('id') }}";
+            let btn = document.querySelector(`.btn-perkembangan-berat[data-id="${ternakId}"]`);
+            if (btn) {
+                setTimeout(() => {
+                    btn.click();
+                    setTimeout(() => {
+                        @if(old('berat_kg')) document.getElementById('input_berat_kg').value = "{{ old('berat_kg') }}"; @endif
+                        @if(old('tanggal_timbang')) document.getElementById('input_tanggal_timbang').value = "{{ old('tanggal_timbang') }}"; @endif
+                    }, 150);
+                }, 100);
+            }
+        @else
+            let tambahModal = new bootstrap.Modal(document.getElementById('modalTambahTernak'));
+            tambahModal.show();
+        @endif
+    });
+</script>
+@endif
+@endpush
 
 @endsection

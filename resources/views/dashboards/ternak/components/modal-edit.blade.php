@@ -2,6 +2,8 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow">
             <form id="formEditTernak" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
                 <div class="modal-header bg-light border-bottom-0">
                     <h1 class="modal-title fs-5 fw-bold text-dark">
                         <i class="bi bi-pencil-square me-2 text-primary"></i> Edit Data Ternak
@@ -22,12 +24,14 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">No. Eartag</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="nomor_eartag" id="edit_nomor_eartag" required>
+                                        <input type="text" class="form-control @error('nomor_eartag') is-invalid @enderror" name="nomor_eartag" id="edit_nomor_eartag" value="{{ old('nomor_eartag') }}" required>
                                         <button class="btn btn-outline-secondary" type="button" id="btnGenerateEartagEdit" title="Generate ulang nomor eartag">
                                             <i class="bi bi-magic"></i>
                                         </button>
                                     </div>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_nomor_eartag" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_nomor_eartag" style="font-size: 0.75rem;">
+                                        @error('nomor_eartag') {{ $message }} @enderror
+                                    </div>
                                     <div class="form-text text-muted" style="font-size: 0.7rem;">
                                         Ketik manual atau generate otomatis. <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill"></i> Nomor eartag harus unik (tidak boleh sama).</span>
                                     </div>
@@ -35,71 +39,86 @@
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Ras Ternak</label>
-                                    <select class="form-select select2-edit-ras" name="ras_id" id="edit_ras_id" required>
+                                    <select class="form-select select2-edit-ras @error('ras_id') is-invalid @enderror" name="ras_id" id="edit_ras_id" required>
                                         @foreach($rasTernaks as $ras)
-                                            <option value="{{ $ras->id }}">{{ $ras->tipeTernak->nama_jenis }} - {{ $ras->nama_ras }}</option>
+                                            <option value="{{ $ras->id }}" {{ old('ras_id') == $ras->id ? 'selected' : '' }}>{{ $ras->tipeTernak->nama_jenis }} - {{ $ras->nama_ras }}</option>
                                         @endforeach
                                     </select>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_ras_id" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_ras_id" style="font-size: 0.75rem;">
+                                        @error('ras_id') {{ $message }} @enderror
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Jenis Kelamin</label>
-                                    <select class="form-select" name="jenis_kelamin" id="edit_jenis_kelamin" required>
-                                        <option value="jantan">Jantan</option>
-                                        <option value="betina">Betina</option>
+                                    <select class="form-select @error('jenis_kelamin') is-invalid @enderror" name="jenis_kelamin" id="edit_jenis_kelamin" required>
+                                        <option value="jantan" {{ old('jenis_kelamin') === 'jantan' ? 'selected' : '' }}>Jantan</option>
+                                        <option value="betina" {{ old('jenis_kelamin') === 'betina' ? 'selected' : '' }}>Betina</option>
                                     </select>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_jenis_kelamin" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_jenis_kelamin" style="font-size: 0.75rem;">
+                                        @error('jenis_kelamin') {{ $message }} @enderror
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Kandang</label>
-                                    <select class="form-select select2-edit-kandang" name="kandang_id" id="edit_kandang_id" required>
+                                    <select class="form-select select2-edit-kandang @error('kandang_id') is-invalid @enderror" name="kandang_id" id="edit_kandang_id" required>
                                         @foreach($kandangs as $kandang)
                                             <option value="{{ $kandang->id }}"
                                                 data-count="{{ $kandang->ternaks_count }}"
                                                 data-max="{{ $kandang->kapasitas_maksimal }}"
-                                                data-nama="{{ $kandang->nama_kandang }}">
+                                                data-nama="{{ $kandang->nama_kandang }}"
+                                                {{ old('kandang_id') == $kandang->id ? 'selected' : '' }}>
                                                 {{ $kandang->nama_kandang }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_kandang_id" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_kandang_id" style="font-size: 0.75rem;">
+                                        @error('kandang_id') {{ $message }} @enderror
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Asal Usul Hewan</label>
                                     <div class="d-flex gap-4 mt-2">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="asal_hewan" id="edit_asal_beli" value="beli" checked>
+                                            <input class="form-check-input" type="radio" name="asal_hewan" id="edit_asal_beli" value="beli" {{ old('asal_hewan') === 'beli' ? 'checked' : '' }}>
                                             <label class="form-check-label small" for="edit_asal_beli">Beli</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="asal_hewan" id="edit_asal_lahir" value="lahir">
+                                            <input class="form-check-input" type="radio" name="asal_hewan" id="edit_asal_lahir" value="lahir" {{ old('asal_hewan') === 'lahir' ? 'checked' : '' }}>
                                             <label class="form-check-label small" for="edit_asal_lahir">Lahir di Peternakan</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3" id="edit_container_harga_beli">
                                     <label class="form-label small fw-bold text-muted">Harga Beli Awal (Rp)</label>
-                                    <input type="number" min="0" step="0.01" class="form-control" name="harga_beli_awal" id="edit_harga_beli_awal" placeholder="Contoh: 15000000">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_harga_beli_awal" style="font-size: 0.75rem;"></div>
+                                    <input type="number" min="0" step="0.01" class="form-control @error('harga_beli_awal') is-invalid @enderror" name="harga_beli_awal" id="edit_harga_beli_awal" value="{{ old('harga_beli_awal') }}" placeholder="Contoh: 15000000">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_harga_beli_awal" style="font-size: 0.75rem;">
+                                        @error('harga_beli_awal') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3" id="edit_container_umur_bulan_beli">
                                     <label class="form-label small fw-bold text-muted">Usia Saat Ini (Bulan)</label>
-                                    <input type="number" min="1" class="form-control" name="umur_bulan_beli" id="edit_umur_bulan_beli" placeholder="Contoh: 18">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_umur_bulan_beli" style="font-size: 0.75rem;"></div>
+                                    <input type="number" min="1" class="form-control @error('umur_bulan_beli') is-invalid @enderror" name="umur_bulan_beli" id="edit_umur_bulan_beli" value="{{ old('umur_bulan_beli') }}" placeholder="Contoh: 18">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_umur_bulan_beli" style="font-size: 0.75rem;">
+                                        @error('umur_bulan_beli') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3 d-none" id="edit_container_tanggal_lahir">
                                     <label class="form-label small fw-bold text-muted">Tanggal Lahir</label>
-                                    <input type="date" class="form-control" name="tanggal_lahir" id="edit_tanggal_lahir">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_tanggal_lahir" style="font-size: 0.75rem;"></div>
+                                    <input type="date" class="form-control @error('tanggal_lahir') is-invalid @enderror" name="tanggal_lahir" id="edit_tanggal_lahir" value="{{ old('tanggal_lahir') }}">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_tanggal_lahir" style="font-size: 0.75rem;">
+                                        @error('tanggal_lahir') {{ $message }} @enderror
+                                    </div>
                                 </div>
 
                                 <div class="col-md-12 mb-2">
                                     <label class="form-label small fw-bold text-muted">Ganti Foto Ternak <span class="text-secondary fw-normal">(Kosongkan jika tidak diubah)</span></label>
-                                    <input type="file" class="form-control" name="foto" id="edit_foto" accept="image/*">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_foto" style="font-size: 0.75rem;"></div>
+                                    <input type="file" class="form-control @error('foto') is-invalid @enderror" name="foto" id="edit_foto" accept="image/*">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_foto" style="font-size: 0.75rem;">
+                                        @error('foto') {{ $message }} @enderror
+                                    </div>
                                     <div class="form-text text-muted" style="font-size: 0.7rem;">
                                         Format gambar (JPG, PNG, WEBP). <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill"></i> Ukuran foto maksimal 2MB.</span>
                                     </div>
@@ -306,178 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==================================================
     // 2. LOGIKA AJAX SUBMIT FORM EDIT
     // ==================================================
-    if (formEditTernak) {
-        formEditTernak.addEventListener('submit', function (e) {
-            e.preventDefault(); // Mencegah mutlak halaman me-refresh!
-            
-            let id = document.getElementById('edit_ternak_id').value;
-            if(!id) {
-                globalErrorMsg.innerText = "ID Hewan tidak ditemukan. Silakan close modal dan klik edit kembali.";
-                globalErrorAlert.classList.remove('d-none');
-                return;
-            }
-
-            // Reset seluruh visual error lama
-            globalErrorAlert.classList.add('d-none');
-            document.querySelectorAll('#formEditTernak .is-invalid').forEach(el => el.classList.remove('is-invalid'));
-            document.querySelectorAll('#formEditTernak .invalid-feedback').forEach(el => el.innerText = '');
-
-            // Validation before submit
-            if (editRadioAsalBeli && editRadioAsalBeli.checked) {
-                if (editInputHargaBeli && !editInputHargaBeli.value.trim()) {
-                    let errEl = document.getElementById('error_edit_harga_beli_awal');
-                    if (errEl) errEl.innerText = 'Harga beli awal wajib diisi jika asal usul adalah Beli.';
-                    if (editInputHargaBeli) editInputHargaBeli.classList.add('is-invalid');
-                    return;
-                }
-                if (editInputHargaBeli && parseFloat(editInputHargaBeli.value) < 0) {
-                    let errEl = document.getElementById('error_edit_harga_beli_awal');
-                    if (errEl) errEl.innerText = 'Harga beli awal tidak boleh bernilai negatif.';
-                    if (editInputHargaBeli) editInputHargaBeli.classList.add('is-invalid');
-                    return;
-                }
-                const inputUmurBeli = document.getElementById('edit_umur_bulan_beli');
-                if (inputUmurBeli && !inputUmurBeli.value.trim()) {
-                    let errEl = document.getElementById('error_edit_umur_bulan_beli');
-                    if (errEl) errEl.innerText = 'Usia wajib diisi jika asal usul adalah Beli.';
-                    if (inputUmurBeli) inputUmurBeli.classList.add('is-invalid');
-                    return;
-                }
-                if (inputUmurBeli && parseInt(inputUmurBeli.value) < 1) {
-                    let errEl = document.getElementById('error_edit_umur_bulan_beli');
-                    if (errEl) errEl.innerText = 'Usia harus minimal 1 Bulan.';
-                    if (inputUmurBeli) inputUmurBeli.classList.add('is-invalid');
-                    return;
-                }
-            } else if (editRadioAsalLahir && editRadioAsalLahir.checked) {
-                if (editInputTanggalLahir && !editInputTanggalLahir.value) {
-                    let errEl = document.getElementById('error_edit_tanggal_lahir');
-                    if (errEl) errEl.innerText = 'Tanggal lahir wajib diisi jika lahir di peternakan.';
-                    if (editInputTanggalLahir) editInputTanggalLahir.classList.add('is-invalid');
-                    return;
-                }
-                if (editInputTanggalLahir && editInputTanggalLahir.value) {
-                    const selectedDate = new Date(editInputTanggalLahir.value);
-                    selectedDate.setHours(0,0,0,0);
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-                    if (selectedDate > today) {
-                        let errEl = document.getElementById('error_edit_tanggal_lahir');
-                        if (errEl) errEl.innerText = 'Tanggal lahir tidak boleh di masa depan.';
-                        if (editInputTanggalLahir) editInputTanggalLahir.classList.add('is-invalid');
-                        return;
-                    }
-                }
-            }
-
-            let oldKandangId = null;
-            let card = document.getElementById(`card-ternak-${id}`);
-            if (card) {
-                let oldBtn = card.querySelector('.btn-edit-ternak');
-                if (oldBtn) {
-                    oldKandangId = oldBtn.getAttribute('data-kandang');
-                }
-            }
-
-            // Mengubah teks tombol menjadi loading state yang rapi
-            btnUpdate.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...';
-            btnUpdate.disabled = true;
-            document.querySelectorAll('#formEditTernak .invalid-feedback').forEach(el => el.innerText = '');
-
-            const formData = new FormData(formEditTernak);
-            formData.append('_method', 'PUT'); // Menyesuaikan agar dibaca sebagai PUT oleh Laravel
-
-            fetch(`/ternak/${id}`, {
-                method: 'POST',
-                headers: { 
-                    'X-CSRF-TOKEN': csrfToken, 
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest' // Memaksa Laravel membalas pesan JSON, dilarang kirim HTML!
-                },
-                body: formData
-            })
-            .then(async response => {
-                const isJson = response.headers.get('content-type')?.includes('application/json');
-                
-                if (!response.ok) {
-                    // Jika error validasi (Misal: Kode Eartag Sudah Digunakan)
-                    if (response.status === 422 && isJson) {
-                        const errData = await response.json();
-                        return Promise.reject({ type: 'validation', errors: errData.errors });
-                    }
-                    
-                    // Jika error server umum (Misal: Query SQL salah / Server AWS Down)
-                    let errorMsg = 'Terjadi kesalahan internal pada server.';
-                    if (isJson) {
-                        const errData = await response.json();
-                        errorMsg = errData.message || errorMsg;
-                    }
-                    return Promise.reject({ type: 'server', message: errorMsg });
-                }
-                
-                if (!isJson) {
-                    return Promise.reject({ type: 'server', message: 'Sesi anda mungkin telah berakhir atau ukuran file terlalu besar. Silahkan muat ulang halaman.' });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    let card = document.getElementById(`card-ternak-${id}`);
-                    
-                    if (card) {
-                        let fotoUrl = data.data.dir_foto_hewan ? `${window.storageBaseUrl}/${data.data.dir_foto_hewan}` : '/image/icons/placeholder.png';
-                        
-                        // Menjalankan render ulang menggunakan template global window
-                        card.innerHTML = window.renderTernakCardHTML(data.data, fotoUrl);
-                        window.initTooltips(card);
-                    }
-
-                    // Dynamic capacity updates
-                    let newKandangId = data.data.kandang_id;
-                    if (oldKandangId && oldKandangId != newKandangId) {
-                        window.decrementKandangCount(oldKandangId);
-                    }
-                    if (newKandangId && data.data.kandang) {
-                        window.updateKandangCapacity(
-                            newKandangId,
-                            data.data.kandang.ternaks_count,
-                            data.data.kandang.kapasitas_maksimal
-                        );
-                    }
-
-                    // Menutup modal dengan aman
-                    let modalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditTernak'));
-                    if (modalInstance) modalInstance.hide();
-                    
-                    formEditTernak.reset();
-                    if (previewContainerEdit) previewContainerEdit.classList.add('d-none');
-                    if (previewImgEdit) previewImgEdit.src = '';
-                    $('#edit_ras_id').val('').trigger('change');
-                    $('#edit_kandang_id').val('').trigger('change');
-                }
-            })
-            .catch(error => {
-                if (error.type === 'validation') {
-                    // Mengisi pesan error validasi langsung ke input komponen bersangkutan
-                    for (const [key, messages] of Object.entries(error.errors || {})) {
-                        let inputEl = document.querySelector(`#formEditTernak [name="${key}"]`);
-                        let errorEl = document.getElementById(`error_edit_${key}`);
-                        
-                        if (inputEl) inputEl.classList.add('is-invalid');
-                        if (errorEl) errorEl.innerText = messages[0]; // Pesan "Nomor eartag ini sudah digunakan" tampil di sini
-                    }
-                } else {
-                    // Menampilkan pesan error server global di kotak merah bagian atas modal
-                    globalErrorMsg.innerText = error.message;
-                    globalErrorAlert.classList.remove('d-none');
-                }
-            })
-            .finally(() => {
-                btnUpdate.innerHTML = 'Simpan Perubahan';
-                btnUpdate.disabled = false;
-            });
-        });
-    }
+    // Form submits normally via standard HTTP POST/PUT, JS AJAX submission removed.
 });
 </script>
 @endpush

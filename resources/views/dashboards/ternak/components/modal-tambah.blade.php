@@ -1,7 +1,8 @@
 <div class="modal fade" id="modalTambahTernak" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow">
-            <form id="formTambahTernak" enctype="multipart/form-data">
+            <form id="formTambahTernak" action="{{ route('ternak.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
                 <div class="modal-header bg-light border-bottom-0">
                     <h1 class="modal-title fs-5 fw-bold text-dark">
                         <i class="bi bi-plus-circle-fill me-2 text-primary"></i> Tambah Data Ternak
@@ -19,92 +20,111 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">No. Eartag</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="nomor_eartag" id="inputEartag" required>
+                                        <input type="text" class="form-control @error('nomor_eartag') is-invalid @enderror" name="nomor_eartag" id="inputEartag" value="{{ old('nomor_eartag') }}" required>
                                         <button class="btn btn-outline-secondary" type="button" id="btnGenerateEartag"
                                             title="Generate otomatis jika hewan belum punya tag">
                                             <i class="bi bi-magic"></i>
                                         </button>
                                     </div>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nomor_eartag" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nomor_eartag" style="font-size: 0.75rem;">
+                                        @error('nomor_eartag') {{ $message }} @enderror
+                                    </div>
                                     <div class="form-text text-muted" style="font-size: 0.7rem;">
                                         Ketik manual atau generate otomatis. <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill"></i> Nomor eartag harus unik (tidak boleh sama).</span>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Ras Ternak</label>
-                                    <select class="form-select select2-ras" name="ras_id" required>
+                                    <select class="form-select select2-ras @error('ras_id') is-invalid @enderror" name="ras_id" required>
                                         <option value="">-- Pilih Ras --</option>
                                         @foreach($rasTernaks as $ras)
-                                        <option value="{{ $ras->id }}">{{ $ras->tipeTernak->nama_jenis }} - {{ $ras->nama_ras }}
+                                        <option value="{{ $ras->id }}" {{ old('ras_id') == $ras->id ? 'selected' : '' }}>{{ $ras->tipeTernak->nama_jenis }} - {{ $ras->nama_ras }}
                                         </option>
                                         @endforeach
                                     </select>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_ras_id" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_ras_id" style="font-size: 0.75rem;">
+                                        @error('ras_id') {{ $message }} @enderror
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Jenis Kelamin</label>
-                                    <select class="form-select" name="jenis_kelamin" required>
-                                        <option value="jantan">Jantan</option>
-                                        <option value="betina">Betina</option>
+                                    <select class="form-select @error('jenis_kelamin') is-invalid @enderror" name="jenis_kelamin" required>
+                                        <option value="jantan" {{ old('jenis_kelamin') === 'jantan' ? 'selected' : '' }}>Jantan</option>
+                                        <option value="betina" {{ old('jenis_kelamin') === 'betina' ? 'selected' : '' }}>Betina</option>
                                     </select>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_jenis_kelamin" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_jenis_kelamin" style="font-size: 0.75rem;">
+                                        @error('jenis_kelamin') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Kandang</label>
-                                    <select class="form-select select2-kandang" name="kandang_id" required>
+                                    <select class="form-select select2-kandang @error('kandang_id') is-invalid @enderror" name="kandang_id" required>
                                         <option value="">-- Pilih Kandang --</option>
                                         @foreach($kandangs as $kandang)
                                         <option value="{{ $kandang->id }}" 
                                             data-count="{{ $kandang->ternaks_count }}" 
                                             data-max="{{ $kandang->kapasitas_maksimal }}" 
                                             data-nama="{{ $kandang->nama_kandang }}"
+                                            {{ old('kandang_id') == $kandang->id ? 'selected' : '' }}
                                             {{ $kandang->ternaks_count >= $kandang->kapasitas_maksimal ? 'disabled' : '' }}>
                                             {{ $kandang->nama_kandang }} ({{ $kandang->ternaks_count }}/{{ $kandang->kapasitas_maksimal }})
                                             @if($kandang->ternaks_count >= $kandang->kapasitas_maksimal) - [Penuh] @endif
                                         </option>
                                         @endforeach
                                     </select>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_kandang_id" style="font-size: 0.75rem;"></div>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_kandang_id" style="font-size: 0.75rem;">
+                                        @error('kandang_id') {{ $message }} @enderror
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Berat Awal (Kg)</label>
-                                    <input type="number" min="1" step="0.01" class="form-control" name="berat_awal" required>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_awal" style="font-size: 0.75rem;"></div>
+                                    <input type="number" min="1" step="0.01" class="form-control @error('berat_awal') is-invalid @enderror" name="berat_awal" value="{{ old('berat_awal') }}" required>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_awal" style="font-size: 0.75rem;">
+                                        @error('berat_awal') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Asal Usul Hewan</label>
                                     <div class="d-flex gap-4 mt-2">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="asal_hewan" id="tambah_asal_beli" value="beli" checked>
+                                            <input class="form-check-input" type="radio" name="asal_hewan" id="tambah_asal_beli" value="beli" {{ old('asal_hewan', 'beli') === 'beli' ? 'checked' : '' }}>
                                             <label class="form-check-label small" for="tambah_asal_beli">Beli</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="asal_hewan" id="tambah_asal_lahir" value="lahir">
+                                            <input class="form-check-input" type="radio" name="asal_hewan" id="tambah_asal_lahir" value="lahir" {{ old('asal_hewan') === 'lahir' ? 'checked' : '' }}>
                                             <label class="form-check-label small" for="tambah_asal_lahir">Lahir di Peternakan</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3" id="tambah_container_harga_beli">
                                     <label class="form-label small fw-bold text-muted">Harga Beli Awal (Rp)</label>
-                                    <input type="number" min="0" step="0.01" class="form-control" name="harga_beli_awal" id="tambah_harga_beli_awal" placeholder="Contoh: 15000000">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_harga_beli_awal" style="font-size: 0.75rem;"></div>
+                                    <input type="number" min="0" step="0.01" class="form-control @error('harga_beli_awal') is-invalid @enderror" name="harga_beli_awal" id="tambah_harga_beli_awal" value="{{ old('harga_beli_awal') }}" placeholder="Contoh: 15000000">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_harga_beli_awal" style="font-size: 0.75rem;">
+                                        @error('harga_beli_awal') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3" id="tambah_container_umur_bulan_beli">
                                     <label class="form-label small fw-bold text-muted">Usia Saat Beli (Bulan)</label>
-                                    <input type="number" min="1" class="form-control" name="umur_bulan_beli" id="tambah_umur_bulan_beli" placeholder="Contoh: 18">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_umur_bulan_beli" style="font-size: 0.75rem;"></div>
+                                    <input type="number" min="1" class="form-control @error('umur_bulan_beli') is-invalid @enderror" name="umur_bulan_beli" id="tambah_umur_bulan_beli" value="{{ old('umur_bulan_beli') }}" placeholder="Contoh: 18">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_umur_bulan_beli" style="font-size: 0.75rem;">
+                                        @error('umur_bulan_beli') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3 d-none" id="tambah_container_tanggal_lahir">
                                     <label class="form-label small fw-bold text-muted">Tanggal Lahir</label>
-                                    <input type="date" class="form-control" name="tanggal_lahir" id="tambah_tanggal_lahir">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_lahir" style="font-size: 0.75rem;"></div>
+                                    <input type="date" class="form-control @error('tanggal_lahir') is-invalid @enderror" name="tanggal_lahir" id="tambah_tanggal_lahir" value="{{ old('tanggal_lahir') }}">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_lahir" style="font-size: 0.75rem;">
+                                        @error('tanggal_lahir') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-muted">Foto Ternak (Opsional)</label>
-                                    <input type="file" class="form-control" name="foto" id="tambah_foto" accept="image/*">
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_foto" style="font-size: 0.75rem;"></div>
+                                    <input type="file" class="form-control @error('foto') is-invalid @enderror" name="foto" id="tambah_foto" accept="image/*">
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_foto" style="font-size: 0.75rem;">
+                                        @error('foto') {{ $message }} @enderror
+                                    </div>
                                     <div class="form-text text-muted" style="font-size: 0.7rem;">
                                         Format gambar (JPG, PNG, WEBP). <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle-fill"></i> Ukuran foto maksimal 2MB.</span>
                                     </div>
@@ -287,174 +307,7 @@
         });
     }
 
-    formTernak.addEventListener('submit', function (e) {
-        e.preventDefault();
-        
-        // Reset seluruh visual error lama
-        document.querySelectorAll('#formTambahTernak .is-invalid').forEach(el => el.classList.remove('is-invalid'));
-        document.querySelectorAll('#formTambahTernak .invalid-feedback').forEach(el => el.innerText = '');
-
-        const globalErrorAlert = document.getElementById('tambah_global_error');
-        const globalErrorMsg = document.getElementById('tambah_global_error_msg');
-        if (globalErrorAlert) globalErrorAlert.classList.add('d-none');
-
-        // Validation before submit
-        if (inputBeratAwal) {
-            if (!inputBeratAwal.value.trim()) {
-                let errEl = document.getElementById('error_berat_awal');
-                if (errEl) errEl.innerText = 'Berat awal wajib diisi.';
-                inputBeratAwal.classList.add('is-invalid');
-                return;
-            }
-            if (parseFloat(inputBeratAwal.value) < 1) {
-                let errEl = document.getElementById('error_berat_awal');
-                if (errEl) errEl.innerText = 'Berat awal harus minimal 1 Kg.';
-                inputBeratAwal.classList.add('is-invalid');
-                return;
-            }
-        }
-
-        if (radioAsalBeli && radioAsalBeli.checked) {
-            if (inputHargaBeli && !inputHargaBeli.value.trim()) {
-                let errEl = document.getElementById('error_harga_beli_awal');
-                if (errEl) errEl.innerText = 'Harga beli awal wajib diisi jika asal usul adalah Beli.';
-                if (inputHargaBeli) inputHargaBeli.classList.add('is-invalid');
-                return;
-            }
-            if (inputHargaBeli && parseFloat(inputHargaBeli.value) < 0) {
-                let errEl = document.getElementById('error_harga_beli_awal');
-                if (errEl) errEl.innerText = 'Harga beli awal tidak boleh bernilai negatif.';
-                if (inputHargaBeli) inputHargaBeli.classList.add('is-invalid');
-                return;
-            }
-            const inputUmurBeli = document.getElementById('tambah_umur_bulan_beli');
-            if (inputUmurBeli && !inputUmurBeli.value.trim()) {
-                let errEl = document.getElementById('error_umur_bulan_beli');
-                if (errEl) errEl.innerText = 'Usia wajib diisi jika asal usul adalah Beli.';
-                if (inputUmurBeli) inputUmurBeli.classList.add('is-invalid');
-                return;
-            }
-            if (inputUmurBeli && parseInt(inputUmurBeli.value) < 1) {
-                let errEl = document.getElementById('error_umur_bulan_beli');
-                if (errEl) errEl.innerText = 'Usia harus minimal 1 Bulan.';
-                if (inputUmurBeli) inputUmurBeli.classList.add('is-invalid');
-                return;
-            }
-        } else if (radioAsalLahir && radioAsalLahir.checked) {
-            if (inputTanggalLahir && !inputTanggalLahir.value) {
-                let errEl = document.getElementById('error_tanggal_lahir');
-                if (errEl) errEl.innerText = 'Tanggal lahir wajib diisi jika lahir di peternakan.';
-                if (inputTanggalLahir) inputTanggalLahir.classList.add('is-invalid');
-                return;
-            }
-            if (inputTanggalLahir && inputTanggalLahir.value) {
-                const selectedDate = new Date(inputTanggalLahir.value);
-                selectedDate.setHours(0,0,0,0);
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                if (selectedDate > today) {
-                    let errEl = document.getElementById('error_tanggal_lahir');
-                    if (errEl) errEl.innerText = 'Tanggal lahir tidak boleh di masa depan.';
-                    if (inputTanggalLahir) inputTanggalLahir.classList.add('is-invalid');
-                    return;
-                }
-            }
-        }
-
-        btnSimpan.disabled = true;
-        btnSimpan.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...';
-
-        const formData = new FormData(formTernak);
-
-        fetch('/ternak', {
-            method: 'POST',
-            headers: { 
-                'X-CSRF-TOKEN': csrfToken, 
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-        .then(async res => {
-            const isJson = res.headers.get('content-type')?.includes('application/json');
-            if (!res.ok) {
-                if (res.status === 422 && isJson) {
-                    const errData = await res.json();
-                    return Promise.reject({ type: 'validation', errors: errData.errors });
-                }
-                
-                let errorMsg = 'Terjadi kesalahan internal pada server.';
-                if (isJson) {
-                    const errData = await res.json();
-                    errorMsg = errData.message || errorMsg;
-                }
-                return Promise.reject({ type: 'server', message: errorMsg });
-            }
-            if (!isJson) {
-                // Prevent "Unexpected token <" if server returns HTML unexpectedly (e.g. session expired, or redirect)
-                return Promise.reject({ type: 'server', message: 'Sesi anda mungkin telah berakhir atau ukuran file terlalu besar. Silahkan muat ulang halaman.' });
-            }
-            return res.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Hapus empty state jika ada
-                let emptyState = document.getElementById('emptyStateTernak');
-                if (emptyState) emptyState.remove();
-
-                let fotoUrl = data.data.dir_foto_hewan ? `${window.storageBaseUrl}/${data.data.dir_foto_hewan}` : '/image/icons/placeholder.png';
-                
-                // MEMANGGIL TEMPLATE KARTU GLOBAL
-                let newCard = document.createElement('div');
-                newCard.className = "card shadow-sm border-1 mb-4";
-                newCard.id = `card-ternak-${data.data.id}`;
-                newCard.style.overflow = "hidden";
-                newCard.innerHTML = window.renderTernakCardHTML(data.data, fotoUrl);
-
-                containerTernak.insertAdjacentElement('afterbegin', newCard);
-                
-                // Panggil utilitas pembantu global
-                window.initTooltips(newCard);
-                window.updateCounter(1);
-
-                if (data.data.kandang_id && data.data.kandang) {
-                    window.updateKandangCapacity(
-                        data.data.kandang_id, 
-                        data.data.kandang.ternaks_count, 
-                        data.data.kandang.kapasitas_maksimal
-                    );
-                }
-
-                // TUTUP MODAL SECARA AMAN (Mencegah Bug Layar Gelap)
-                let modalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalTambahTernak'));
-                if (modalInstance) modalInstance.hide();
-                
-                formTernak.reset();
-                if (previewContainer) previewContainer.classList.add('d-none');
-                if (previewImg) previewImg.src = '';
-                $('#modalTambahTernak .select2-ras').val('').trigger('change');
-                $('#modalTambahTernak .select2-kandang').val('').trigger('change');
-                alert(data.message);
-            }
-        })
-        .catch(err => {
-            if (err.type === 'validation') {
-                for (const [key, messages] of Object.entries(err.errors || {})) {
-                    let inputEl = document.querySelector(`#formTambahTernak [name="${key}"]`);
-                    let errorEl = document.getElementById(`error_${key}`);
-                    if (inputEl) inputEl.classList.add('is-invalid');
-                    if (errorEl) errorEl.innerText = messages[0];
-                }
-            } else {
-                if (globalErrorMsg) globalErrorMsg.innerText = err.message || 'Terjadi kesalahan pada server.';
-                if (globalErrorAlert) globalErrorAlert.classList.remove('d-none');
-            }
-        })
-        .finally(() => {
-            btnSimpan.innerHTML = 'Simpan Data';
-            btnSimpan.disabled = false;
-        });
-    });
+    // Form submits normally via standard HTTP POST, JS AJAX submission removed.
 });
 
 </script>

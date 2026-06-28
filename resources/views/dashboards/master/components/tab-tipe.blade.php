@@ -59,7 +59,8 @@
 <div class="modal fade" id="modalTambahTipe" tabindex="-1" aria-labelledby="modalTambahTipeLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formTambahTipe">
+            <form id="formTambahTipe" action="{{ url('/master/tipe') }}" method="POST">
+                @csrf
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="modalTambahTipeLabel">Tambah Tipe Ternak</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -67,14 +68,18 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="nama_jenis" class="form-label">Nama Jenis</label>
-                        <input type="text" class="form-control" id="nama_jenis" name="nama_jenis" required>
-                        <div class="invalid-feedback" id="error_nama_jenis"></div>
+                        <input type="text" class="form-control @error('nama_jenis') is-invalid @enderror" id="nama_jenis" name="nama_jenis" value="{{ old('nama_jenis') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nama_jenis" style="font-size: 0.75rem;">
+                            @error('nama_jenis') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="umur_minimal_qurban" class="form-label">Umur Minimal Qurban (Bulan)</label>
-                        <input type="number" class="form-control" id="umur_minimal_qurban" name="umur_minimal_qurban"
-                            required>
-                        <div class="invalid-feedback" id="error_umur_minimal_qurban"></div>
+                        <input type="number" class="form-control @error('umur_minimal_qurban') is-invalid @enderror" id="umur_minimal_qurban" name="umur_minimal_qurban"
+                            value="{{ old('umur_minimal_qurban') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_umur_minimal_qurban" style="font-size: 0.75rem;">
+                            @error('umur_minimal_qurban') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -94,24 +99,30 @@
 <div class="modal fade" id="modalEditTipe" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formEditTipe">
+            <form id="formEditTipe" method="POST">
+                @csrf
+                @method('PUT')
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Edit Tipe Ternak</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="edit_id_tipe" name="id">
+                    <input type="hidden" id="edit_id_tipe" name="id_tipe" value="{{ old('id_tipe') }}">
 
                     <div class="mb-3">
                         <label class="form-label">Nama Jenis</label>
-                        <input type="text" class="form-control" id="edit_nama_jenis" name="nama_jenis" required>
-                        <div class="invalid-feedback" id="error_edit_nama_jenis"></div>
+                        <input type="text" class="form-control @error('nama_jenis') is-invalid @enderror" id="edit_nama_jenis" name="nama_jenis" value="{{ old('nama_jenis') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_nama_jenis" style="font-size: 0.75rem;">
+                            @error('nama_jenis') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Umur Minimal Qurban (Bulan)</label>
-                        <input type="number" class="form-control" id="edit_umur_minimal_qurban"
-                            name="umur_minimal_qurban" required>
-                        <div class="invalid-feedback" id="error_edit_umur_minimal_qurban"></div>
+                        <input type="number" class="form-control @error('umur_minimal_qurban') is-invalid @enderror" id="edit_umur_minimal_qurban"
+                            name="umur_minimal_qurban" value="{{ old('umur_minimal_qurban') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_umur_minimal_qurban" style="font-size: 0.75rem;">
+                            @error('umur_minimal_qurban') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -135,226 +146,52 @@
 
         const formTipe = document.getElementById('formTambahTipe');
         const tableBody = document.getElementById('tableBodyTipe');
-        const btnSimpan = document.getElementById('btnSimpanTipe');
-        const loadingIcon = document.getElementById('loadingTipe');
 
         // Ambil CSRF Token dari Meta Tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        formTipe.addEventListener('submit', function (e) {
-            e.preventDefault(); // Mencegah reload halaman
-
-            // UX: Ubah tombol jadi loading state
-            btnSimpan.disabled = true;
-            loadingIcon.classList.remove('d-none');
-
-            // Reset error message sebelumnya
-            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-
-            // Siapkan data form
-            const formData = new FormData(formTipe);
-
-            // Lakukan request AJAX menggunakan Fetch API
-            fetch('/master/tipe', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json' // Penting agar Laravel membalas dengan JSON saat validasi gagal
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let emptyRow = tableBody.querySelector('td[colspan]');
-                        if (emptyRow && (emptyRow.innerText.toLowerCase().includes('kosong') || emptyRow.innerText.toLowerCase().includes('belum ada'))) {
-                            emptyRow.parentElement.remove(); // Hapus elemen <tr> pembungkusnya
-                        }
-                        // 1. Sisipkan baris baru ke dalam tabel tanpa reload
-                        // Catatan: Variabel 'data.data' berisi object model dari Controller
-                        let tr = document.createElement('tr');
-                        // Tambahkan ID pada row baru ini
-                        tr.id = `row-tipe-${data.data.id}`;
-                        tr.innerHTML = `
-                            <td class="py-3 px-3 fw-semibold text-secondary">Baru</td>
-                            <td class="py-3 px-3 col-nama fw-bold text-dark">${data.data.nama_jenis}</td>
-                            <td class="py-3 px-3 col-umur">
-                                <span class="fw-semibold text-dark">${data.data.umur_minimal_qurban}</span> <span class="text-muted small">bulan</span>
-                            </td>
-                            <td class="py-3 px-3 text-end">
-                                <button class="btn btn-sm btn-outline-secondary btn-edit-tipe" 
-                                    data-id="${data.data.id}" 
-                                    data-nama="${data.data.nama_jenis}" 
-                                    data-umur="${data.data.umur_minimal_qurban}"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Jenis">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-delete-tipe" data-id="${data.data.id}"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Jenis">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        `;
-                        tableBody.insertAdjacentElement('afterbegin',
-                            tr); // Masukkan di urutan paling atas
-                        if (window.tipePagination) window.tipePagination.update();
-
-                        // 2. Tutup Modal Bootstrap
-                        let modalEl = document.getElementById('modalTambahTipe');
-                        let modalInstance = bootstrap.Modal.getInstance(modalEl);
-                        modalInstance.hide();
-
-                        // 3. Reset isi Form
-                        formTipe.reset();
-
-                        // Opsional: Tampilkan toast/alert sukses di sini
-                        alert(data.message);
-
-                        // Trigger custom event agar komponen lain (seperti tab-ras) bisa update dropdown
-                        document.dispatchEvent(new CustomEvent('tipeTernakAdded', {
-                            detail: {
-                                id: data.data.id,
-                                nama_jenis: data.data.nama_jenis
-                            }
-                        }));
-                    } else if (data.message) {
-                        // Tangkap error validasi dari Laravel (Status Code 422)
-                        for (const [key, messages] of Object.entries(data.errors || {})) {
-                            let inputEl = document.getElementById(key);
-                            let errorEl = document.getElementById(`error_${key}`);
-                            if (inputEl && errorEl) {
-                                inputEl.classList.add('is-invalid');
-                                errorEl.innerText = messages[0];
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan pada server.');
-                })
-                .finally(() => {
-                    // Kembalikan tombol ke keadaan semula
-                    btnSimpan.disabled = false;
-                    loadingIcon.classList.add('d-none');
-                });
-        });
-
-
+        // formTipe submit handler - AJAX removed. Form submits normally.
 
         // edit
         // ====== FITUR EDIT TIPE TERNAK ====== //
 
         const formEditTipe = document.getElementById('formEditTipe');
-        const btnUpdateTipe = document.getElementById('btnUpdateTipe');
-        const loadingEditTipe = document.getElementById('loadingEditTipe');
-        const modalEditInstance = new bootstrap.Modal(document.getElementById('modalEditTipe'));
+        const modalEditInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditTipe'));
 
         // 1. Event Delegation untuk membuka Modal Edit
-        // Kita memasang event di tableBody agar row yang baru ditambah via AJAX juga bisa langsung diedit
         tableBody.addEventListener('click', function (e) {
-            // Cari elemen terdekat yang memiliki class .btn-edit-tipe
             let btnEdit = e.target.closest('.btn-edit-tipe');
 
             if (btnEdit) {
-                // Ambil data dari atribut tombol
                 let id = btnEdit.getAttribute('data-id');
                 let nama = btnEdit.getAttribute('data-nama');
                 let umur = btnEdit.getAttribute('data-umur');
 
-                // Isi form edit
                 document.getElementById('edit_id_tipe').value = id;
                 document.getElementById('edit_nama_jenis').value = nama;
                 document.getElementById('edit_umur_minimal_qurban').value = umur;
 
-                // Buka modal
                 modalEditInstance.show();
             }
         });
 
-        // 2. Submit Form Edit via AJAX
+        // 2. Submit Form Edit via standard HTTP PUT
         formEditTipe.addEventListener('submit', function (e) {
             e.preventDefault();
-
             let id = document.getElementById('edit_id_tipe').value;
-
-            btnUpdateTipe.disabled = true;
-            loadingEditTipe.classList.remove('d-none');
-            document.querySelectorAll('#formEditTipe .is-invalid').forEach(el => el.classList.remove(
-                'is-invalid'));
-
-            const formData = new FormData(formEditTipe);
-            // Trik penting di Laravel: Kirim POST tapi beri tahu Laravel bahwa ini adalah PUT request
-            formData.append('_method', 'PUT');
-
-            fetch(`/master/tipe/${id}`, {
-                    method: 'POST', // Gunakan POST untuk FormData
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update tampilan baris di tabel tanpa reload
-                        let tr = document.getElementById(`row-tipe-${id}`);
-                        tr.querySelector('.col-nama').innerText = data.data.nama_jenis;
-                        
-                        let colUmur = tr.querySelector('.col-umur');
-                        if (colUmur) {
-                            colUmur.innerHTML = `<span class="fw-semibold text-dark">${data.data.umur_minimal_qurban}</span> <span class="text-muted small">bulan</span>`;
-                        }
-
-                        // Update juga atribut data-* pada tombol editnya agar jika diklik lagi datanya sudah baru
-                        let btnEdit = tr.querySelector('.btn-edit-tipe');
-                        btnEdit.setAttribute('data-nama', data.data.nama_jenis);
-                        btnEdit.setAttribute('data-umur', data.data.umur_minimal_qurban);
-
-                        modalEditInstance.hide();
-                        alert(data.message);
-
-                        // Trigger custom event agar komponen lain (seperti tab-ras) bisa update dropdown
-                        document.dispatchEvent(new CustomEvent('tipeTernakUpdated', {
-                            detail: {
-                                id: id,
-                                nama_jenis: data.data.nama_jenis
-                            }
-                        }));
-                    } else if (data.errors) {
-                        for (const [key, messages] of Object.entries(data.errors || {})) {
-                            let inputEl = document.getElementById(`edit_${key}`);
-                            let errorEl = document.getElementById(`error_edit_${key}`);
-                            if (inputEl && errorEl) {
-                                inputEl.classList.add('is-invalid');
-                                errorEl.innerText = messages[0];
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat mengupdate data.');
-                })
-                .finally(() => {
-                    btnUpdateTipe.disabled = false;
-                    loadingEditTipe.classList.add('d-none');
-                });
+            formEditTipe.action = `/master/tipe/${id}`;
+            formEditTipe.submit();
         });
 
 
         // ====== FITUR HAPUS TIPE TERNAK ====== //
 
-        // Kita tetap menggunakan event delegation pada tableBody
         tableBody.addEventListener('click', function (e) {
-            // Cari elemen terdekat yang memiliki class .btn-delete-tipe
             let btnDelete = e.target.closest('.btn-delete-tipe');
 
             if (btnDelete) {
                 let id = btnDelete.getAttribute('data-id');
 
-                // Munculkan dialog konfirmasi
                 Swal.fire({
                     title: 'Hapus Tipe?',
                     text: "Apakah Anda yakin ingin menghapus tipe ternak ini?",
@@ -366,72 +203,20 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // UX: Ubah tombol jadi status loading agar tidak diklik dua kali
-                        let originalIcon = btnDelete.innerHTML;
-                        btnDelete.innerHTML =
-                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-                        btnDelete.disabled = true;
-
-                        // Lakukan request DELETE
-                        fetch(`/master/tipe/${id}`, {
-                                method: 'DELETE', // Method langsung menggunakan DELETE
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // 1. Cari elemen <tr> berdasarkan ID yang kita buat sebelumnya
-                                    let tr = document.getElementById(`row-tipe-${id}`);
-                                    if (tr) {
-                                        // Hapus elemen dari DOM HTML secara langsung
-                                        tr.remove();
-                                    }
-                                    if (window.tipePagination) window.tipePagination.update();
-
-                                    // 2. Cek apakah tabel sekarang kosong, jika ya, tampilkan pesan kosong
-                                    if (tableBody.querySelectorAll('tr').length === 0) {
-                                        tableBody.innerHTML =
-                                            '<tr><td colspan="4" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Tipe Ternak</h6><p class="small text-muted mb-0">Klik tombol "Tambah Tipe" untuk mendaftarkan kategori baru.</p></td></tr>';
-                                    }
-
-                                    Swal.fire({
-                                        title: 'Berhasil',
-                                        text: data.message,
-                                        icon: 'success',
-                                        confirmButtonColor: '#428475'
-                                    });
-
-                                    // Trigger custom event agar dropdown di tab-ras juga bisa ikut update
-                                    document.dispatchEvent(new CustomEvent('tipeTernakDeleted', {
-                                        detail: {
-                                            id: id
-                                        }
-                                    }));
-                                } else {
-                                    Swal.fire({
-                                        title: 'Gagal',
-                                        text: 'Gagal menghapus data.',
-                                        icon: 'error',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                    btnDelete.innerHTML = originalIcon;
-                                    btnDelete.disabled = false;
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Terjadi kesalahan saat menghubungi server.',
-                                    icon: 'error',
-                                    confirmButtonColor: '#428475'
-                                });
-                                btnDelete.innerHTML = originalIcon;
-                                btnDelete.disabled = false;
-                            });
+                        let deleteForm = document.getElementById('formDeleteTipe');
+                        if (!deleteForm) {
+                            deleteForm = document.createElement('form');
+                            deleteForm.id = 'formDeleteTipe';
+                            deleteForm.method = 'POST';
+                            deleteForm.style.display = 'none';
+                            deleteForm.innerHTML = `
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="_method" value="DELETE">
+                            `;
+                            document.body.appendChild(deleteForm);
+                        }
+                        deleteForm.action = `/master/tipe/${id}`;
+                        deleteForm.submit();
                     }
                 });
             }

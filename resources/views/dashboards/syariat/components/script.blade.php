@@ -107,108 +107,7 @@
             cb.addEventListener('change', updateSkkhCheckAllState);
         });
 
-        // 2. Submit Form SKKH (AJAX)
-        const formSkkh = document.getElementById('formUploadSKKH');
-        const btnSimpanSkkh = document.getElementById('btnSimpanSKKH');
-
-        if (formSkkh) {
-            formSkkh.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                let originalText = btnSimpanSkkh.innerHTML;
-
-                if (inputTanggalSkkh && inputTanggalSkkh.value) {
-                    const selectedDate = new Date(inputTanggalSkkh.value);
-                    selectedDate.setHours(0,0,0,0);
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-                    if (selectedDate > today) {
-                        inputTanggalSkkh.classList.add('is-invalid');
-                        let errorEl = document.getElementById('error_tanggal_terbit');
-                        if (errorEl) {
-                            errorEl.innerText = 'Tanggal terbit tidak boleh di masa depan.';
-                        }
-                        return;
-                    }
-                }
-
-                btnSimpanSkkh.innerHTML =
-                    '<span class="spinner-border spinner-border-sm"></span> Mengunggah...';
-                btnSimpanSkkh.disabled = true;
-
-                document.getElementById('error_global_skkh').classList.add('d-none');
-                document.querySelectorAll('#formUploadSKKH .is-invalid').forEach(el => el.classList
-                    .remove('is-invalid'));
-                document.querySelectorAll('#formUploadSKKH .invalid-feedback').forEach(el => el
-                    .innerText = '');
-
-                const formData = new FormData(formSkkh);
-
-                fetch('/syariat/skkh', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: formData
-                    })
-                    .then(async response => {
-                        const isJson = response.headers.get('content-type')?.includes(
-                            'application/json');
-                        if (!response.ok) {
-                            if (response.status === 422 && isJson) {
-                                const errData = await response.json();
-                                return Promise.reject({
-                                    type: 'validation',
-                                    errors: errData.errors
-                                });
-                            }
-                            let errorMsg = 'Terjadi kesalahan internal.';
-                            if (isJson) {
-                                const errData = await response.json();
-                                errorMsg = errData.message || errorMsg;
-                            }
-                            return Promise.reject({
-                                type: 'server',
-                                message: errorMsg
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            window.location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        if (error.type === 'validation') {
-                            for (const [key, messages] of Object.entries(error.errors || {})) {
-                                let inputEl = document.querySelector(
-                                    `#formUploadSKKH [name="${key}"]`);
-                                if (inputEl) {
-                                    inputEl.classList.add('is-invalid');
-                                    let errorEl = document.getElementById(`error_${key}`);
-                                    if (errorEl) errorEl.innerText = messages[0];
-                                } else if (key === 'pemeriksaan_ids' || key.includes(
-                                        'pemeriksaan_ids')) {
-                                    // Khusus untuk error array checkbox
-                                    document.getElementById('error_pemeriksaan_ids').innerText =
-                                        messages[0];
-                                }
-                            }
-                        } else {
-                            document.getElementById('error_msg_skkh').innerText = error.message;
-                            document.getElementById('error_global_skkh').classList.remove('d-none');
-                        }
-                    })
-                    .finally(() => {
-                        btnSimpanSkkh.innerHTML = originalText;
-                        btnSimpanSkkh.disabled = false;
-                    });
-            });
-        }
+        // 2. Submit Form SKKH (AJAX) - Form submits normally via standard HTTP POST now, AJAX removed.
 
         // FUNGSI DETAIL PEMERIKSAAN
         function showDetail(id) {
@@ -352,50 +251,20 @@
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            btnDelete.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-                            btnDelete.disabled = true;
-
-                            fetch(`/syariat/pemeriksaan/${id}`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                        'X-CSRF-TOKEN': csrfToken,
-                                        'Accept': 'application/json',
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    }
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        Swal.fire({
-                                            title: 'Berhasil',
-                                            text: data.message,
-                                            icon: 'success',
-                                            confirmButtonColor: '#428475'
-                                        }).then(() => {
-                                            window.location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            title: 'Gagal',
-                                            text: data.message,
-                                            icon: 'error',
-                                            confirmButtonColor: '#428475'
-                                        });
-                                        btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
-                                        btnDelete.disabled = false;
-                                    }
-                                })
-                                .catch(err => {
-                                    console.error(err);
-                                    Swal.fire({
-                                        title: 'Error',
-                                        text: "Terjadi kesalahan sistem saat menghapus data.",
-                                        icon: 'error',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                    btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
-                                    btnDelete.disabled = false;
-                                });
+                            let deleteForm = document.getElementById('formDeletePemeriksaan');
+                            if (!deleteForm) {
+                                deleteForm = document.createElement('form');
+                                deleteForm.id = 'formDeletePemeriksaan';
+                                deleteForm.method = 'POST';
+                                deleteForm.style.display = 'none';
+                                deleteForm.innerHTML = `
+                                    <input type="hidden" name="_token" value="${csrfToken}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                `;
+                                document.body.appendChild(deleteForm);
+                            }
+                            deleteForm.action = `/syariat/pemeriksaan/${id}`;
+                            deleteForm.submit();
                         }
                     });
                 }
@@ -511,50 +380,20 @@
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            btnDelete.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-                            btnDelete.disabled = true;
-
-                            fetch(`/syariat/skkh/${id}`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                        'X-CSRF-TOKEN': csrfToken,
-                                        'Accept': 'application/json',
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    }
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        Swal.fire({
-                                            title: 'Berhasil',
-                                            text: data.message,
-                                            icon: 'success',
-                                            confirmButtonColor: '#428475'
-                                        }).then(() => {
-                                            window.location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            title: 'Gagal',
-                                            text: data.message,
-                                            icon: 'error',
-                                            confirmButtonColor: '#428475'
-                                        });
-                                        btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
-                                        btnDelete.disabled = false;
-                                    }
-                                })
-                                .catch(err => {
-                                    console.error(err);
-                                    Swal.fire({
-                                        title: 'Error',
-                                        text: "Terjadi kesalahan sistem saat menghapus dokumen.",
-                                        icon: 'error',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                    btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
-                                    btnDelete.disabled = false;
-                                });
+                            let deleteForm = document.getElementById('formDeleteSkkh');
+                            if (!deleteForm) {
+                                deleteForm = document.createElement('form');
+                                deleteForm.id = 'formDeleteSkkh';
+                                deleteForm.method = 'POST';
+                                deleteForm.style.display = 'none';
+                                deleteForm.innerHTML = `
+                                    <input type="hidden" name="_token" value="${csrfToken}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                `;
+                                document.body.appendChild(deleteForm);
+                            }
+                            deleteForm.action = `/syariat/skkh/${id}`;
+                            deleteForm.submit();
                         }
                     });
                 }

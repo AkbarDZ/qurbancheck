@@ -19,18 +19,23 @@
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-3">
              
-                        <form id="formTambahBerat">
-                            <input type="hidden" id="berat_ternak_id">
+                        <form id="formTambahBerat" method="POST">
+                            @csrf
+                            <input type="hidden" name="id" id="berat_ternak_id" value="{{ old('id') }}">
                             <div class="row g-2 align-items-end">
                                 <div class="col-md-5">
                                     <label class="form-label small fw-bold text-muted mb-1">Tanggal</label>
-                                    <input type="date" class="form-control form-control-sm" name="tanggal_timbang" id="input_tanggal_timbang" max="{{ date('Y-m-d') }}" required>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_timbang" style="font-size: 0.75rem;"></div>
+                                    <input type="date" class="form-control form-control-sm @error('tanggal_timbang') is-invalid @enderror" name="tanggal_timbang" id="input_tanggal_timbang" max="{{ date('Y-m-d') }}" value="{{ old('tanggal_timbang', date('Y-m-d')) }}" required>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tanggal_timbang" style="font-size: 0.75rem;">
+                                        @error('tanggal_timbang') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-bold text-muted mb-1">Berat (Kg)</label>
-                                    <input type="number" min="1" step="0.01" class="form-control form-control-sm" name="berat_kg" id="input_berat_kg" required>
-                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_kg" style="font-size: 0.75rem;"></div>
+                                    <input type="number" min="1" step="0.01" class="form-control form-control-sm @error('berat_kg') is-invalid @enderror" name="berat_kg" id="input_berat_kg" value="{{ old('berat_kg') }}" required>
+                                    <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_berat_kg" style="font-size: 0.75rem;">
+                                        @error('berat_kg') {{ $message }} @enderror
+                                    </div>
                                 </div>
                                 <div class="col-md-2 d-grid">
                                     <button type="submit" class="btn btn-sm btn-primary" id="btnSimpanBerat"><i class="bi bi-plus-lg"></i></button>

@@ -60,7 +60,8 @@
 <div class="modal fade" id="modalTambahRas" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formTambahRas">
+            <form id="formTambahRas" action="{{ url('/master/ras') }}" method="POST">
+                @csrf
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Tambah Ras Ternak</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -68,23 +69,29 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Tipe Ternak</label>
-                        <select class="form-select" id="tipe_ternak_id" name="tipe_ternak_id" required>
+                        <select class="form-select @error('tipe_ternak_id') is-invalid @enderror" id="tipe_ternak_id" name="tipe_ternak_id" required>
                             <option value="">Pilih Tipe Ternak...</option>
                             @foreach($tipeTernaks as $tipe)
-                            <option value="{{ $tipe->id }}">{{ $tipe->nama_jenis }}</option>
+                            <option value="{{ $tipe->id }}" {{ old('tipe_ternak_id') == $tipe->id ? 'selected' : '' }}>{{ $tipe->nama_jenis }}</option>
                             @endforeach
                         </select>
-                        <div class="invalid-feedback" id="error_tipe_ternak_id"></div>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_tipe_ternak_id" style="font-size: 0.75rem;">
+                            @error('tipe_ternak_id') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Nama Ras</label>
-                        <input type="text" class="form-control" id="nama_ras" name="nama_ras" required>
-                        <div class="invalid-feedback" id="error_nama_ras"></div>
+                        <input type="text" class="form-control @error('nama_ras') is-invalid @enderror" id="nama_ras" name="nama_ras" value="{{ old('nama_ras') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_nama_ras" style="font-size: 0.75rem;">
+                            @error('nama_ras') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="deskripsi" name="deskripsi" rows="2"></textarea>
-                        <div class="invalid-feedback" id="error_deskripsi"></div>
+                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="deskripsi" name="deskripsi" rows="2">{{ old('deskripsi') }}</textarea>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_deskripsi" style="font-size: 0.75rem;">
+                            @error('deskripsi') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -103,33 +110,41 @@
 <div class="modal fade" id="modalEditRas" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formEditRas">
+            <form id="formEditRas" method="POST">
+                @csrf
+                @method('PUT')
                 <div class="modal-header">
                     <h1 class="modal-title fs-5">Edit Ras Ternak</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="edit_id_ras" name="id">
+                    <input type="hidden" id="edit_id_ras" name="id_ras" value="{{ old('id_ras') }}">
 
                     <div class="mb-3">
                         <label class="form-label">Tipe Ternak</label>
-                        <select class="form-select" id="edit_tipe_ternak_id" name="tipe_ternak_id" required>
+                        <select class="form-select @error('tipe_ternak_id') is-invalid @enderror" id="edit_tipe_ternak_id" name="tipe_ternak_id" required>
                             <option value="">Pilih Tipe Ternak...</option>
                             @foreach($tipeTernaks as $tipe)
-                            <option value="{{ $tipe->id }}">{{ $tipe->nama_jenis }}</option>
+                            <option value="{{ $tipe->id }}" {{ old('tipe_ternak_id') == $tipe->id ? 'selected' : '' }}>{{ $tipe->nama_jenis }}</option>
                             @endforeach
                         </select>
-                        <div class="invalid-feedback" id="error_edit_tipe_ternak_id"></div>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_tipe_ternak_id" style="font-size: 0.75rem;">
+                            @error('tipe_ternak_id') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Nama Ras</label>
-                        <input type="text" class="form-control" id="edit_nama_ras" name="nama_ras" required>
-                        <div class="invalid-feedback" id="error_edit_nama_ras"></div>
+                        <input type="text" class="form-control @error('nama_ras') is-invalid @enderror" id="edit_nama_ras" name="nama_ras" value="{{ old('nama_ras') }}" required>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_nama_ras" style="font-size: 0.75rem;">
+                            @error('nama_ras') {{ $message }} @enderror
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="edit_deskripsi" name="deskripsi" rows="2"></textarea>
-                        <div class="invalid-feedback" id="error_edit_deskripsi"></div>
+                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="edit_deskripsi" name="deskripsi" rows="2">{{ old('deskripsi') }}</textarea>
+                        <div class="invalid-feedback d-block mt-1 fw-semibold text-danger" id="error_edit_deskripsi" style="font-size: 0.75rem;">
+                            @error('deskripsi') {{ $message }} @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -151,79 +166,11 @@
         window.rasPagination = window.initTablePagination('tableBodyRas', 'paginationRas', 5);
 
         // --- Handler Form Ras ---
-        const formRas = document.getElementById('formTambahRas');
-        const tableBodyRas = document.getElementById('tableBodyRas');
-        const btnSimpanRas = document.getElementById('btnSimpanRas');
-        const loadingRas = document.getElementById('loadingRas');
-
-        formRas.addEventListener('submit', function (e) {
-            e.preventDefault();
-            btnSimpanRas.disabled = true;
-            loadingRas.classList.remove('d-none');
-            document.querySelectorAll('#formTambahRas .is-invalid').forEach(el => el.classList.remove(
-                'is-invalid'));
-
-            fetch('/master/ras', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: new FormData(formRas)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let emptyRow = tableBodyRas.querySelector('td[colspan]');
-                        if (emptyRow && (emptyRow.innerText.toLowerCase().includes('kosong') || emptyRow.innerText.toLowerCase().includes('belum ada'))) {
-                            emptyRow.parentElement.remove();
-                        }
-                        let tr = document.createElement('tr');
-                        tr.id = `row-ras-${data.data.id}`;
-                        tr.innerHTML = `
-                        <td class="py-3 px-3 fw-semibold text-secondary">Baru</td>
-                        <td class="py-3 px-3 col-tipe">
-                            <span class="badge bg-info-subtle text-dark border border-info px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">${data.data.tipe_ternak.nama_jenis}</span>
-                        </td>
-                        <td class="py-3 px-3 col-nama fw-bold text-dark">${data.data.nama_ras}</td>
-                        <td class="py-3 px-3 col-deskripsi text-secondary small">${data.data.deskripsi || '-'}</td>
-                        <td class="py-3 px-3 text-end">
-                            <button class="btn btn-sm btn-outline-secondary btn-edit-ras" data-id="${data.data.id}" data-tipe="${data.data.tipe_ternak_id}" data-nama="${data.data.nama_ras}" data-deskripsi="${data.data.deskripsi || ''}" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Ras"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete-ras" data-id="${data.data.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Ras"><i class="bi bi-trash"></i></button>
-                        </td>
-                    `;
-                        tableBodyRas.insertAdjacentElement('afterbegin', tr);
-                        if (window.rasPagination) window.rasPagination.update();
-                        bootstrap.Modal.getInstance(document.getElementById('modalTambahRas'))
-                            .hide();
-                        formRas.reset();
-                        alert(data.message);
-                    } else if (data.message) {
-                        for (const [key, messages] of Object.entries(data.errors || {})) {
-                            let inputEl = document.getElementById(key);
-                            let errorEl = document.getElementById(`error_${key}`);
-                            if (inputEl && errorEl) {
-                                inputEl.classList.add('is-invalid');
-                                errorEl.innerText = messages[0];
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan.');
-                })
-                .finally(() => {
-                    btnSimpanRas.disabled = false;
-                    loadingRas.classList.add('d-none');
-                });
-        });
+        // AJAX submit removed. Form submits normally using standard HTTP POST.
 
         // edit
         const formEditRas = document.getElementById('formEditRas');
-        const btnUpdateRas = document.getElementById('btnUpdateRas');
-        const loadingEditRas = document.getElementById('loadingEditRas');
-        const modalEditRasInstance = new bootstrap.Modal(document.getElementById('modalEditRas'));
+        const modalEditRasInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditRas'));
 
         tableBodyRas.addEventListener('click', function (e) {
             let btnEdit = e.target.closest('.btn-edit-ras');
@@ -245,75 +192,19 @@
 
         formEditRas.addEventListener('submit', function (e) {
             e.preventDefault();
-
             let id = document.getElementById('edit_id_ras').value;
-
-            btnUpdateRas.disabled = true;
-            loadingEditRas.classList.remove('d-none');
-            document.querySelectorAll('#formEditRas .is-invalid').forEach(el => el.classList.remove(
-                'is-invalid'));
-
-            const formData = new FormData(formEditRas);
-            formData.append('_method', 'PUT');
-
-            fetch(`/master/ras/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let tr = document.getElementById(`row-ras-${id}`);
-                        let tipeText = formEditRas.querySelector(
-                            `select option[value="${data.data.tipe_ternak_id}"]`).text;
-                        tr.querySelector('.col-tipe').innerHTML =
-                            `<span class="badge bg-info-subtle text-dark border border-info px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.75rem;">${tipeText}</span>`;
-                        tr.querySelector('.col-nama').innerText = data.data.nama_ras;
-                        tr.querySelector('.col-deskripsi').innerText = data.data.deskripsi || '-';
-
-                        let btnEdit = tr.querySelector('.btn-edit-ras');
-                        btnEdit.setAttribute('data-tipe', data.data.tipe_ternak_id);
-                        btnEdit.setAttribute('data-nama', data.data.nama_ras);
-                        btnEdit.setAttribute('data-deskripsi', data.data.deskripsi || '');
-
-                        modalEditRasInstance.hide();
-                        alert(data.message);
-                    } else if (data.errors) {
-                        for (const [key, messages] of Object.entries(data.errors || {})) {
-                            let inputEl = document.getElementById(`edit_${key}`);
-                            let errorEl = document.getElementById(`error_edit_${key}`);
-                            if (inputEl && errorEl) {
-                                inputEl.classList.add('is-invalid');
-                                errorEl.innerText = messages[0];
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan.');
-                })
-                .finally(() => {
-                    btnUpdateRas.disabled = false;
-                    loadingEditRas.classList.add('d-none');
-                });
+            formEditRas.action = `/master/ras/${id}`;
+            formEditRas.submit();
         });
 
         // ====== FITUR HAPUS TIPE TERNAK ====== //
 
-        // Kita tetap menggunakan event delegation pada tableBodyRas
         tableBodyRas.addEventListener('click', function (e) {
-            // Cari elemen terdekat yang memiliki class .btn-delete-ras
             let btnDelete = e.target.closest('.btn-delete-ras');
 
             if (btnDelete) {
                 let id = btnDelete.getAttribute('data-id');
 
-                // Munculkan dialog konfirmasi
                 Swal.fire({
                     title: 'Hapus Ras?',
                     text: "Apakah Anda yakin ingin menghapus ras ini?",
@@ -325,65 +216,20 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // UX: Ubah tombol jadi status loading agar tidak diklik dua kali
-                        let originalIcon = btnDelete.innerHTML;
-                        btnDelete.innerHTML =
-                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-                        btnDelete.disabled = true;
-
-                        // Lakukan request DELETE
-                        fetch(`/master/ras/${id}`, {
-                                method: 'DELETE', // Method langsung menggunakan DELETE
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // 1. Cari elemen <tr> berdasarkan ID yang kita buat sebelumnya
-                                    let tr = document.getElementById(`row-ras-${id}`);
-                                    if (tr) {
-                                        // Hapus elemen dari DOM HTML secara langsung
-                                        tr.remove();
-                                    }
-                                    if (window.rasPagination) window.rasPagination.update();
-
-                                    // 2. Cek apakah tabel sekarang kosong, jika ya, tampilkan pesan kosong
-                                    if (tableBodyRas.querySelectorAll('tr').length === 0) {
-                                        tableBodyRas.innerHTML =
-                                            '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-2 d-block mb-3 text-muted opacity-50"></i><h6 class="mb-0 fw-semibold text-secondary">Belum Ada Data Ras Ternak</h6><p class="small text-muted mb-0">Klik tombol "Tambah Ras" untuk mendaftarkan kategori ras baru.</p></td></tr>';
-                                    }
-
-                                    Swal.fire({
-                                        title: 'Berhasil',
-                                        text: data.message,
-                                        icon: 'success',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: 'Gagal',
-                                        text: 'Gagal menghapus data.',
-                                        icon: 'error',
-                                        confirmButtonColor: '#428475'
-                                    });
-                                    btnDelete.innerHTML = originalIcon;
-                                    btnDelete.disabled = false;
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Terjadi kesalahan saat menghubungi server.',
-                                    icon: 'error',
-                                    confirmButtonColor: '#428475'
-                                });
-                                btnDelete.innerHTML = originalIcon;
-                                btnDelete.disabled = false;
-                            });
+                        let deleteForm = document.getElementById('formDeleteRas');
+                        if (!deleteForm) {
+                            deleteForm = document.createElement('form');
+                            deleteForm.id = 'formDeleteRas';
+                            deleteForm.method = 'POST';
+                            deleteForm.style.display = 'none';
+                            deleteForm.innerHTML = `
+                                <input type="hidden" name="_token" value="${csrfToken}">
+                                <input type="hidden" name="_method" value="DELETE">
+                            `;
+                            document.body.appendChild(deleteForm);
+                        }
+                        deleteForm.action = `/master/ras/${id}`;
+                        deleteForm.submit();
                     }
                 });
             }

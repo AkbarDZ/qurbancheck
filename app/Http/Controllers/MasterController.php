@@ -30,11 +30,14 @@ class MasterController extends Controller
 
         $tipe = TipeTernak::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Tipe ternak berhasil ditambahkan',
-            'data' => $tipe
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipe ternak berhasil ditambahkan',
+                'data' => $tipe
+            ]);
+        }
+        return redirect()->back()->with('success', 'Tipe ternak berhasil ditambahkan');
     }
 
     public function storeRas(Request $request)
@@ -48,11 +51,14 @@ class MasterController extends Controller
         $ras = RasTernak::create($validated);
         $ras->load('tipeTernak');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ras ternak berhasil ditambahkan',
-            'data' => $ras
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Ras ternak berhasil ditambahkan',
+                'data' => $ras
+            ]);
+        }
+        return redirect()->back()->with('success', 'Ras ternak berhasil ditambahkan');
     }
 
     public function storeKandang(Request $request)
@@ -65,11 +71,14 @@ class MasterController extends Controller
         $kandang = Kandang::create($validated);
         $kandang->loadCount('ternaks');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kandang berhasil ditambahkan',
-            'data' => $kandang
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kandang berhasil ditambahkan',
+                'data' => $kandang
+            ]);
+        }
+        return redirect()->back()->with('success', 'Kandang berhasil ditambahkan');
     }
 
     public function storeKriteria(Request $request)
@@ -84,11 +93,14 @@ class MasterController extends Controller
 
         $kriteria = KriteriaKurban::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kriteria kurban berhasil ditambahkan',
-            'data' => $kriteria
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kriteria kurban berhasil ditambahkan',
+                'data' => $kriteria
+            ]);
+        }
+        return redirect()->back()->with('success', 'Kriteria kurban berhasil ditambahkan');
     }
 
 
@@ -103,11 +115,14 @@ class MasterController extends Controller
         $tipe = TipeTernak::findOrFail($id);
         $tipe->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Tipe ternak berhasil diperbarui',
-            'data' => $tipe
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipe ternak berhasil diperbarui',
+                'data' => $tipe
+            ]);
+        }
+        return redirect()->back()->with('success', 'Tipe ternak berhasil diperbarui');
     }
 
     public function updateRas(Request $request, $id)
@@ -122,11 +137,14 @@ class MasterController extends Controller
         $ras->update($validated);
         $ras->load('tipeTernak');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ras ternak berhasil diperbarui',
-            'data' => $ras
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Ras ternak berhasil diperbarui',
+                'data' => $ras
+            ]);
+        }
+        return redirect()->back()->with('success', 'Ras ternak berhasil diperbarui');
     }
 
     public function updateKandang(Request $request, $id)
@@ -140,11 +158,14 @@ class MasterController extends Controller
         $kandang->update($validated);
         $kandang->loadCount('ternaks');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kandang berhasil diperbarui',
-            'data' => $kandang
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kandang berhasil diperbarui',
+                'data' => $kandang
+            ]);
+        }
+        return redirect()->back()->with('success', 'Kandang berhasil diperbarui');
     }
 
     public function updateKriteria(Request $request, $id)
@@ -160,56 +181,71 @@ class MasterController extends Controller
         $kriteria = KriteriaKurban::findOrFail($id);
         $kriteria->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kriteria kurban berhasil diperbarui',
-            'data' => $kriteria
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kriteria kurban berhasil diperbarui',
+                'data' => $kriteria
+            ]);
+        }
+        return redirect()->back()->with('success', 'Kriteria kurban berhasil diperbarui');
     }
 
 
     // delete functions
-    public function destroyTipe($id)
+    public function destroyTipe(Request $request, $id)
     {
         $tipe = TipeTernak::findOrFail($id);
         $tipe->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Tipe ternak berhasil dihapus'
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipe ternak berhasil dihapus'
+            ]);
+        }
+        return redirect()->back()->with('success', 'Tipe ternak berhasil dihapus');
     }
 
-    public function destroyRas($id)
+    public function destroyRas(Request $request, $id)
     {
         $ras = RasTernak::findOrFail($id);
         $ras->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ras ternak berhasil dihapus'
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Ras ternak berhasil dihapus'
+            ]);
+        }
+        return redirect()->back()->with('success', 'Ras ternak berhasil dihapus');
     }
 
-    public function destroyKandang($id)
+    public function destroyKandang(Request $request, $id)
     {
         $kandang = Kandang::findOrFail($id);
         $kandang->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kandang berhasil dihapus'
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kandang berhasil dihapus'
+            ]);
+        }
+        return redirect()->back()->with('success', 'Kandang berhasil dihapus');
     }
 
-    public function destroyKriteria($id)
+    public function destroyKriteria(Request $request, $id)
     {
         $kriteria = KriteriaKurban::findOrFail($id);
         $kriteria->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kriteria kurban berhasil dihapus'
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kriteria kurban berhasil dihapus'
+            ]);
+        }
+        return redirect()->back()->with('success', 'Kriteria kurban berhasil dihapus');
     }
 }
